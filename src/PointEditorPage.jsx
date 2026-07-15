@@ -4,6 +4,10 @@ import { HAND_R_VIDEO_POINTS } from './handPressureData.js';
 const EDITOR_MATRIX_SIZE = 32;
 const POINT_DRAFT_STORAGE_KEY = 'shroomLab.handPointEditor.draft.v1';
 const POINT_VERSIONS_STORAGE_KEY = 'shroomLab.handPointEditor.versions.v1';
+const POINT_CELL_SIZE_STORAGE_KEY = 'shroomLab.handPointEditor.cellSize.v1';
+const DEFAULT_POINT_CELL_SIZE = 9;
+const MIN_POINT_CELL_SIZE = 6;
+const MAX_POINT_CELL_SIZE = 18;
 
 function pointKey(row, col) {
   return `${row}:${col}`;
@@ -99,6 +103,14 @@ export function getInitialEditorPoints() {
   return readStoredDraft();
 }
 
+function readStoredCellSize() {
+  const storedValue = readLocalStorage(POINT_CELL_SIZE_STORAGE_KEY);
+  const storedSize = Number(storedValue);
+  return storedValue !== null && Number.isFinite(storedSize)
+    ? Math.max(MIN_POINT_CELL_SIZE, Math.min(MAX_POINT_CELL_SIZE, storedSize))
+    : DEFAULT_POINT_CELL_SIZE;
+}
+
 function sanitizeVersion(version, index) {
   if (!version || typeof version !== 'object') {
     return null;
@@ -165,6 +177,7 @@ export default function PointEditorPage({
   const [versionName, setVersionName] = useState('');
   const [selectedVersionId, setSelectedVersionId] = useState('');
   const [lastPoint, setLastPoint] = useState(null);
+  const [pointCellSize, setPointCellSize] = useState(readStoredCellSize);
   const points = useMemo(
     () => (isControlled ? sanitizeEditorPoints(controlledPoints) : internalPoints),
     [controlledPoints, internalPoints, isControlled],
@@ -183,6 +196,10 @@ export default function PointEditorPage({
   useEffect(() => {
     writeLocalStorage(POINT_VERSIONS_STORAGE_KEY, versions);
   }, [versions]);
+
+  useEffect(() => {
+    writeLocalStorage(POINT_CELL_SIZE_STORAGE_KEY, pointCellSize);
+  }, [pointCellSize]);
 
   const commitPoints = (nextPoints) => {
     const sanitizedPoints = sanitizeEditorPoints(nextPoints);
@@ -282,27 +299,47 @@ export default function PointEditorPage({
     <section className={`point-editor-shell${embedded ? ' embedded-point-editor-shell' : ''}`}>
       <div className="point-editor-board-panel">
         <header className="point-editor-header">
-          <h1>Hand Coordinate Modeler</h1>
-          <p>32x32 sensor coordinate grid</p>
+          <div>
+            <h1>Hand Coordinate Modeler</h1>
+            <p>32x32 sensor coordinate grid</p>
+          </div>
+          <label className="point-cell-size-control">
+            <span>Cell size</span>
+            <input
+              type="range"
+              min={MIN_POINT_CELL_SIZE}
+              max={MAX_POINT_CELL_SIZE}
+              step="1"
+              value={pointCellSize}
+              onChange={(event) => setPointCellSize(Number(event.target.value))}
+            />
+            <strong>{pointCellSize}px</strong>
+          </label>
         </header>
 
-        <div className="point-grid" aria-label="32x32 point editor">
-          {Array.from({ length: EDITOR_MATRIX_SIZE }, (_, row) =>
-            Array.from({ length: EDITOR_MATRIX_SIZE }, (_, col) => {
-              const active = pointSet.has(pointKey(row, col));
+        <div className="point-grid-scroll">
+          <div
+            className="point-grid"
+            aria-label="32x32 point editor"
+            style={{ '--point-cell-size': `${pointCellSize}px` }}
+          >
+            {Array.from({ length: EDITOR_MATRIX_SIZE }, (_, row) =>
+              Array.from({ length: EDITOR_MATRIX_SIZE }, (_, col) => {
+                const active = pointSet.has(pointKey(row, col));
 
-              return (
-                <button
-                  key={`${row}-${col}`}
-                  className={`point-cell${active ? ' active' : ''}`}
-                  type="button"
-                  title={`[${row}, ${col}]`}
-                  aria-pressed={active}
-                  onClick={() => togglePoint(row, col)}
-                />
-              );
-            }),
-          )}
+                return (
+                  <button
+                    key={`${row}-${col}`}
+                    className={`point-cell${active ? ' active' : ''}`}
+                    type="button"
+                    title={`[${row}, ${col}]`}
+                    aria-pressed={active}
+                    onClick={() => togglePoint(row, col)}
+                  />
+                );
+              }),
+            )}
+          </div>
         </div>
       </div>
 

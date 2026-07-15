@@ -7,6 +7,7 @@ import {
   buildHandPressureFrame,
   buildHandRegionFrame,
 } from './handPressureData.js';
+import { DEFAULT_PRESSURE_PALETTE, PRESSURE_COLOR_STOPS } from './pressurePalette.js';
 
 const TERRAIN_SIZE = 10.8;
 const WIDTH = TERRAIN_SIZE;
@@ -117,16 +118,15 @@ function surfaceHeightAt(x, z, pressureMatrix, heightScale, gaussianKernelSize) 
   return pressureAt(x, z, pressureMatrix, gaussianKernelSize) * heightScale * edgeFadeAt(x, z);
 }
 
-function colorForPressure(value, colorDepth) {
+function buildColorStops(pressurePalette) {
+  return PRESSURE_COLOR_STOPS.map((stop, index) => [
+    stop.position,
+    new THREE.Color(pressurePalette[index] || DEFAULT_PRESSURE_PALETTE[index]),
+  ]);
+}
+
+function colorForPressure(value, colorDepth, stops) {
   const boosted = clamp01(value * colorDepth);
-  const stops = [
-    [0, new THREE.Color('#050f16')],
-    [0.18, new THREE.Color('#00a8c8')],
-    [0.38, new THREE.Color('#00f0d8')],
-    [0.58, new THREE.Color('#ffe600')],
-    [0.78, new THREE.Color('#ff7a00')],
-    [1, new THREE.Color('#ff2438')],
-  ];
 
   for (let i = 1; i < stops.length; i += 1) {
     const [stop, color] = stops[i];
@@ -160,19 +160,20 @@ function buildGeometry(matrixSize) {
   return geometry;
 }
 
-function updateTerrain(geometry, pressureMatrix, heightScale, colorDepth, gaussianKernelSize) {
+function updateTerrain(geometry, pressureMatrix, heightScale, colorDepth, gaussianKernelSize, pressurePalette) {
   const matrixSize = matrixSizeOf(pressureMatrix);
   const positions = geometry.attributes.position;
   const colors = geometry.attributes.color;
   const vertexPressures = [];
   const indices = [];
+  const colorStops = buildColorStops(pressurePalette);
 
   for (let i = 0; i < positions.count; i += 1) {
     const x = positions.getX(i);
     const z = positions.getZ(i);
     const pressure = pressureAt(x, z, pressureMatrix, gaussianKernelSize);
     const y = pressure * heightScale * edgeFadeAt(x, z);
-    const color = colorForPressure(pressure, colorDepth);
+    const color = colorForPressure(pressure, colorDepth, colorStops);
 
     vertexPressures[i] = pressure;
     positions.setY(i, y);
@@ -321,6 +322,7 @@ export default function PressureTerrain({
   colorDepth = 1.25,
   matrixSize = SENSOR_MATRIX_SIZE,
   gaussianKernelSize = DEFAULT_GAUSSIAN_KERNEL_SIZE,
+  pressurePalette = DEFAULT_PRESSURE_PALETTE,
   sourcePoints,
 }) {
   const mountRef = useRef(null);
@@ -329,6 +331,7 @@ export default function PressureTerrain({
     colorDepth,
     matrixSize,
     gaussianKernelSize,
+    pressurePalette,
     sourcePoints,
     sourcePointsSignature: pointsSignature(sourcePoints),
   });
@@ -339,10 +342,11 @@ export default function PressureTerrain({
       colorDepth,
       matrixSize,
       gaussianKernelSize,
+      pressurePalette,
       sourcePoints,
       sourcePointsSignature: pointsSignature(sourcePoints),
     };
-  }, [colorDepth, gaussianKernelSize, heightScale, matrixSize, sourcePoints]);
+  }, [colorDepth, gaussianKernelSize, heightScale, matrixSize, pressurePalette, sourcePoints]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -407,6 +411,7 @@ export default function PressureTerrain({
       initialSettings.heightScale,
       initialSettings.colorDepth,
       initialSettings.gaussianKernelSize,
+      initialSettings.pressurePalette,
     );
 
     const material = new THREE.MeshLambertMaterial({
@@ -476,6 +481,7 @@ export default function PressureTerrain({
         currentSettings.heightScale,
         currentSettings.colorDepth,
         currentSettings.gaussianKernelSize,
+        currentSettings.pressurePalette,
       );
       updateSurfaceGrid(surfaceGridGeometry, pressureMatrix, currentSettings.heightScale, currentSettings.gaussianKernelSize);
       heatLight.intensity = 0.5 + Math.sin(elapsed * 1.2) * 0.06;

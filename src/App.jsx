@@ -10,6 +10,11 @@ import {
   SENSOR_MATRIX_SIZE,
   buildHandPressureFrame,
 } from './handPressureData.js';
+import {
+  DEFAULT_PRESSURE_PALETTE,
+  PRESSURE_COLOR_STOPS,
+  pressureColorAt,
+} from './pressurePalette.js';
 
 const peakRows = [
   ['Index Finger', '22.1N', 'danger'],
@@ -42,7 +47,7 @@ function clamp01(value) {
   return Math.max(0, Math.min(1, value));
 }
 
-function MatrixPanel({ colorDepth, matrixSize, gaussianKernelSize, sourcePoints }) {
+function MatrixPanel({ colorDepth, matrixSize, gaussianKernelSize, pressurePalette, sourcePoints }) {
   const matrix = useMemo(
     () => buildHandPressureFrame(0.8, { matrixSize, gaussianKernelSize, sourcePoints }).matrix,
     [gaussianKernelSize, matrixSize, sourcePoints],
@@ -55,12 +60,17 @@ function MatrixPanel({ colorDepth, matrixSize, gaussianKernelSize, sourcePoints 
         {matrix.flatMap((row, y) =>
           row.map((value, x) => {
             const displayPressure = clamp01(value * colorDepth);
+            const displayColor = pressureColorAt(value, colorDepth, pressurePalette);
 
             return (
               <span
                 key={`${x}-${y}`}
                 className={`sensor-dot${value > 0 ? ' active' : ''}`}
-                style={{ '--pressure': displayPressure }}
+                style={{
+                  '--pressure': displayPressure,
+                  backgroundColor: value > 0 ? displayColor : undefined,
+                  boxShadow: value > 0 ? `0 0 ${2 + displayPressure * 8}px ${displayColor}` : undefined,
+                }}
                 aria-hidden="true"
               />
             );
@@ -71,7 +81,7 @@ function MatrixPanel({ colorDepth, matrixSize, gaussianKernelSize, sourcePoints 
   );
 }
 
-function StatsPanel({ colorDepth, matrixSize, gaussianKernelSize, sourcePoints }) {
+function StatsPanel({ colorDepth, matrixSize, gaussianKernelSize, pressurePalette, sourcePoints }) {
   return (
     <aside className="stats-column">
       <section className="side-card force-card">
@@ -96,6 +106,7 @@ function StatsPanel({ colorDepth, matrixSize, gaussianKernelSize, sourcePoints }
         colorDepth={colorDepth}
         matrixSize={matrixSize}
         gaussianKernelSize={gaussianKernelSize}
+        pressurePalette={pressurePalette}
         sourcePoints={sourcePoints}
       />
     </aside>
@@ -107,10 +118,13 @@ function TerrainControls({
   colorDepth,
   matrixSize,
   gaussianKernelSize,
+  pressurePalette,
   onHeightScaleChange,
   onColorDepthChange,
   onMatrixSizeChange,
   onGaussianKernelSizeChange,
+  onPressurePaletteChange,
+  onPressurePaletteReset,
 }) {
   return (
     <section className="terrain-controls" aria-label="Terrain controls">
@@ -162,6 +176,25 @@ function TerrainControls({
         />
         <strong>{gaussianKernelSize}x{gaussianKernelSize}</strong>
       </label>
+      <div className="heat-palette-control">
+        <div className="heat-palette-heading">
+          <span>Heat colors</span>
+          <button type="button" onClick={onPressurePaletteReset}>Reset</button>
+        </div>
+        <div className="heat-palette-grid">
+          {PRESSURE_COLOR_STOPS.map((stop, index) => (
+            <label key={stop.label} title={`${stop.label}: ${pressurePalette[index]}`}>
+              <span>{stop.label}</span>
+              <input
+                type="color"
+                value={pressurePalette[index]}
+                aria-label={`${stop.label} heat map color`}
+                onChange={(event) => onPressurePaletteChange(index, event.target.value)}
+              />
+            </label>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -172,7 +205,14 @@ function App() {
   const [colorDepth, setColorDepth] = useState(1.25);
   const [matrixSize, setMatrixSize] = useState(SENSOR_MATRIX_SIZE);
   const [gaussianKernelSize, setGaussianKernelSize] = useState(DEFAULT_GAUSSIAN_KERNEL_SIZE);
+  const [pressurePalette, setPressurePalette] = useState(() => [...DEFAULT_PRESSURE_PALETTE]);
   const [sourcePoints, setSourcePoints] = useState(getInitialEditorPoints);
+
+  const updatePressurePalette = (index, color) => {
+    setPressurePalette((currentPalette) =>
+      currentPalette.map((currentColor, colorIndex) => (colorIndex === index ? color : currentColor)),
+    );
+  };
 
   useEffect(() => {
     const syncPage = () => setPage(pageFromHash());
@@ -246,10 +286,13 @@ function App() {
           colorDepth={colorDepth}
           matrixSize={matrixSize}
           gaussianKernelSize={gaussianKernelSize}
+          pressurePalette={pressurePalette}
           onHeightScaleChange={setHeightScale}
           onColorDepthChange={setColorDepth}
           onMatrixSizeChange={setMatrixSize}
           onGaussianKernelSizeChange={setGaussianKernelSize}
+          onPressurePaletteChange={updatePressurePalette}
+          onPressurePaletteReset={() => setPressurePalette([...DEFAULT_PRESSURE_PALETTE])}
         />
 
         <PressureTerrain
@@ -257,6 +300,7 @@ function App() {
           colorDepth={colorDepth}
           matrixSize={matrixSize}
           gaussianKernelSize={gaussianKernelSize}
+          pressurePalette={pressurePalette}
           sourcePoints={sourcePoints}
         />
 
@@ -271,6 +315,7 @@ function App() {
         colorDepth={colorDepth}
         matrixSize={matrixSize}
         gaussianKernelSize={gaussianKernelSize}
+        pressurePalette={pressurePalette}
         sourcePoints={sourcePoints}
       />
     </main>

@@ -581,14 +581,44 @@ button {
   color: #93a9b6;
 }
 
+.point-editor-header > div {
+  display: grid;
+  gap: 8px;
+}
+
+.point-cell-size-control {
+  display: grid;
+  grid-template-columns: auto minmax(90px, 150px) 38px;
+  align-items: center;
+  gap: 8px;
+  color: #aeb9c6;
+  font-size: 0.78rem;
+}
+
+.point-cell-size-control input {
+  width: 100%;
+  accent-color: #00f0d8;
+}
+
+.point-cell-size-control strong {
+  color: #d7edf4;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.point-grid-scroll {
+  min-width: 0;
+  overflow: auto;
+  scrollbar-color: rgba(0, 240, 216, 0.38) rgba(3, 11, 17, 0.32);
+}
+
 .point-grid {
   align-self: center;
   justify-self: center;
-  width: min(76vh, 100%);
-  max-width: 760px;
-  aspect-ratio: 1;
+  width: max-content;
+  margin: auto;
   display: grid;
-  grid-template-columns: repeat(32, 1fr);
+  grid-template-columns: repeat(32, var(--point-cell-size, 9px));
   gap: 2px;
   padding: 10px;
   border: 1px solid rgba(82, 230, 243, 0.22);
@@ -598,15 +628,13 @@ button {
 }
 
 .embedded-point-editor .point-grid {
-  width: 100%;
-  max-width: none;
   gap: 1px;
   padding: 6px;
 }
 
 .point-cell {
-  min-width: 0;
-  aspect-ratio: 1;
+  width: var(--point-cell-size, 9px);
+  height: var(--point-cell-size, 9px);
   border: 0;
   border-radius: 3px;
   background: rgba(20, 54, 67, 0.72);
@@ -893,6 +921,55 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+.heat-palette-control {
+  display: grid;
+  gap: 8px;
+  padding-top: 2px;
+  border-top: 1px solid rgba(122, 179, 224, 0.16);
+}
+
+.heat-palette-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #aeb9c6;
+  font-size: 0.78rem;
+}
+
+.heat-palette-heading button {
+  border: 0;
+  padding: 2px 0;
+  color: #72dce7;
+  background: transparent;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.heat-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.terrain-controls .heat-palette-grid label {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  color: #8fa5b2;
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.heat-palette-grid input[type="color"] {
+  width: 100%;
+  height: 25px;
+  border: 1px solid rgba(122, 179, 224, 0.3);
+  border-radius: 5px;
+  padding: 2px;
+  background: rgba(3, 12, 18, 0.82);
+  cursor: pointer;
+}
+
 .view-tabs {
   position: absolute;
   left: 50%;
@@ -1148,8 +1225,11 @@ button {
   }
 
   .point-grid {
-    width: 100%;
     gap: 1px;
     padding: 6px;
+  }
+
+  .point-cell-size-control {
+    grid-template-columns: auto minmax(0, 1fr) 38px;
   }
 }

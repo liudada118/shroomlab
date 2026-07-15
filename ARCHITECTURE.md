@@ -1,12 +1,12 @@
 # Pressure Terrain Map Architecture
 
-Last updated: 2026-07-13
+Last updated: 2026-07-15
 
 ## Overview
 
 This is a React, Vite, and Three.js frontend visualization project. It contains:
 
-- Pressure terrain page: renders hand pressure data as a 3D terrain, an embedded 32x32 point editor, side statistics, and a switchable 32x32 / 64x64 sensor matrix.
+- Pressure terrain page: renders hand pressure data as a 3D terrain, an embedded 32x32 point editor with adjustable cell size, side statistics, a switchable 32x32 / 64x64 sensor matrix, and a shared customizable six-stop heat-map palette.
 - Pressure2 route: `#/pressure2` intentionally falls through to the same dashboard render branch as `/`, so layout, panels, controls, canvas container, `PressureTerrain.jsx`, data pipeline, interpolation, Gaussian smoothing, cutoff, grid, height, color, material, and base rendering all match the main Pressure page.
 - Hand wireframe page: loads `hand0423g.glb`, renders it as a cyan glowing wireframe model, and exposes a simplification slider.
 - OBJ model page: loads `hand0423g_quads.obj` by default as the complete hand quad mesh, lets users type another OBJ model name from `public/model`, renders full-hand surface / edge / point grids, and lets users color selected grid points and lines from the pressure matrix.
@@ -63,6 +63,7 @@ E:\shroomLab
     |-- PressureTerrain.jsx
     |-- RegionObjPage.jsx
     |-- handPressureData.js
+    |-- pressurePalette.js
     |-- main.jsx
     `-- styles.css
 ```
@@ -92,18 +93,19 @@ flowchart TD
   R --> S["public/hand_info/finger_thirds_export hand0423g_finger_thirds_and_palm OBJ/MTL"]
 ```
 
-- `src/App.jsx`: owns page routing, height scale, color depth, matrix size, Gaussian kernel size state, and the shared editable source point array. Routes include `/`, `#/pressure2`, `#/hand-wireframe`, `#/obj-model`, `#/region-obj`, and `#/point-editor`.
-- `src/PointEditorPage.jsx`: initializes from unique `HAND_R_VIDEO_POINTS`, restores the saved local draft when present, renders a 32x32 clickable grid, supports embedded and standalone modes, persists edits to localStorage, manages named saved versions, and emits a formatted array for hand coordinate modeling.
+- `src/App.jsx`: owns page routing, height scale, color depth, matrix size, Gaussian kernel size, the six-stop pressure palette, and the shared editable source point array. Routes include `/`, `#/pressure2`, `#/hand-wireframe`, `#/obj-model`, `#/region-obj`, and `#/point-editor`.
+- `src/PointEditorPage.jsx`: initializes from unique `HAND_R_VIDEO_POINTS`, restores the saved local draft when present, renders a 32x32 clickable grid with a persisted `6px` to `18px` cell-size control, supports embedded and standalone modes, persists edits to localStorage, manages named saved versions, and emits a formatted array for hand coordinate modeling.
 - `src/handPressureData.js`: owns raw right-hand 32x32 points, source pressure values, dynamic source-point normalization, palm internal gap filling, 32x32 / 64x64 matrix generation, bilinear sampling, Gaussian smoothing, and low-value thresholding.
 - `src/PressureTerrain.jsx`: builds the Three.js scene and terrain. The terrain samples pressure with bilinear + local Gaussian blending from the current editable point set, only creates faces and surface grid lines where pressure exists, and rebuilds the low-opacity matrix-region base when point coordinates change.
+- `src/pressurePalette.js`: defines the six heat-map stop positions, default colors, and RGB interpolation shared by the Three.js terrain and DOM sensor matrix.
 - `#/pressure2`: uses the same dashboard JSX as `/`, so it has no separate page shell, canvas sizing, terrain interpolation, smoothing, height, color, material, grid, or base implementation.
 - `src/HandWireframePage.jsx`: loads `/model/hand0423g.glb`, simplifies its mesh topology with `SimplifyModifier`, renders a continuous low-poly cyan triangle wireframe, and exposes a `55%` to `94%` simplification slider.
 - `src/ObjModelPage.jsx`: loads `/model/hand0423g_quads.obj` by default, accepts a typed OBJ file name in the control panel, normalizes the loaded mesh into view, and builds closed quad outlines from the original OBJ face loops so the full hand grid is visible. The `Surface`, `Edges`, `Points`, and `Rotate` controls tune the view; `Coarse` clusters original vertices while preserving edge continuity. The `Data` toggle writes animated pressure colors onto selected grid lines and point markers while dimming non-selected grid lines so the active region stays visually distinguishable. The page loads `/hand_info/hand0423g_front_hand_palm_fingers.json` and `.csv` as the default front-hand/palm/finger selection. `Select` supports rectangle selection, `Clear` empties the set, `All` selects every current grid point, `Palm Map` exports the authored front-hand map, `Copy Map` exports the full OBJ coordinate map, and `Copy XYZ` exports the current model-space `x/y/z` filtered point/quad map.
 - `src/RegionObjPage.jsx`: loads `/model/hand0423g_regular_square_texture_fixed.glb` as the full-hand reference, then loads `/hand_info/finger_thirds_export/hand0423g_finger_thirds_and_palm.obj` with its MTL file in the same coordinate group. It normalizes the combined group into view, exposes `Hand`, `Surface`, `Edges`, and `Rotate` toggles, overlays cyan edge/point markers, and reports vertex/quad counts plus OBJ group face counts for each finger-tip, finger-to-palm, and palm segment.
 - `src/styles.css`: defines the dark dashboard layout, controls, dynamic matrix grid, terrain panel, and wireframe page styles.
-- `.github/workflows/ci-cd.yml`: runs `npm ci` and `npm run build` on pull requests and pushes, then deploys `dist` to GitHub Pages from `main` or `master`.
-- `vite.config.js`: enables the React plugin and uses relative asset paths with `base: './'` so GitHub Pages subpath deployments work.
-- Pressure terrain and sensor matrix colors use a higher-saturation cyan, yellow, orange, and red palette.
+- `.github/workflows/ci-cd.yml`: runs `npm ci` and `npm run build` on pull requests and pushes, then deploys `dist` to a self-hosted server over SSH/rsync from `main` or `master`.
+- `vite.config.js`: enables the React plugin and uses relative asset paths with `base: './'` so static deployments work from a server directory or subpath.
+- Pressure terrain and sensor matrix colors share six user-editable color stops (`Base`, `Low`, `Cool`, `Mid`, `Warm`, and `High`); Reset restores the original high-saturation cyan, yellow, orange, and red palette.
 
 ## Data Notes
 
@@ -118,7 +120,7 @@ flowchart TD
 - `hand0423g_quads.obj` is the complete hand grid model used by `#/obj-model` and currently contains 8129 vertices and 7653 faces. `hand0423g_quads_regular_grid_only.obj` is a smaller 803-vertex / 636-face regular sensor grid asset and is not used as the full-hand display model.
 - The Cell OBJ page uses the exported OBJ/MTL directly for sensor cells and overlays it with the complete regular-square-texture GLB reference. The current OBJ file contains 803 vertices, 636 quad faces, and 11 OBJ groups.
 - On the pressure page, the embedded 32x32 editor, Three.js terrain, matrix-region base, and sensor matrix all consume the same source point array, so clicking a grid cell changes the 3D map immediately.
-- Point editor persistence uses browser localStorage keys `shroomLab.handPointEditor.draft.v1` for the active draft and `shroomLab.handPointEditor.versions.v1` for saved versions.
+- Point editor persistence uses browser localStorage keys `shroomLab.handPointEditor.draft.v1` for the active draft, `shroomLab.handPointEditor.versions.v1` for saved versions, and `shroomLab.handPointEditor.cellSize.v1` for the selected cell size.
 
 ## Verification
 
@@ -135,6 +137,7 @@ flowchart TD
 - `#/region-obj` renders `hand0423g_finger_thirds_and_palm.obj` as a colored quad mesh over the full hand reference model, with hand, surface, edge, rotate, count, and group-summary controls.
 - `#/point-editor` builds successfully, starts from 252 unique points when no saved draft exists, auto-persists the active draft, and supports named saved versions.
 - `/` builds successfully with the embedded point editor and shared point state feeding the 3D terrain and sensor matrix.
+- The production build passes with the adjustable point-grid cell size and shared six-stop heat palette; palette interpolation was checked at the base, mid, and high stops. Browser interaction verification was unavailable because the in-app browser webview did not attach.
 - `#/pressure2` builds successfully and is served by Vite at `http://127.0.0.1:5188/#/pressure2`.
 
 ## Project Progress
@@ -156,7 +159,8 @@ flowchart TD
 | 2026-07-13 | Pressure2 full alignment | Replaced the separate Pressure2 renderer with the shared `PressureTerrain.jsx` component so the page fully matches the main Pressure terrain behavior. |
 | 2026-07-13 | Pressure2 shell alignment | Removed the Pressure2-specific full-screen shell and styles so `#/pressure2` renders through the exact same dashboard branch as `/`. |
 | 2026-07-13 | Palm continuity fix | Added bounded row-wise palm gap interpolation and widened the palm fill range so internal zero-value cells no longer break the pressure surface. |
-| 2026-07-15 | GitHub CI/CD | Added GitHub Actions CI/CD for npm install, Vite build, and GitHub Pages deployment; added `vite.config.js` for relative static asset paths. |
+| 2026-07-15 | GitHub CI/CD | Added GitHub Actions CI/CD for npm install, Vite build, and SSH/rsync deployment to a self-hosted server; added `vite.config.js` for relative static asset paths. |
+| 2026-07-15 | Pressure display controls | Added persisted 32x32 coordinate-grid cell sizing plus a shared six-stop heat-map palette for the terrain and sensor matrix. |
 
 ## Update Log
 
@@ -212,4 +216,5 @@ flowchart TD
 | 2026-07-08 | Feature | Embedded the point editor into the Pressure page and wired edited coordinates directly into the live 3D terrain and sensor matrix. |
 | 2026-07-09 | Dependency | Added local `shroom-backend-sdk` from `E:/ShroomSDK` using pnpm. |
 | 2026-07-15 | Dependency | Removed the unused local `shroom-backend-sdk` link dependency so CI can install dependencies on GitHub-hosted runners. |
-| 2026-07-15 | DevOps | Added GitHub Actions workflow for CI and GitHub Pages deployment. |
+| 2026-07-15 | DevOps | Added GitHub Actions workflow for CI and self-hosted server deployment over SSH/rsync. |
+| 2026-07-15 | Feature | Added a persisted 6–18 px cell-size slider to the 32x32 coordinate grid and six editable heat-map color stops shared by the 3D terrain and sensor matrix. |
