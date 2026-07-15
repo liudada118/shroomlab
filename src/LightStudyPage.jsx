@@ -396,11 +396,13 @@ export default function LightStudyPage({ onNavigate }) {
                   </span>
                   <input
                     type="range"
+                    aria-label={control.label}
                     min={control.min}
                     max={control.max}
                     step={control.step}
                     value={value}
                     onChange={(event) => updateTerrainTransform(control.key, Number(event.target.value))}
+                    onInput={(event) => updateTerrainTransform(control.key, Number(event.target.value))}
                   />
                 </label>
               );

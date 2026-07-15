@@ -15,7 +15,7 @@ This is a React, Vite, and Three.js frontend visualization project. It contains:
 - Cell OBJ page: loads `hand0423g_finger_thirds_and_palm.obj` as a sensor-cell mesh and displays the full hand GLB as a translucent reference layer so the exported finger-third and palm quads can be inspected in context.
 - Authored hand region data: exposes the finger-thirds and rectified-palm coordinate exports from `hand_info/finger_thirds_export` as browser-readable static JSON/CSV for GLB grid filtering and export.
 - Point editor page: renders the shared hand points on a 32x32 editable grid, persists the current draft locally, saves multiple named versions, and outputs the updated array.
-- Light study page: reuses the live 64x64 hand-pressure terrain as a giant cinematic foreground form with animated grazing light, Bloom, floating dust, responsive typography, pointer/touch parallax, zoom, pause, and three selectable light temperatures.
+- Light study page: reuses the live 64x64 hand-pressure terrain as a giant cinematic foreground form with animated grazing light, Bloom, floating dust, responsive typography, pointer/touch parallax, zoom, pause, three selectable light temperatures, and a responsive terrain-transform control panel.
 
 ## Tech Stack
 
@@ -113,7 +113,7 @@ flowchart TD
 
 - `src/App.jsx`: owns page routing, height scale, color depth, matrix size, Gaussian kernel size, the six-stop pressure palette, and the shared editable source point array. Routes include `/`, `#/pressure2`, `#/hand-wireframe`, `#/glb-bones`, `#/obj-model`, `#/region-obj`, `#/point-editor`, `#/light-study`, and `#/spatial-charts`.
 - `src/SpatialChartsPage.jsx`: creates the `#/spatial-charts` full-screen Three.js scene from three switchable datasets. Reusable geometry helpers build illuminated bars, tube-based trend lines, extruded donut/pie segments, radial progress arcs, labels, chart plates, and a faceted market-shape object; `OrbitControls` provides drag, touch, wheel zoom, auto rotation, and view reset behavior with full renderer/resource cleanup on route or dataset changes.
-- `src/LightStudyPage.jsx`: builds the `#/light-study` scene from the same 64x64 pressure frame, Gaussian smoothing, height mapping, six-stop palette, active-cell surface, and grid geometry used by the Pressure page. The terrain is rotated and scaled into the existing giant foreground composition; its depth buffer occludes behind-surface glow sprites, while seeded dust, `UnrealBloomPass`, pointer/touch parallax, wheel zoom, pause/resume, responsive framing, and cold/pearl/ember light temperatures remain available. Terrain geometry updates are capped at 12 fps while the scene renders continuously.
+- `src/LightStudyPage.jsx`: builds the `#/light-study` scene from the same 64x64 pressure frame, Gaussian smoothing, height mapping, six-stop palette, active-cell surface, and grid geometry used by the Pressure page. The terrain is rotated and scaled into the existing giant foreground composition; its depth buffer occludes behind-surface glow sprites, while seeded dust, `UnrealBloomPass`, pointer/touch parallax, wheel zoom, pause/resume, responsive framing, and cold/pearl/ember light temperatures remain available. A collapsible transform panel controls relative X/Y/Z position, pitch/yaw/roll, and scale with live output values and one-click reset; a ref transfers React control state into the current Three.js rig without rebuilding the scene. Terrain geometry updates are capped at 12 fps while the scene renders continuously.
 - `src/BoneControlPage.jsx`: loads `/model/hand0423g_skinned.glb`, verifies that GLTFLoader produced a `SkinnedMesh`, and maps the weighted joints to readable finger/segment labels. Five Curl sliders apply local-Z quaternion rotations across each finger chain; `Open` and `Fist` provide full-hand poses, while joint-level X/Y/Z controls remain available for fine adjustment. Non-deforming `_end` joints are omitted from the selector.
 - `scripts/build-skinned-hand-glb.mjs`: repairs the source GLB's unbound skeleton by generating smooth four-influence `JOINTS_0` / `WEIGHTS_0` attributes from vertex-to-bone-segment distance, linking the hand mesh node to skin `0`, and writing `public/model/hand0423g_skinned.glb` while preserving the original asset.
 - `src/PointEditorPage.jsx`: initializes from unique `HAND_R_VIDEO_POINTS`, restores the saved local draft when present, renders a 32x32 clickable grid with a persisted `6px` to `18px` cell-size control, supports embedded and standalone modes, persists edits to localStorage, manages named saved versions, and emits a formatted array for hand coordinate modeling.
@@ -166,6 +166,7 @@ flowchart TD
 - `#/spatial-charts` passes the production build with switchable revenue, user, and conversion datasets; it uses the existing Three.js dependency and adds no package dependency.
 - `#/light-study` was browser-checked at `1280x720` and `390x844`: one WebGL canvas rendered the shared animated pressure-hand terrain, surface grid, grazing light, Bloom, dust, and responsive overlay with no console errors or horizontal mobile overflow. The giant left-side composition and camera framing remain consistent across desktop and mobile.
 - Light Study light occlusion was browser-checked across the pointer range: the live pressure surface hides the behind-terrain light through depth testing, while light outside the active terrain silhouette remains visible.
+- Light Study terrain transforms were browser-checked on desktop and at `390x844`: the panel opens uniquely, all seven sliders are accessible, X position and Y yaw update their live values without console errors, Reset restores the default composition, and the mobile panel has no horizontal overflow.
 
 ## Project Progress
 
@@ -194,6 +195,7 @@ flowchart TD
 | 2026-07-15 | Cinematic 3D light study page | Added `#/light-study` with procedural surface detail, animated edge light, Bloom, dust, interactive parallax/zoom, pause, color temperatures, and responsive desktop/mobile composition. |
 | 2026-07-15 | Light Study depth occlusion | Moved the light sprites behind the sphere and enabled depth testing so the solid form blocks the light core while retaining silhouette glow. |
 | 2026-07-15 | Pressure terrain Light Study | Replaced the procedural sphere with the shared live 64x64 Pressure terrain and grid while retaining the cinematic camera composition, responsive layout, interactions, Bloom, and depth-correct backlight. |
+| 2026-07-15 | Light Study terrain transform controls | Added a collapsible responsive panel for X/Y/Z position, pitch/yaw/roll, scale, live numeric values, and one-click composition reset without rebuilding the WebGL scene. |
 
 ## Update Log
 
@@ -257,3 +259,4 @@ flowchart TD
 | 2026-07-15 | Feature | Added the responsive `#/light-study` real-time 3D grazing-light scene with interactive color and motion controls. |
 | 2026-07-15 | Fix | Enabled sphere depth occlusion for Light Study glow sprites so hidden light no longer shines through the solid object. |
 | 2026-07-15 | Refactor | Replaced the Light Study sphere with shared Pressure terrain geometry/data helpers, added a 12 fps terrain-update cap, and retained continuous light/camera rendering. |
+| 2026-07-15 | Feature | Added live position, orientation, rotation, scale, and reset controls for the Light Study pressure terrain with desktop/mobile panel styling. |
