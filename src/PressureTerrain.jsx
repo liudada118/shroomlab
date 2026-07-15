@@ -140,7 +140,7 @@ function colorForPressure(value, colorDepth, stops) {
   return stops[stops.length - 1][1].clone();
 }
 
-function buildGeometry(matrixSize) {
+export function buildGeometry(matrixSize) {
   const geometry = new THREE.BufferGeometry();
   const positions = [];
   const colors = [];
@@ -160,7 +160,7 @@ function buildGeometry(matrixSize) {
   return geometry;
 }
 
-function updateTerrain(geometry, pressureMatrix, heightScale, colorDepth, gaussianKernelSize, pressurePalette) {
+export function updateTerrain(geometry, pressureMatrix, heightScale, colorDepth, gaussianKernelSize, pressurePalette) {
   const matrixSize = matrixSizeOf(pressureMatrix);
   const positions = geometry.attributes.position;
   const colors = geometry.attributes.color;
@@ -200,7 +200,7 @@ function updateTerrain(geometry, pressureMatrix, heightScale, colorDepth, gaussi
   geometry.computeVertexNormals();
 }
 
-function buildSurfaceGridGeometry() {
+export function buildSurfaceGridGeometry() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
   return geometry;
@@ -251,7 +251,7 @@ function pushSurfacePoint(positions, row, col, pressureMatrix, heightScale, gaus
   positions.push(x, y, z);
 }
 
-function updateSurfaceGrid(geometry, pressureMatrix, heightScale, gaussianKernelSize) {
+export function updateSurfaceGrid(geometry, pressureMatrix, heightScale, gaussianKernelSize) {
   const matrixSize = matrixSizeOf(pressureMatrix);
   const positions = [];
 

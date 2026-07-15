@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import BoneControlPage from './BoneControlPage.jsx';
 import HandWireframePage from './HandWireframePage.jsx';
+import LightStudyPage from './LightStudyPage.jsx';
 import ObjModelPage from './ObjModelPage.jsx';
 import PointEditorPage, { getInitialEditorPoints } from './PointEditorPage.jsx';
 import PressureTerrain from './PressureTerrain.jsx';
 import RegionObjPage from './RegionObjPage.jsx';
+import SpatialChartsPage from './SpatialChartsPage.jsx';
 import {
   DEFAULT_GAUSSIAN_KERNEL_SIZE,
   MATRIX_SIZE_OPTIONS,
@@ -28,6 +31,9 @@ function pageFromHash() {
   if (window.location.hash === '#/hand-wireframe') {
     return 'hand';
   }
+  if (window.location.hash === '#/glb-bones') {
+    return 'bones';
+  }
   if (window.location.hash === '#/point-editor') {
     return 'points';
   }
@@ -39,6 +45,12 @@ function pageFromHash() {
   }
   if (window.location.hash === '#/pressure2') {
     return 'pressure2';
+  }
+  if (window.location.hash === '#/light-study') {
+    return 'lightStudy';
+  }
+  if (window.location.hash === '#/spatial-charts') {
+    return 'spatialCharts';
   }
   return 'terrain';
 }
@@ -223,10 +235,13 @@ function App() {
   const navigate = (nextPage) => {
     const routeMap = {
       hand: '/hand-wireframe',
+      lightStudy: '/light-study',
+      bones: '/glb-bones',
       obj: '/obj-model',
       points: '/point-editor',
       pressure2: '/pressure2',
       regionObj: '/region-obj',
+      spatialCharts: '/spatial-charts',
       terrain: '/',
     };
     window.location.hash = routeMap[nextPage] || '/';
@@ -234,6 +249,10 @@ function App() {
 
   if (page === 'hand') {
     return <HandWireframePage onNavigate={navigate} />;
+  }
+
+  if (page === 'bones') {
+    return <BoneControlPage onNavigate={navigate} />;
   }
 
   if (page === 'points') {
@@ -248,9 +267,17 @@ function App() {
     return <RegionObjPage onNavigate={navigate} />;
   }
 
+  if (page === 'lightStudy') {
+    return <LightStudyPage onNavigate={navigate} />;
+  }
+
+  if (page === 'spatialCharts') {
+    return <SpatialChartsPage onNavigate={navigate} />;
+  }
+
   return (
     <main className="dashboard-shell dashboard-shell-with-editor">
-      <nav className="app-nav" style={{ '--nav-count': 5 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 8 }} aria-label="Page view">
         <button className="active" type="button" onClick={() => navigate('terrain')}>
           Pressure
         </button>
@@ -263,8 +290,17 @@ function App() {
         <button type="button" onClick={() => navigate('obj')}>
           OBJ
         </button>
+        <button type="button" onClick={() => navigate('bones')}>
+          Bones
+        </button>
         <button type="button" onClick={() => navigate('points')}>
           Points
+        </button>
+        <button type="button" onClick={() => navigate('lightStudy')}>
+          Light
+        </button>
+        <button type="button" onClick={() => navigate('spatialCharts')}>
+          Charts
         </button>
       </nav>
 

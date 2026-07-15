@@ -307,7 +307,7 @@ export default function HandWireframePage({ onNavigate }) {
 
   return (
     <main className="hand-page">
-      <nav className="app-nav" aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 5 }} aria-label="Page view">
         <button type="button" onClick={() => onNavigate('terrain')}>
           Pressure
         </button>
@@ -316,6 +316,9 @@ export default function HandWireframePage({ onNavigate }) {
         </button>
         <button type="button" onClick={() => onNavigate('obj')}>
           OBJ
+        </button>
+        <button type="button" onClick={() => onNavigate('bones')}>
+          Bones
         </button>
         <button type="button" onClick={() => onNavigate('points')}>
           Points
