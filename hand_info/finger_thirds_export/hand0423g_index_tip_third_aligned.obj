@@ -1,0 +1,52 @@
+# hand0423g aligned OBJ export
+# Vertices are baked with the original GLB mesh node rotation/scale, so OBJ aligns with hand0423g.glb surface.
+# source_glb=D:/cad/blender/hand/hand0423g.glb
+# baked_scale=[-0.7999998927116394, -0.7999998927116394, -0.7999998927116394]
+# baked_rotation_xyzw=[-0.7071065902709961, 0.0, 0.0, 0.7071070075035095]
+mtllib hand0423g_finger_thirds_and_palm_aligned.mtl
+v -2.2275453 -0.7372277 5.5784672
+v -2.3716226 -0.8235724 5.5324402
+v -2.4176495 -0.8517644 5.6765175
+v -2.2735722 -0.7651198 5.7225444
+v -2.5156999 -0.8133017 5.4864133
+v -2.5617268 -0.8414015 5.6304906
+v -2.6597772 -0.7120584 5.4403865
+v -2.7058041 -0.7389569 5.5844637
+v -2.4636764 -0.8789021 5.8205948
+v -2.3195991 -0.7824975 5.8666217
+v -2.6077537 -0.8654522 5.7745679
+v -2.7518310 -0.7568018 5.7285410
+v -2.5097033 -0.8929483 5.9646721
+v -2.3656260 -0.7919855 6.0106990
+v -2.6537806 -0.8817659 5.9186452
+v -2.7978579 -0.7665171 5.8726183
+v -2.5557302 -0.8860016 6.1087494
+v -2.4116529 -0.7749940 6.1547763
+v -2.6998075 -0.8791257 6.0627225
+v -2.8438848 -0.7365331 6.0166956
+g finger_tip_third_index
+usemtl finger_tip_third
+# global_wiring_id=446 component=index segment=finger_tip_third finger=index row=0 col=0 source_quad_id=1186
+f 1 2 3 4
+# global_wiring_id=447 component=index segment=finger_tip_third finger=index row=0 col=1 source_quad_id=1185
+f 2 5 6 3
+# global_wiring_id=448 component=index segment=finger_tip_third finger=index row=0 col=2 source_quad_id=1137
+f 5 7 8 6
+# global_wiring_id=449 component=index segment=finger_tip_third finger=index row=1 col=0 source_quad_id=1974
+f 4 3 9 10
+# global_wiring_id=450 component=index segment=finger_tip_third finger=index row=1 col=1 source_quad_id=1181
+f 3 6 11 9
+# global_wiring_id=451 component=index segment=finger_tip_third finger=index row=1 col=2 source_quad_id=1138
+f 6 8 12 11
+# global_wiring_id=452 component=index segment=finger_tip_third finger=index row=2 col=0 source_quad_id=1970
+f 10 9 13 14
+# global_wiring_id=453 component=index segment=finger_tip_third finger=index row=2 col=1 source_quad_id=1180
+f 9 11 15 13
+# global_wiring_id=454 component=index segment=finger_tip_third finger=index row=2 col=2 source_quad_id=1139
+f 11 12 16 15
+# global_wiring_id=455 component=index segment=finger_tip_third finger=index row=3 col=0 source_quad_id=1969
+f 14 13 17 18
+# global_wiring_id=456 component=index segment=finger_tip_third finger=index row=3 col=1 source_quad_id=1968
+f 13 15 19 17
+# global_wiring_id=457 component=index segment=finger_tip_third finger=index row=3 col=2 source_quad_id=1176
+f 15 16 20 19

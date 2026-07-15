@@ -1,0 +1,25 @@
+# hand0423g aligned OBJ export
+# Vertices are baked with the original GLB mesh node rotation/scale, so OBJ aligns with hand0423g.glb surface.
+# source_glb=D:/cad/blender/hand/hand0423g.glb
+# baked_scale=[-0.7999998927116394, -0.7999998927116394, -0.7999998927116394]
+# baked_rotation_xyzw=[-0.7071065902709961, 0.0, 0.0, 0.7071070075035095]
+mtllib hand0423g_finger_thirds_and_palm_aligned.mtl
+v 1.0219103 -0.9284896 5.0084873
+v 0.8707017 -0.9944659 5.0120511
+v 0.8742655 -1.0094355 5.1632597
+v 1.0254741 -0.9364089 5.1596960
+v 0.7194931 -0.9472454 5.0156149
+v 0.7230569 -0.9618612 5.1668235
+v 0.8778293 -1.0078256 5.3144683
+v 1.0290379 -0.9198789 5.3109046
+v 0.7266207 -0.9572573 5.3180322
+g finger_tip_third_pinky
+usemtl finger_tip_third
+# global_wiring_id=632 component=pinky segment=finger_tip_third finger=pinky row=0 col=0 source_quad_id=1517
+f 1 2 3 4
+# global_wiring_id=633 component=pinky segment=finger_tip_third finger=pinky row=0 col=1 source_quad_id=6598
+f 2 5 6 3
+# global_wiring_id=634 component=pinky segment=finger_tip_third finger=pinky row=1 col=0 source_quad_id=1568
+f 4 3 7 8
+# global_wiring_id=635 component=pinky segment=finger_tip_third finger=pinky row=1 col=1 source_quad_id=1524
+f 3 6 9 7

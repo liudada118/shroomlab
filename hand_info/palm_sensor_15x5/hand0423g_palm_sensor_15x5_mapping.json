@@ -1,0 +1,22 @@
+{
+  "source_obj": "D:\\cad\\blender\\hand\\hand0423g_quads.obj",
+  "geometry_modified": false,
+  "rows": 15,
+  "cols": 5,
+  "sensor_count": 75,
+  "indexing": "row-major, sensor_index = row * 5 + col",
+  "orientation": {
+    "row_0": "wrist / minimum Y",
+    "row_14": "finger bases / maximum Y",
+    "col_0": "pinky side / minimum X",
+    "col_4": "thumb side / maximum X"
+  },
+  "sensor_points_csv": "E:\\shroomLab\\hand_info\\palm_sensor_15x5\\hand0423g_palm_sensor_15x5_points.csv",
+  "face_interpolation_csv": "E:\\shroomLab\\hand_info\\palm_sensor_15x5\\hand0423g_palm_sensor_15x5_face_interpolation.csv",
+  "vertex_interpolation_csv": "E:\\shroomLab\\hand_info\\palm_sensor_15x5\\hand0423g_palm_sensor_15x5_vertex_interpolation.csv",
+  "points_obj": "D:\\cad\\blender\\hand\\hand0423g_palm_sensor_15x5_points.obj",
+  "preview": "D:\\cad\\blender\\hand\\hand0423g_palm_sensor_15x5_preview.png",
+  "mapped_original_palm_faces": 252,
+  "mapped_original_vertices": 252,
+  "interpolation": "bilinear from the four neighboring logical sensor points"
+}

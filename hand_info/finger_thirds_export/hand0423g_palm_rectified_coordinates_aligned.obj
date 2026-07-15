@@ -1,0 +1,1127 @@
+# hand0423g aligned OBJ export
+# Vertices are baked with the original GLB mesh node rotation/scale, so OBJ aligns with hand0423g.glb surface.
+# source_glb=D:/cad/blender/hand/hand0423g.glb
+# baked_scale=[-0.7999998927116394, -0.7999998927116394, -0.7999998927116394]
+# baked_rotation_xyzw=[-0.7071065902709961, 0.0, 0.0, 0.7071070075035095]
+mtllib hand0423g_finger_thirds_and_palm_aligned.mtl
+v 1.0653678 -0.4699592 0.3752503
+v 0.9141172 -0.6683989 0.3752502
+v 0.9141172 -0.7234280 0.5265008
+v 1.0653678 -0.5656230 0.5265009
+v 0.7628666 -0.7698090 0.3752502
+v 0.7628666 -0.8165180 0.5265007
+v 0.6116160 -0.8341501 0.3752501
+v 0.6116160 -0.8762227 0.5265007
+v 0.4603654 -0.8714359 0.3752501
+v 0.4603654 -0.9048449 0.5265007
+v 0.3091148 -0.8847936 0.3752501
+v 0.3091148 -0.9122205 0.5265007
+v 0.1578642 -0.8727460 0.3752501
+v 0.1578642 -0.9020632 0.5265007
+v 0.0066136 -0.8596401 0.3752501
+v 0.0066136 -0.8794332 0.5265007
+v -0.1446370 -0.8409562 0.3752501
+v -0.1446370 -0.8539060 0.5265007
+v -0.2958876 -0.8477076 0.3752501
+v -0.2958876 -0.8651492 0.5265007
+v -0.4471382 -0.8687987 0.3752501
+v -0.4471382 -0.9013383 0.5265007
+v -0.5983888 -0.9044748 0.3752501
+v -0.5983888 -0.9429982 0.5265007
+v -0.7496394 -0.9316735 0.3752501
+v -0.7496394 -0.9692227 0.5265007
+v -0.9008899 -0.9425946 0.3752501
+v -0.9008899 -0.9848374 0.5265006
+v -1.0521405 -0.9419607 0.3752501
+v -1.0521405 -0.9906651 0.5265006
+v -1.2033911 -0.9290388 0.3752501
+v -1.2033911 -0.9844889 0.5265006
+v -1.3546417 -0.9107925 0.3752501
+v -1.3546417 -0.9703655 0.5265007
+v -1.5058923 -0.8648901 0.3752501
+v -1.5058923 -0.9447116 0.5265007
+v -1.6571429 -0.8025592 0.3752501
+v -1.6571429 -0.9148400 0.5265007
+v 0.9141172 -0.7695316 0.6777514
+v 1.0653678 -0.6320139 0.6777514
+v 0.7628666 -0.8546049 0.6777513
+v 0.6116160 -0.9111088 0.6777513
+v 0.4603654 -0.9351109 0.6777513
+v 0.3091148 -0.9354935 0.6777513
+v 0.1578642 -0.9208355 0.6777513
+v 0.0066136 -0.8891520 0.6777513
+v -0.1446370 -0.8733118 0.6777513
+v -0.2958876 -0.8820833 0.6777513
+v -0.4471382 -0.9207971 0.6777513
+v -0.5983888 -0.9591771 0.6777513
+v -0.7496394 -0.9880560 0.6777512
+v -0.9008899 -1.0084402 0.6777512
+v -1.0521405 -1.0154764 0.6777512
+v -1.2033911 -1.0177217 0.6777512
+v -1.3546417 -1.0143974 0.6777512
+v -1.5058923 -0.9979299 0.6777512
+v -1.6571429 -0.9790153 0.6777513
+v 0.9141172 -0.8052736 0.8290019
+v 1.0653678 -0.6767159 0.8290020
+v 0.7628666 -0.8861676 0.8290019
+v 0.6116160 -0.9390221 0.8290019
+v 0.4603654 -0.9578862 0.8290019
+v 0.3091148 -0.9530450 0.8290019
+v 0.1578642 -0.9320061 0.8290019
+v 0.0066136 -0.9004727 0.8290019
+v -0.1446370 -0.8782529 0.8290019
+v -0.2958876 -0.8992895 0.8290019
+v -0.4471382 -0.9238089 0.8290019
+v -0.5983888 -0.9639965 0.8290019
+v -0.7496394 -0.9953118 0.8290018
+v -0.9008899 -1.0180911 0.8290018
+v -1.0521405 -1.0269622 0.8290018
+v -1.2033911 -1.0301835 0.8290018
+v -1.3546417 -1.0298691 0.8290018
+v -1.5058923 -1.0231088 0.8290018
+v -1.6571429 -1.0128867 0.8290018
+v 0.9141172 -0.8333656 0.9802525
+v 1.0653678 -0.7068402 0.9802526
+v 0.7628666 -0.9115338 0.9802525
+v 0.6116160 -0.9572922 0.9802525
+v 0.4603654 -0.9714435 0.9802525
+v 0.3091148 -0.9615587 0.9802525
+v 0.1578642 -0.9402324 0.9802525
+v 0.0066136 -0.9077323 0.9802525
+v -0.1446370 -0.8831165 0.9802525
+v -0.2958876 -0.8831112 0.9802525
+v -0.4471382 -0.9078010 0.9802525
+v -0.5983888 -0.9454286 0.9802525
+v -0.7496394 -0.9828940 0.9802524
+v -0.9008899 -1.0075561 0.9802524
+v -1.0521405 -1.0195661 0.9802524
+v -1.2033911 -1.0277793 0.9802524
+v -1.3546417 -1.0303932 0.9802524
+v -1.5058923 -1.0270599 0.9802524
+v -1.6571429 -1.0197637 0.9802524
+v 0.9141172 -0.8516085 1.1315031
+v 1.0653678 -0.7338947 1.1315032
+v 0.7628666 -0.9258563 1.1315031
+v 0.6116160 -0.9638472 1.1315031
+v 0.4603654 -0.9746134 1.1315031
+v 0.3091148 -0.9656370 1.1315031
+v 0.1578642 -0.9423890 1.1315031
+v 0.0066136 -0.9096014 1.1315031
+v -0.1446370 -0.8835164 1.1315031
+v -0.2958876 -0.8680876 1.1315031
+v -0.4471382 -0.8871194 1.1315031
+v -0.5983888 -0.9210389 1.1315031
+v -0.7496394 -0.9561054 1.1315031
+v -0.9008899 -0.9848757 1.1315030
+v -1.0521405 -1.0004516 1.1315030
+v -1.2033911 -1.0093539 1.1315030
+v -1.3546417 -1.0145649 1.1315030
+v -1.5058923 -1.0130098 1.1315030
+v -1.6571429 -1.0092774 1.1315030
+v 0.9141172 -0.8624499 1.2827537
+v 1.0653678 -0.7496123 1.2827538
+v 0.7628666 -0.9312456 1.2827537
+v 0.6116160 -0.9650105 1.2827537
+v 0.4603654 -0.9748849 1.2827537
+v 0.3091148 -0.9624858 1.2827537
+v 0.1578642 -0.9360912 1.2827537
+v 0.0066136 -0.9019939 1.2827537
+v -0.1446370 -0.8725414 1.2827537
+v -0.2958876 -0.8599700 1.2827537
+v -0.4471382 -0.8715961 1.2827537
+v -0.5983888 -0.8944423 1.2827537
+v -0.7496394 -0.9265609 1.2827537
+v -0.9008899 -0.9517025 1.2827537
+v -1.0521405 -0.9689775 1.2827537
+v -1.2033911 -0.9797225 1.2827537
+v -1.3546417 -0.9854078 1.2827536
+v -1.5058923 -0.9818808 1.2827536
+v -1.6571429 -0.9782539 1.2827537
+v 0.9141172 -0.8635125 1.4340043
+v 1.0653678 -0.7570995 1.4340044
+v 0.7628666 -0.9283061 1.4340043
+v 0.6116160 -0.9611315 1.4340043
+v 0.4603654 -0.9714074 1.4340043
+v 0.3091148 -0.9566451 1.4340043
+v 0.1578642 -0.9251373 1.4340043
+v 0.0066136 -0.8916903 1.4340043
+v -0.1446370 -0.8612961 1.4340043
+v -0.2958876 -0.8491662 1.4340043
+v -0.4471382 -0.8514912 1.4340043
+v -0.5983888 -0.8673236 1.4340043
+v -0.7496394 -0.8937495 1.4340043
+v -0.9008899 -0.9163256 1.4340043
+v -1.0521405 -0.9279201 1.4340043
+v -1.2033911 -0.9369440 1.4340043
+v -1.3546417 -0.9394276 1.4340043
+v -1.5058923 -0.9354257 1.4340043
+v -1.6571429 -0.9260265 1.4340043
+v 0.9141172 -0.8594762 1.5852549
+v 1.0653678 -0.7561331 1.5852550
+v 0.7628666 -0.9241649 1.5852549
+v 0.6116160 -0.9569422 1.5852549
+v 0.4603654 -0.9639083 1.5852549
+v 0.3091148 -0.9479745 1.5852549
+v 0.1578642 -0.9159842 1.5852549
+v 0.0066136 -0.8810156 1.5852549
+v -0.1446370 -0.8506515 1.5852549
+v -0.2958876 -0.8342217 1.5852549
+v -0.4471382 -0.8319496 1.5852549
+v -0.5983888 -0.8350894 1.5852549
+v -0.7496394 -0.8574246 1.5852549
+v -0.9008899 -0.8744019 1.5852549
+v -1.0521405 -0.8867322 1.5852549
+v -1.2033911 -0.8870266 1.5852549
+v -1.3546417 -0.8819231 1.5852549
+v -1.5058923 -0.8714864 1.5852549
+v -1.6571429 -0.8541945 1.5852549
+v 0.9141172 -0.8552627 1.7365055
+v 1.0653678 -0.7534778 1.7365056
+v 0.7628666 -0.9172888 1.7365055
+v 0.6116160 -0.9498968 1.7365055
+v 0.4603654 -0.9535896 1.7365055
+v 0.3091148 -0.9369440 1.7365055
+v 0.1578642 -0.9036090 1.7365055
+v 0.0066136 -0.8650642 1.7365055
+v -0.1446370 -0.8362094 1.7365055
+v -0.2958876 -0.8182128 1.7365055
+v -0.4471382 -0.8106147 1.7365055
+v -0.5983888 -0.8116794 1.7365055
+v -0.7496394 -0.8191201 1.7365055
+v -0.9008899 -0.8278866 1.7365055
+v -1.0521405 -0.8318163 1.7365055
+v -1.2033911 -0.8256571 1.7365055
+v -1.3546417 -0.8111626 1.7365055
+v -1.5058923 -0.7921143 1.7365056
+v -1.6571429 -0.7636266 1.7365056
+v 0.9141172 -0.8505612 1.8877561
+v 1.0653678 -0.7503623 1.8877562
+v 0.7628666 -0.9116837 1.8877561
+v 0.6116160 -0.9407535 1.8877561
+v 0.4603654 -0.9401683 1.8877561
+v 0.3091148 -0.9207744 1.8877561
+v 0.1578642 -0.8879634 1.8877561
+v 0.0066136 -0.8509543 1.8877561
+v -0.1446370 -0.8241852 1.8877561
+v -0.2958876 -0.8046573 1.8877561
+v -0.4471382 -0.7894472 1.8877562
+v -0.5983888 -0.7843423 1.8877562
+v -0.7496394 -0.7830195 1.8877562
+v -0.9008899 -0.7850797 1.8877562
+v -1.0521405 -0.7784723 1.8877562
+v -1.2033911 -0.7671034 1.8877562
+v -1.3546417 -0.7445351 1.8877562
+v -1.5058923 -0.7126532 1.8877562
+v -1.6571429 -0.6741105 1.8877562
+v 0.9141172 -0.8506353 2.0390067
+v 1.0653678 -0.7464717 2.0390068
+v 0.7628666 -0.9092183 2.0390067
+v 0.6116160 -0.9331360 2.0390067
+v 0.4603654 -0.9305434 2.0390067
+v 0.3091148 -0.9072953 2.0390067
+v 0.1578642 -0.8744852 2.0390067
+v 0.0066136 -0.8397114 2.0390067
+v -0.1446370 -0.8132703 2.0390067
+v -0.2958876 -0.7930173 2.0390067
+v -0.4471382 -0.7754063 2.0390068
+v -0.5983888 -0.7626351 2.0390068
+v -0.7496394 -0.7559632 2.0390068
+v -0.9008899 -0.7511312 2.0390068
+v -1.0521405 -0.7450378 2.0390068
+v -1.2033911 -0.7254798 2.0390068
+v -1.3546417 -0.7015994 2.0390068
+v -1.5058923 -0.6668182 2.0390068
+v -1.6571429 -0.6184770 2.0390068
+v 0.9141172 -0.8521965 2.1902573
+v 1.0653678 -0.7436418 2.1902574
+v 0.7628666 -0.9060475 2.1902573
+v 0.6116160 -0.9262904 2.1902573
+v 0.4603654 -0.9226169 2.1902573
+v 0.3091148 -0.8975355 2.1902573
+v 0.1578642 -0.8633049 2.1902573
+v 0.0066136 -0.8297390 2.1902573
+v -0.1446370 -0.8039657 2.1902573
+v -0.2958876 -0.7830395 2.1902574
+v -0.4471382 -0.7642876 2.1902574
+v -0.5983888 -0.7487893 2.1902574
+v -0.7496394 -0.7386760 2.1902574
+v -0.9008899 -0.7330863 2.1902574
+v -1.0521405 -0.7250988 2.1902574
+v -1.2033911 -0.7091177 2.1902574
+v -1.3546417 -0.6808415 2.1902574
+v -1.5058923 -0.6461566 2.1902574
+v -1.6571429 -0.5919726 2.1902575
+v 0.9141172 -0.8508568 2.3415079
+v 1.0653678 -0.7377087 2.3415080
+v 0.7628666 -0.9042456 2.3415079
+v 0.6116160 -0.9213158 2.3415079
+v 0.4603654 -0.9164125 2.3415079
+v 0.3091148 -0.8898830 2.3415079
+v 0.1578642 -0.8554181 2.3415079
+v 0.0066136 -0.8218710 2.3415079
+v -0.1446370 -0.7948933 2.3415079
+v -0.2958876 -0.7749952 2.3415080
+v -0.4471382 -0.7575674 2.3415080
+v -0.5983888 -0.7421845 2.3415080
+v -0.7496394 -0.7323919 2.3415080
+v -0.9008899 -0.7280291 2.3415080
+v -1.0521405 -0.7237467 2.3415080
+v -1.2033911 -0.7104666 2.3415080
+v -1.3546417 -0.6860489 2.3415080
+v -1.5058923 -0.6530109 2.3415080
+v -1.6571429 -0.6027652 2.3415081
+v 0.9141172 -0.8537372 2.4927585
+v 1.0653678 -0.7350954 2.4927586
+v 0.7628666 -0.9055097 2.4927585
+v 0.6116160 -0.9201154 2.4927585
+v 0.4603654 -0.9145366 2.4927585
+v 0.3091148 -0.8865432 2.4927585
+v 0.1578642 -0.8515573 2.4927585
+v 0.0066136 -0.8167954 2.4927585
+v -0.1446370 -0.7908305 2.4927585
+v -0.2958876 -0.7721105 2.4927586
+v -0.4471382 -0.7557301 2.4927586
+v -0.5983888 -0.7409111 2.4927586
+v -0.7496394 -0.7311964 2.4927586
+v -0.9008899 -0.7251385 2.4927586
+v -1.0521405 -0.7211487 2.4927586
+v -1.2033911 -0.7145853 2.4927586
+v -1.3546417 -0.6993226 2.4927586
+v -1.5058923 -0.6651781 2.4927586
+v -1.6571429 -0.6214655 2.4927586
+v 0.9141172 -0.8656696 2.6440091
+v 1.0653678 -0.7395675 2.6440092
+v 0.7628666 -0.9130148 2.6440091
+v 0.6116160 -0.9241895 2.6440091
+v 0.4603654 -0.9172389 2.6440091
+v 0.3091148 -0.8904652 2.6440091
+v 0.1578642 -0.8541755 2.6440091
+v 0.0066136 -0.8190626 2.6440091
+v -0.1446370 -0.7914909 2.6440091
+v -0.2958876 -0.7720580 2.6440092
+v -0.4471382 -0.7561534 2.6440092
+v -0.5983888 -0.7423958 2.6440092
+v -0.7496394 -0.7329081 2.6440092
+v -0.9008899 -0.7262607 2.6440092
+v -1.0521405 -0.7200152 2.6440092
+v -1.2033911 -0.7133547 2.6440092
+v -1.3546417 -0.7020255 2.6440092
+v -1.5058923 -0.6722057 2.6440092
+v -1.6571429 -0.6266140 2.6440092
+v 0.9141172 -0.8805632 2.7952597
+v 1.0653678 -0.7475378 2.7952598
+v 0.7628666 -0.9269191 2.7952597
+v 0.6116160 -0.9351115 2.7952597
+v 0.4603654 -0.9226903 2.7952597
+v 0.3091148 -0.8957033 2.7952597
+v 0.1578642 -0.8619791 2.7952597
+v 0.0066136 -0.8259429 2.7952597
+v -0.1446370 -0.7960986 2.7952597
+v -0.2958876 -0.7758118 2.7952598
+v -0.4471382 -0.7596367 2.7952598
+v -0.5983888 -0.7466208 2.7952598
+v -0.7496394 -0.7375502 2.7952598
+v -0.9008899 -0.7308086 2.7952598
+v -1.0521405 -0.7235338 2.7952598
+v -1.2033911 -0.7179990 2.7952598
+v -1.3546417 -0.7110236 2.7952598
+v -1.5058923 -0.6871849 2.7952598
+v -1.6571429 -0.6437130 2.7952598
+v 0.9141172 -0.8924701 2.9465103
+v 1.0653678 -0.7557053 2.9465104
+v 0.7628666 -0.9424990 2.9465103
+v 0.6116160 -0.9509401 2.9465103
+v 0.4603654 -0.9375581 2.9465103
+v 0.3091148 -0.9118134 2.9465103
+v 0.1578642 -0.8815541 2.9465103
+v 0.0066136 -0.8452175 2.9465103
+v -0.1446370 -0.8134541 2.9465103
+v -0.2958876 -0.7895390 2.9465103
+v -0.4471382 -0.7701643 2.9465104
+v -0.5983888 -0.7581289 2.9465104
+v -0.7496394 -0.7502273 2.9465104
+v -0.9008899 -0.7426181 2.9465104
+v -1.0521405 -0.7347367 2.9465104
+v -1.2033911 -0.7284170 2.9465104
+v -1.3546417 -0.7232780 2.9465104
+v -1.5058923 -0.7014711 2.9465104
+v -1.6571429 -0.6572588 2.9465104
+v 0.9141172 -0.8945029 3.0977609
+v 1.0653678 -0.7605760 3.0977610
+v 0.7628666 -0.9456170 3.0977609
+v 0.6116160 -0.9555988 3.0977609
+v 0.4603654 -0.9427559 3.0977609
+v 0.3091148 -0.9216948 3.0977609
+v 0.1578642 -0.9001778 3.0977609
+v 0.0066136 -0.8702823 3.0977609
+v -0.1446370 -0.8411533 3.0977609
+v -0.2958876 -0.8136217 3.0977609
+v -0.4471382 -0.7903503 3.0977609
+v -0.5983888 -0.7783748 3.0977610
+v -0.7496394 -0.7690203 3.0977610
+v -0.9008899 -0.7586426 3.0977610
+v -1.0521405 -0.7456201 3.0977610
+v -1.2033911 -0.7338055 3.0977610
+v -1.3546417 -0.7245050 3.0977610
+v -1.5058923 -0.7031856 3.0977610
+v -1.6571429 -0.6653804 3.0977610
+v 0.9141172 -0.8830339 3.2490115
+v 1.0653678 -0.7620505 3.2490116
+v 0.7628666 -0.9327424 3.2490115
+v 0.6116160 -0.9431303 3.2490115
+v 0.4603654 -0.9342590 3.2490115
+v 0.3091148 -0.9205951 3.2490115
+v 0.1578642 -0.9093881 3.2490115
+v 0.0066136 -0.8886580 3.2490115
+v -0.1446370 -0.8625726 3.2490115
+v -0.2958876 -0.8297206 3.2490115
+v -0.4471382 -0.8023760 3.2490115
+v -0.5983888 -0.7836449 3.2490116
+v -0.7496394 -0.7701209 3.2490116
+v -0.9008899 -0.7568801 3.2490116
+v -1.0521405 -0.7380770 3.2490116
+v -1.2033911 -0.7213151 3.2490116
+v -1.3546417 -0.7082841 3.2490116
+v -1.5058923 -0.6887919 3.2490116
+v -1.6571429 -0.6616367 3.2490116
+v 0.9141172 -0.8706076 3.4002621
+v 1.0653678 -0.7557796 3.4002622
+v 0.7628666 -0.9095966 3.4002621
+v 0.6116160 -0.9173634 3.4002621
+v 0.4603654 -0.9149641 3.4002621
+v 0.3091148 -0.9092290 3.4002621
+v 0.1578642 -0.9068403 3.4002621
+v 0.0066136 -0.8941027 3.4002621
+v -0.1446370 -0.8696186 3.4002621
+v -0.2958876 -0.8336799 3.4002621
+v -0.4471382 -0.8036083 3.4002621
+v -0.5983888 -0.7831820 3.4002622
+v -0.7496394 -0.7658108 3.4002622
+v -0.9008899 -0.7460715 3.4002622
+v -1.0521405 -0.7230918 3.4002622
+v -1.2033911 -0.6967621 3.4002622
+v -1.3546417 -0.6805938 3.4002622
+v -1.5058923 -0.6655105 3.4002622
+v -1.6571429 -0.6476717 3.4002622
+g palm_rectified_palm
+usemtl palm_rectified
+# global_wiring_id=0 component=palm segment=palm_rectified finger=palm row=0 col=0 source_quad_id=4006
+f 1 2 3 4
+# global_wiring_id=1 component=palm segment=palm_rectified finger=palm row=0 col=1 source_quad_id=4008
+f 2 5 6 3
+# global_wiring_id=2 component=palm segment=palm_rectified finger=palm row=0 col=2 source_quad_id=3888
+f 5 7 8 6
+# global_wiring_id=3 component=palm segment=palm_rectified finger=palm row=0 col=3 source_quad_id=3887
+f 7 9 10 8
+# global_wiring_id=4 component=palm segment=palm_rectified finger=palm row=0 col=4 source_quad_id=117
+f 9 11 12 10
+# global_wiring_id=5 component=palm segment=palm_rectified finger=palm row=0 col=5 source_quad_id=6500
+f 11 13 14 12
+# global_wiring_id=6 component=palm segment=palm_rectified finger=palm row=0 col=6 source_quad_id=3761
+f 13 15 16 14
+# global_wiring_id=7 component=palm segment=palm_rectified finger=palm row=0 col=7 source_quad_id=3762
+f 15 17 18 16
+# global_wiring_id=8 component=palm segment=palm_rectified finger=palm row=0 col=8 source_quad_id=3759
+f 17 19 20 18
+# global_wiring_id=9 component=palm segment=palm_rectified finger=palm row=0 col=9 source_quad_id=3759
+f 19 21 22 20
+# global_wiring_id=10 component=palm segment=palm_rectified finger=palm row=0 col=10 source_quad_id=3627
+f 21 23 24 22
+# global_wiring_id=11 component=palm segment=palm_rectified finger=palm row=0 col=11 source_quad_id=3621
+f 23 25 26 24
+# global_wiring_id=12 component=palm segment=palm_rectified finger=palm row=0 col=12 source_quad_id=3624
+f 25 27 28 26
+# global_wiring_id=13 component=palm segment=palm_rectified finger=palm row=0 col=13 source_quad_id=3624
+f 27 29 30 28
+# global_wiring_id=14 component=palm segment=palm_rectified finger=palm row=0 col=14 source_quad_id=3625
+f 29 31 32 30
+# global_wiring_id=15 component=palm segment=palm_rectified finger=palm row=0 col=15 source_quad_id=3478
+f 31 33 34 32
+# global_wiring_id=16 component=palm segment=palm_rectified finger=palm row=0 col=16 source_quad_id=3476
+f 33 35 36 34
+# global_wiring_id=17 component=palm segment=palm_rectified finger=palm row=0 col=17 source_quad_id=3477
+f 35 37 38 36
+# global_wiring_id=18 component=palm segment=palm_rectified finger=palm row=1 col=0 source_quad_id=3870
+f 4 3 39 40
+# global_wiring_id=19 component=palm segment=palm_rectified finger=palm row=1 col=1 source_quad_id=3874
+f 3 6 41 39
+# global_wiring_id=20 component=palm segment=palm_rectified finger=palm row=1 col=2 source_quad_id=3876
+f 6 8 42 41
+# global_wiring_id=21 component=palm segment=palm_rectified finger=palm row=1 col=3 source_quad_id=3886
+f 8 10 43 42
+# global_wiring_id=22 component=palm segment=palm_rectified finger=palm row=1 col=4 source_quad_id=3884
+f 10 12 44 43
+# global_wiring_id=23 component=palm segment=palm_rectified finger=palm row=1 col=5 source_quad_id=3884
+f 12 14 45 44
+# global_wiring_id=24 component=palm segment=palm_rectified finger=palm row=1 col=6 source_quad_id=3885
+f 14 16 46 45
+# global_wiring_id=25 component=palm segment=palm_rectified finger=palm row=1 col=7 source_quad_id=3761
+f 16 18 47 46
+# global_wiring_id=26 component=palm segment=palm_rectified finger=palm row=1 col=8 source_quad_id=3757
+f 18 20 48 47
+# global_wiring_id=27 component=palm segment=palm_rectified finger=palm row=1 col=9 source_quad_id=3760
+f 20 22 49 48
+# global_wiring_id=28 component=palm segment=palm_rectified finger=palm row=1 col=10 source_quad_id=3760
+f 22 24 50 49
+# global_wiring_id=29 component=palm segment=palm_rectified finger=palm row=1 col=11 source_quad_id=3619
+f 24 26 51 50
+# global_wiring_id=30 component=palm segment=palm_rectified finger=palm row=1 col=12 source_quad_id=3622
+f 26 28 52 51
+# global_wiring_id=31 component=palm segment=palm_rectified finger=palm row=1 col=13 source_quad_id=3623
+f 28 30 53 52
+# global_wiring_id=32 component=palm segment=palm_rectified finger=palm row=1 col=14 source_quad_id=3623
+f 30 32 54 53
+# global_wiring_id=33 component=palm segment=palm_rectified finger=palm row=1 col=15 source_quad_id=6501
+f 32 34 55 54
+# global_wiring_id=34 component=palm segment=palm_rectified finger=palm row=1 col=16 source_quad_id=3467
+f 34 36 56 55
+# global_wiring_id=35 component=palm segment=palm_rectified finger=palm row=1 col=17 source_quad_id=3470
+f 36 38 57 56
+# global_wiring_id=36 component=palm segment=palm_rectified finger=palm row=2 col=0 source_quad_id=3872
+f 40 39 58 59
+# global_wiring_id=37 component=palm segment=palm_rectified finger=palm row=2 col=1 source_quad_id=3874
+f 39 41 60 58
+# global_wiring_id=38 component=palm segment=palm_rectified finger=palm row=2 col=2 source_quad_id=3876
+f 41 42 61 60
+# global_wiring_id=39 component=palm segment=palm_rectified finger=palm row=2 col=3 source_quad_id=3878
+f 42 43 62 61
+# global_wiring_id=40 component=palm segment=palm_rectified finger=palm row=2 col=4 source_quad_id=3880
+f 43 44 63 62
+# global_wiring_id=41 component=palm segment=palm_rectified finger=palm row=2 col=5 source_quad_id=3880
+f 44 45 64 63
+# global_wiring_id=42 component=palm segment=palm_rectified finger=palm row=2 col=6 source_quad_id=3885
+f 45 46 65 64
+# global_wiring_id=43 component=palm segment=palm_rectified finger=palm row=2 col=7 source_quad_id=3755
+f 46 47 66 65
+# global_wiring_id=44 component=palm segment=palm_rectified finger=palm row=2 col=8 source_quad_id=3755
+f 47 48 67 66
+# global_wiring_id=45 component=palm segment=palm_rectified finger=palm row=2 col=9 source_quad_id=3758
+f 48 49 68 67
+# global_wiring_id=46 component=palm segment=palm_rectified finger=palm row=2 col=10 source_quad_id=3617
+f 49 50 69 68
+# global_wiring_id=47 component=palm segment=palm_rectified finger=palm row=2 col=11 source_quad_id=3618
+f 50 51 70 69
+# global_wiring_id=48 component=palm segment=palm_rectified finger=palm row=2 col=12 source_quad_id=3620
+f 51 52 71 70
+# global_wiring_id=49 component=palm segment=palm_rectified finger=palm row=2 col=13 source_quad_id=3461
+f 52 53 72 71
+# global_wiring_id=50 component=palm segment=palm_rectified finger=palm row=2 col=14 source_quad_id=3462
+f 53 54 73 72
+# global_wiring_id=51 component=palm segment=palm_rectified finger=palm row=2 col=15 source_quad_id=3465
+f 54 55 74 73
+# global_wiring_id=52 component=palm segment=palm_rectified finger=palm row=2 col=16 source_quad_id=3465
+f 55 56 75 74
+# global_wiring_id=53 component=palm segment=palm_rectified finger=palm row=2 col=17 source_quad_id=3468
+f 56 57 76 75
+# global_wiring_id=54 component=palm segment=palm_rectified finger=palm row=3 col=0 source_quad_id=3873
+f 59 58 77 78
+# global_wiring_id=55 component=palm segment=palm_rectified finger=palm row=3 col=1 source_quad_id=3875
+f 58 60 79 77
+# global_wiring_id=56 component=palm segment=palm_rectified finger=palm row=3 col=2 source_quad_id=3877
+f 60 61 80 79
+# global_wiring_id=57 component=palm segment=palm_rectified finger=palm row=3 col=3 source_quad_id=3879
+f 61 62 81 80
+# global_wiring_id=58 component=palm segment=palm_rectified finger=palm row=3 col=4 source_quad_id=3881
+f 62 63 82 81
+# global_wiring_id=59 component=palm segment=palm_rectified finger=palm row=3 col=5 source_quad_id=3883
+f 63 64 83 82
+# global_wiring_id=60 component=palm segment=palm_rectified finger=palm row=3 col=6 source_quad_id=3882
+f 64 65 84 83
+# global_wiring_id=61 component=palm segment=palm_rectified finger=palm row=3 col=7 source_quad_id=3753
+f 65 66 85 84
+# global_wiring_id=62 component=palm segment=palm_rectified finger=palm row=3 col=8 source_quad_id=3754
+f 66 67 86 85
+# global_wiring_id=63 component=palm segment=palm_rectified finger=palm row=3 col=9 source_quad_id=3615
+f 67 68 87 86
+# global_wiring_id=64 component=palm segment=palm_rectified finger=palm row=3 col=10 source_quad_id=3615
+f 68 69 88 87
+# global_wiring_id=65 component=palm segment=palm_rectified finger=palm row=3 col=11 source_quad_id=3616
+f 69 70 89 88
+# global_wiring_id=66 component=palm segment=palm_rectified finger=palm row=3 col=12 source_quad_id=3459
+f 70 71 90 89
+# global_wiring_id=67 component=palm segment=palm_rectified finger=palm row=3 col=13 source_quad_id=3460
+f 71 72 91 90
+# global_wiring_id=68 component=palm segment=palm_rectified finger=palm row=3 col=14 source_quad_id=3462
+f 72 73 92 91
+# global_wiring_id=69 component=palm segment=palm_rectified finger=palm row=3 col=15 source_quad_id=3463
+f 73 74 93 92
+# global_wiring_id=70 component=palm segment=palm_rectified finger=palm row=3 col=16 source_quad_id=3250
+f 74 75 94 93
+# global_wiring_id=71 component=palm segment=palm_rectified finger=palm row=3 col=17 source_quad_id=3253
+f 75 76 95 94
+# global_wiring_id=72 component=palm segment=palm_rectified finger=palm row=4 col=0 source_quad_id=3735
+f 78 77 96 97
+# global_wiring_id=73 component=palm segment=palm_rectified finger=palm row=4 col=1 source_quad_id=3737
+f 77 79 98 96
+# global_wiring_id=74 component=palm segment=palm_rectified finger=palm row=4 col=2 source_quad_id=3739
+f 79 80 99 98
+# global_wiring_id=75 component=palm segment=palm_rectified finger=palm row=4 col=3 source_quad_id=3741
+f 80 81 100 99
+# global_wiring_id=76 component=palm segment=palm_rectified finger=palm row=4 col=4 source_quad_id=3743
+f 81 82 101 100
+# global_wiring_id=77 component=palm segment=palm_rectified finger=palm row=4 col=5 source_quad_id=3883
+f 82 83 102 101
+# global_wiring_id=78 component=palm segment=palm_rectified finger=palm row=4 col=6 source_quad_id=3751
+f 83 84 103 102
+# global_wiring_id=79 component=palm segment=palm_rectified finger=palm row=4 col=7 source_quad_id=3751
+f 84 85 104 103
+# global_wiring_id=80 component=palm segment=palm_rectified finger=palm row=4 col=8 source_quad_id=3752
+f 85 86 105 104
+# global_wiring_id=81 component=palm segment=palm_rectified finger=palm row=4 col=9 source_quad_id=3613
+f 86 87 106 105
+# global_wiring_id=82 component=palm segment=palm_rectified finger=palm row=4 col=10 source_quad_id=3614
+f 87 88 107 106
+# global_wiring_id=83 component=palm segment=palm_rectified finger=palm row=4 col=11 source_quad_id=3614
+f 88 89 108 107
+# global_wiring_id=84 component=palm segment=palm_rectified finger=palm row=4 col=12 source_quad_id=3457
+f 89 90 109 108
+# global_wiring_id=85 component=palm segment=palm_rectified finger=palm row=4 col=13 source_quad_id=3458
+f 90 91 110 109
+# global_wiring_id=86 component=palm segment=palm_rectified finger=palm row=4 col=14 source_quad_id=3247
+f 91 92 111 110
+# global_wiring_id=87 component=palm segment=palm_rectified finger=palm row=4 col=15 source_quad_id=3247
+f 92 93 112 111
+# global_wiring_id=88 component=palm segment=palm_rectified finger=palm row=4 col=16 source_quad_id=3248
+f 93 94 113 112
+# global_wiring_id=89 component=palm segment=palm_rectified finger=palm row=4 col=17 source_quad_id=3251
+f 94 95 114 113
+# global_wiring_id=90 component=palm segment=palm_rectified finger=palm row=5 col=0 source_quad_id=3736
+f 97 96 115 116
+# global_wiring_id=91 component=palm segment=palm_rectified finger=palm row=5 col=1 source_quad_id=3738
+f 96 98 117 115
+# global_wiring_id=92 component=palm segment=palm_rectified finger=palm row=5 col=2 source_quad_id=3740
+f 98 99 118 117
+# global_wiring_id=93 component=palm segment=palm_rectified finger=palm row=5 col=3 source_quad_id=3742
+f 99 100 119 118
+# global_wiring_id=94 component=palm segment=palm_rectified finger=palm row=5 col=4 source_quad_id=3744
+f 100 101 120 119
+# global_wiring_id=95 component=palm segment=palm_rectified finger=palm row=5 col=5 source_quad_id=3745
+f 101 102 121 120
+# global_wiring_id=96 component=palm segment=palm_rectified finger=palm row=5 col=6 source_quad_id=3747
+f 102 103 122 121
+# global_wiring_id=97 component=palm segment=palm_rectified finger=palm row=5 col=7 source_quad_id=3749
+f 103 104 123 122
+# global_wiring_id=98 component=palm segment=palm_rectified finger=palm row=5 col=8 source_quad_id=3749
+f 104 105 124 123
+# global_wiring_id=99 component=palm segment=palm_rectified finger=palm row=5 col=9 source_quad_id=3611
+f 105 106 125 124
+# global_wiring_id=100 component=palm segment=palm_rectified finger=palm row=5 col=10 source_quad_id=3612
+f 106 107 126 125
+# global_wiring_id=101 component=palm segment=palm_rectified finger=palm row=5 col=11 source_quad_id=3453
+f 107 108 127 126
+# global_wiring_id=102 component=palm segment=palm_rectified finger=palm row=5 col=12 source_quad_id=3456
+f 108 109 128 127
+# global_wiring_id=103 component=palm segment=palm_rectified finger=palm row=5 col=13 source_quad_id=3456
+f 109 110 129 128
+# global_wiring_id=104 component=palm segment=palm_rectified finger=palm row=5 col=14 source_quad_id=3245
+f 110 111 130 129
+# global_wiring_id=105 component=palm segment=palm_rectified finger=palm row=5 col=15 source_quad_id=3246
+f 111 112 131 130
+# global_wiring_id=106 component=palm segment=palm_rectified finger=palm row=5 col=16 source_quad_id=2964
+f 112 113 132 131
+# global_wiring_id=107 component=palm segment=palm_rectified finger=palm row=5 col=17 source_quad_id=3249
+f 113 114 133 132
+# global_wiring_id=108 component=palm segment=palm_rectified finger=palm row=6 col=0 source_quad_id=3587
+f 116 115 134 135
+# global_wiring_id=109 component=palm segment=palm_rectified finger=palm row=6 col=1 source_quad_id=3589
+f 115 117 136 134
+# global_wiring_id=110 component=palm segment=palm_rectified finger=palm row=6 col=2 source_quad_id=3591
+f 117 118 137 136
+# global_wiring_id=111 component=palm segment=palm_rectified finger=palm row=6 col=3 source_quad_id=3593
+f 118 119 138 137
+# global_wiring_id=112 component=palm segment=palm_rectified finger=palm row=6 col=4 source_quad_id=3744
+f 119 120 139 138
+# global_wiring_id=113 component=palm segment=palm_rectified finger=palm row=6 col=5 source_quad_id=3746
+f 120 121 140 139
+# global_wiring_id=114 component=palm segment=palm_rectified finger=palm row=6 col=6 source_quad_id=3748
+f 121 122 141 140
+# global_wiring_id=115 component=palm segment=palm_rectified finger=palm row=6 col=7 source_quad_id=3750
+f 122 123 142 141
+# global_wiring_id=116 component=palm segment=palm_rectified finger=palm row=6 col=8 source_quad_id=3609
+f 123 124 143 142
+# global_wiring_id=117 component=palm segment=palm_rectified finger=palm row=6 col=9 source_quad_id=3610
+f 124 125 144 143
+# global_wiring_id=118 component=palm segment=palm_rectified finger=palm row=6 col=10 source_quad_id=3610
+f 125 126 145 144
+# global_wiring_id=119 component=palm segment=palm_rectified finger=palm row=6 col=11 source_quad_id=3451
+f 126 127 146 145
+# global_wiring_id=120 component=palm segment=palm_rectified finger=palm row=6 col=12 source_quad_id=3454
+f 127 128 147 146
+# global_wiring_id=121 component=palm segment=palm_rectified finger=palm row=6 col=13 source_quad_id=3241
+f 128 129 148 147
+# global_wiring_id=122 component=palm segment=palm_rectified finger=palm row=6 col=14 source_quad_id=3243
+f 129 130 149 148
+# global_wiring_id=123 component=palm segment=palm_rectified finger=palm row=6 col=15 source_quad_id=3244
+f 130 131 150 149
+# global_wiring_id=124 component=palm segment=palm_rectified finger=palm row=6 col=16 source_quad_id=2962
+f 131 132 151 150
+# global_wiring_id=125 component=palm segment=palm_rectified finger=palm row=6 col=17 source_quad_id=2965
+f 132 133 152 151
+# global_wiring_id=126 component=palm segment=palm_rectified finger=palm row=7 col=0 source_quad_id=3588
+f 135 134 153 154
+# global_wiring_id=127 component=palm segment=palm_rectified finger=palm row=7 col=1 source_quad_id=3590
+f 134 136 155 153
+# global_wiring_id=128 component=palm segment=palm_rectified finger=palm row=7 col=2 source_quad_id=3594
+f 136 137 156 155
+# global_wiring_id=129 component=palm segment=palm_rectified finger=palm row=7 col=3 source_quad_id=3595
+f 137 138 157 156
+# global_wiring_id=130 component=palm segment=palm_rectified finger=palm row=7 col=4 source_quad_id=3595
+f 138 139 158 157
+# global_wiring_id=131 component=palm segment=palm_rectified finger=palm row=7 col=5 source_quad_id=3597
+f 139 140 159 158
+# global_wiring_id=132 component=palm segment=palm_rectified finger=palm row=7 col=6 source_quad_id=3599
+f 140 141 160 159
+# global_wiring_id=133 component=palm segment=palm_rectified finger=palm row=7 col=7 source_quad_id=3601
+f 141 142 161 160
+# global_wiring_id=134 component=palm segment=palm_rectified finger=palm row=7 col=8 source_quad_id=3607
+f 142 143 162 161
+# global_wiring_id=135 component=palm segment=palm_rectified finger=palm row=7 col=9 source_quad_id=3608
+f 143 144 163 162
+# global_wiring_id=136 component=palm segment=palm_rectified finger=palm row=7 col=10 source_quad_id=3449
+f 144 145 164 163
+# global_wiring_id=137 component=palm segment=palm_rectified finger=palm row=7 col=11 source_quad_id=3450
+f 145 146 165 164
+# global_wiring_id=138 component=palm segment=palm_rectified finger=palm row=7 col=12 source_quad_id=3452
+f 146 147 166 165
+# global_wiring_id=139 component=palm segment=palm_rectified finger=palm row=7 col=13 source_quad_id=3239
+f 147 148 167 166
+# global_wiring_id=140 component=palm segment=palm_rectified finger=palm row=7 col=14 source_quad_id=3240
+f 148 149 168 167
+# global_wiring_id=141 component=palm segment=palm_rectified finger=palm row=7 col=15 source_quad_id=2960
+f 149 150 169 168
+# global_wiring_id=142 component=palm segment=palm_rectified finger=palm row=7 col=16 source_quad_id=2960
+f 150 151 170 169
+# global_wiring_id=143 component=palm segment=palm_rectified finger=palm row=7 col=17 source_quad_id=2961
+f 151 152 171 170
+# global_wiring_id=144 component=palm segment=palm_rectified finger=palm row=8 col=0 source_quad_id=3419
+f 154 153 172 173
+# global_wiring_id=145 component=palm segment=palm_rectified finger=palm row=8 col=1 source_quad_id=3592
+f 153 155 174 172
+# global_wiring_id=146 component=palm segment=palm_rectified finger=palm row=8 col=2 source_quad_id=3594
+f 155 156 175 174
+# global_wiring_id=147 component=palm segment=palm_rectified finger=palm row=8 col=3 source_quad_id=3596
+f 156 157 176 175
+# global_wiring_id=148 component=palm segment=palm_rectified finger=palm row=8 col=4 source_quad_id=3598
+f 157 158 177 176
+# global_wiring_id=149 component=palm segment=palm_rectified finger=palm row=8 col=5 source_quad_id=3600
+f 158 159 178 177
+# global_wiring_id=150 component=palm segment=palm_rectified finger=palm row=8 col=6 source_quad_id=3600
+f 159 160 179 178
+# global_wiring_id=151 component=palm segment=palm_rectified finger=palm row=8 col=7 source_quad_id=3602
+f 160 161 180 179
+# global_wiring_id=152 component=palm segment=palm_rectified finger=palm row=8 col=8 source_quad_id=3603
+f 161 162 181 180
+# global_wiring_id=153 component=palm segment=palm_rectified finger=palm row=8 col=9 source_quad_id=3605
+f 162 163 182 181
+# global_wiring_id=154 component=palm segment=palm_rectified finger=palm row=8 col=10 source_quad_id=3447
+f 163 164 183 182
+# global_wiring_id=155 component=palm segment=palm_rectified finger=palm row=8 col=11 source_quad_id=3448
+f 164 165 184 183
+# global_wiring_id=156 component=palm segment=palm_rectified finger=palm row=8 col=12 source_quad_id=3237
+f 165 166 185 184
+# global_wiring_id=157 component=palm segment=palm_rectified finger=palm row=8 col=13 source_quad_id=3238
+f 166 167 186 185
+# global_wiring_id=158 component=palm segment=palm_rectified finger=palm row=8 col=14 source_quad_id=3238
+f 167 168 187 186
+# global_wiring_id=159 component=palm segment=palm_rectified finger=palm row=8 col=15 source_quad_id=2958
+f 168 169 188 187
+# global_wiring_id=160 component=palm segment=palm_rectified finger=palm row=8 col=16 source_quad_id=2959
+f 169 170 189 188
+# global_wiring_id=161 component=palm segment=palm_rectified finger=palm row=8 col=17 source_quad_id=2605
+f 170 171 190 189
+# global_wiring_id=162 component=palm segment=palm_rectified finger=palm row=9 col=0 source_quad_id=3419
+f 173 172 191 192
+# global_wiring_id=163 component=palm segment=palm_rectified finger=palm row=9 col=1 source_quad_id=3423
+f 172 174 193 191
+# global_wiring_id=164 component=palm segment=palm_rectified finger=palm row=9 col=2 source_quad_id=3425
+f 174 175 194 193
+# global_wiring_id=165 component=palm segment=palm_rectified finger=palm row=9 col=3 source_quad_id=3427
+f 175 176 195 194
+# global_wiring_id=166 component=palm segment=palm_rectified finger=palm row=9 col=4 source_quad_id=3429
+f 176 177 196 195
+# global_wiring_id=167 component=palm segment=palm_rectified finger=palm row=9 col=5 source_quad_id=3431
+f 177 178 197 196
+# global_wiring_id=168 component=palm segment=palm_rectified finger=palm row=9 col=6 source_quad_id=3433
+f 178 179 198 197
+# global_wiring_id=169 component=palm segment=palm_rectified finger=palm row=9 col=7 source_quad_id=3604
+f 179 180 199 198
+# global_wiring_id=170 component=palm segment=palm_rectified finger=palm row=9 col=8 source_quad_id=3604
+f 180 181 200 199
+# global_wiring_id=171 component=palm segment=palm_rectified finger=palm row=9 col=9 source_quad_id=3606
+f 181 182 201 200
+# global_wiring_id=172 component=palm segment=palm_rectified finger=palm row=9 col=10 source_quad_id=3445
+f 182 183 202 201
+# global_wiring_id=173 component=palm segment=palm_rectified finger=palm row=9 col=11 source_quad_id=3446
+f 183 184 203 202
+# global_wiring_id=174 component=palm segment=palm_rectified finger=palm row=9 col=12 source_quad_id=3235
+f 184 185 204 203
+# global_wiring_id=175 component=palm segment=palm_rectified finger=palm row=9 col=13 source_quad_id=3236
+f 185 186 205 204
+# global_wiring_id=176 component=palm segment=palm_rectified finger=palm row=9 col=14 source_quad_id=2955
+f 186 187 206 205
+# global_wiring_id=177 component=palm segment=palm_rectified finger=palm row=9 col=15 source_quad_id=2953
+f 187 188 207 206
+# global_wiring_id=178 component=palm segment=palm_rectified finger=palm row=9 col=16 source_quad_id=2957
+f 188 189 208 207
+# global_wiring_id=179 component=palm segment=palm_rectified finger=palm row=9 col=17 source_quad_id=2604
+f 189 190 209 208
+# global_wiring_id=180 component=palm segment=palm_rectified finger=palm row=10 col=0 source_quad_id=3420
+f 192 191 210 211
+# global_wiring_id=181 component=palm segment=palm_rectified finger=palm row=10 col=1 source_quad_id=3424
+f 191 193 212 210
+# global_wiring_id=182 component=palm segment=palm_rectified finger=palm row=10 col=2 source_quad_id=3426
+f 193 194 213 212
+# global_wiring_id=183 component=palm segment=palm_rectified finger=palm row=10 col=3 source_quad_id=3428
+f 194 195 214 213
+# global_wiring_id=184 component=palm segment=palm_rectified finger=palm row=10 col=4 source_quad_id=3430
+f 195 196 215 214
+# global_wiring_id=185 component=palm segment=palm_rectified finger=palm row=10 col=5 source_quad_id=3432
+f 196 197 216 215
+# global_wiring_id=186 component=palm segment=palm_rectified finger=palm row=10 col=6 source_quad_id=3434
+f 197 198 217 216
+# global_wiring_id=187 component=palm segment=palm_rectified finger=palm row=10 col=7 source_quad_id=3435
+f 198 199 218 217
+# global_wiring_id=188 component=palm segment=palm_rectified finger=palm row=10 col=8 source_quad_id=3437
+f 199 200 219 218
+# global_wiring_id=189 component=palm segment=palm_rectified finger=palm row=10 col=9 source_quad_id=3439
+f 200 201 220 219
+# global_wiring_id=190 component=palm segment=palm_rectified finger=palm row=10 col=10 source_quad_id=3441
+f 201 202 221 220
+# global_wiring_id=191 component=palm segment=palm_rectified finger=palm row=10 col=11 source_quad_id=3441
+f 202 203 222 221
+# global_wiring_id=192 component=palm segment=palm_rectified finger=palm row=10 col=12 source_quad_id=3234
+f 203 204 223 222
+# global_wiring_id=193 component=palm segment=palm_rectified finger=palm row=10 col=13 source_quad_id=3232
+f 204 205 224 223
+# global_wiring_id=194 component=palm segment=palm_rectified finger=palm row=10 col=14 source_quad_id=3233
+f 205 206 225 224
+# global_wiring_id=195 component=palm segment=palm_rectified finger=palm row=10 col=15 source_quad_id=2952
+f 206 207 226 225
+# global_wiring_id=196 component=palm segment=palm_rectified finger=palm row=10 col=16 source_quad_id=2951
+f 207 208 227 226
+# global_wiring_id=197 component=palm segment=palm_rectified finger=palm row=10 col=17 source_quad_id=2602
+f 208 209 228 227
+# global_wiring_id=198 component=palm segment=palm_rectified finger=palm row=11 col=0 source_quad_id=3185
+f 211 210 229 230
+# global_wiring_id=199 component=palm segment=palm_rectified finger=palm row=11 col=1 source_quad_id=3188
+f 210 212 231 229
+# global_wiring_id=200 component=palm segment=palm_rectified finger=palm row=11 col=2 source_quad_id=3190
+f 212 213 232 231
+# global_wiring_id=201 component=palm segment=palm_rectified finger=palm row=11 col=3 source_quad_id=3192
+f 213 214 233 232
+# global_wiring_id=202 component=palm segment=palm_rectified finger=palm row=11 col=4 source_quad_id=3194
+f 214 215 234 233
+# global_wiring_id=203 component=palm segment=palm_rectified finger=palm row=11 col=5 source_quad_id=3196
+f 215 216 235 234
+# global_wiring_id=204 component=palm segment=palm_rectified finger=palm row=11 col=6 source_quad_id=3434
+f 216 217 236 235
+# global_wiring_id=205 component=palm segment=palm_rectified finger=palm row=11 col=7 source_quad_id=3436
+f 217 218 237 236
+# global_wiring_id=206 component=palm segment=palm_rectified finger=palm row=11 col=8 source_quad_id=3438
+f 218 219 238 237
+# global_wiring_id=207 component=palm segment=palm_rectified finger=palm row=11 col=9 source_quad_id=3440
+f 219 220 239 238
+# global_wiring_id=208 component=palm segment=palm_rectified finger=palm row=11 col=10 source_quad_id=3442
+f 220 221 240 239
+# global_wiring_id=209 component=palm segment=palm_rectified finger=palm row=11 col=11 source_quad_id=3444
+f 221 222 241 240
+# global_wiring_id=210 component=palm segment=palm_rectified finger=palm row=11 col=12 source_quad_id=3231
+f 222 223 242 241
+# global_wiring_id=211 component=palm segment=palm_rectified finger=palm row=11 col=13 source_quad_id=3229
+f 223 224 243 242
+# global_wiring_id=212 component=palm segment=palm_rectified finger=palm row=11 col=14 source_quad_id=3229
+f 224 225 244 243
+# global_wiring_id=213 component=palm segment=palm_rectified finger=palm row=11 col=15 source_quad_id=3230
+f 225 226 245 244
+# global_wiring_id=214 component=palm segment=palm_rectified finger=palm row=11 col=16 source_quad_id=2950
+f 226 227 246 245
+# global_wiring_id=215 component=palm segment=palm_rectified finger=palm row=11 col=17 source_quad_id=2948
+f 227 228 247 246
+# global_wiring_id=216 component=palm segment=palm_rectified finger=palm row=12 col=0 source_quad_id=3183
+f 230 229 248 249
+# global_wiring_id=217 component=palm segment=palm_rectified finger=palm row=12 col=1 source_quad_id=3189
+f 229 231 250 248
+# global_wiring_id=218 component=palm segment=palm_rectified finger=palm row=12 col=2 source_quad_id=3191
+f 231 232 251 250
+# global_wiring_id=219 component=palm segment=palm_rectified finger=palm row=12 col=3 source_quad_id=3193
+f 232 233 252 251
+# global_wiring_id=220 component=palm segment=palm_rectified finger=palm row=12 col=4 source_quad_id=3195
+f 233 234 253 252
+# global_wiring_id=221 component=palm segment=palm_rectified finger=palm row=12 col=5 source_quad_id=3196
+f 234 235 254 253
+# global_wiring_id=222 component=palm segment=palm_rectified finger=palm row=12 col=6 source_quad_id=3198
+f 235 236 255 254
+# global_wiring_id=223 component=palm segment=palm_rectified finger=palm row=12 col=7 source_quad_id=3200
+f 236 237 256 255
+# global_wiring_id=224 component=palm segment=palm_rectified finger=palm row=12 col=8 source_quad_id=3202
+f 237 238 257 256
+# global_wiring_id=225 component=palm segment=palm_rectified finger=palm row=12 col=9 source_quad_id=3204
+f 238 239 258 257
+# global_wiring_id=226 component=palm segment=palm_rectified finger=palm row=12 col=10 source_quad_id=3206
+f 239 240 259 258
+# global_wiring_id=227 component=palm segment=palm_rectified finger=palm row=12 col=11 source_quad_id=3208
+f 240 241 260 259
+# global_wiring_id=228 component=palm segment=palm_rectified finger=palm row=12 col=12 source_quad_id=6503
+f 241 242 261 260
+# global_wiring_id=229 component=palm segment=palm_rectified finger=palm row=12 col=13 source_quad_id=3228
+f 242 243 262 261
+# global_wiring_id=230 component=palm segment=palm_rectified finger=palm row=12 col=14 source_quad_id=3227
+f 243 244 263 262
+# global_wiring_id=231 component=palm segment=palm_rectified finger=palm row=12 col=15 source_quad_id=3226
+f 244 245 264 263
+# global_wiring_id=232 component=palm segment=palm_rectified finger=palm row=12 col=16 source_quad_id=3224
+f 245 246 265 264
+# global_wiring_id=233 component=palm segment=palm_rectified finger=palm row=12 col=17 source_quad_id=3225
+f 246 247 266 265
+# global_wiring_id=234 component=palm segment=palm_rectified finger=palm row=13 col=0 source_quad_id=3184
+f 249 248 267 268
+# global_wiring_id=235 component=palm segment=palm_rectified finger=palm row=13 col=1 source_quad_id=2856
+f 248 250 269 267
+# global_wiring_id=236 component=palm segment=palm_rectified finger=palm row=13 col=2 source_quad_id=2858
+f 250 251 270 269
+# global_wiring_id=237 component=palm segment=palm_rectified finger=palm row=13 col=3 source_quad_id=2860
+f 251 252 271 270
+# global_wiring_id=238 component=palm segment=palm_rectified finger=palm row=13 col=4 source_quad_id=3195
+f 252 253 272 271
+# global_wiring_id=239 component=palm segment=palm_rectified finger=palm row=13 col=5 source_quad_id=3197
+f 253 254 273 272
+# global_wiring_id=240 component=palm segment=palm_rectified finger=palm row=13 col=6 source_quad_id=3199
+f 254 255 274 273
+# global_wiring_id=241 component=palm segment=palm_rectified finger=palm row=13 col=7 source_quad_id=3201
+f 255 256 275 274
+# global_wiring_id=242 component=palm segment=palm_rectified finger=palm row=13 col=8 source_quad_id=3203
+f 256 257 276 275
+# global_wiring_id=243 component=palm segment=palm_rectified finger=palm row=13 col=9 source_quad_id=3205
+f 257 258 277 276
+# global_wiring_id=244 component=palm segment=palm_rectified finger=palm row=13 col=10 source_quad_id=3207
+f 258 259 278 277
+# global_wiring_id=245 component=palm segment=palm_rectified finger=palm row=13 col=11 source_quad_id=3208
+f 259 260 279 278
+# global_wiring_id=246 component=palm segment=palm_rectified finger=palm row=13 col=12 source_quad_id=3210
+f 260 261 280 279
+# global_wiring_id=247 component=palm segment=palm_rectified finger=palm row=13 col=13 source_quad_id=3212
+f 261 262 281 280
+# global_wiring_id=248 component=palm segment=palm_rectified finger=palm row=13 col=14 source_quad_id=3214
+f 262 263 282 281
+# global_wiring_id=249 component=palm segment=palm_rectified finger=palm row=13 col=15 source_quad_id=3216
+f 263 264 283 282
+# global_wiring_id=250 component=palm segment=palm_rectified finger=palm row=13 col=16 source_quad_id=3218
+f 264 265 284 283
+# global_wiring_id=251 component=palm segment=palm_rectified finger=palm row=13 col=17 source_quad_id=3220
+f 265 266 285 284
+# global_wiring_id=252 component=palm segment=palm_rectified finger=palm row=14 col=0 source_quad_id=2852
+f 268 267 286 287
+# global_wiring_id=253 component=palm segment=palm_rectified finger=palm row=14 col=1 source_quad_id=2857
+f 267 269 288 286
+# global_wiring_id=254 component=palm segment=palm_rectified finger=palm row=14 col=2 source_quad_id=2859
+f 269 270 289 288
+# global_wiring_id=255 component=palm segment=palm_rectified finger=palm row=14 col=3 source_quad_id=2860
+f 270 271 290 289
+# global_wiring_id=256 component=palm segment=palm_rectified finger=palm row=14 col=4 source_quad_id=2862
+f 271 272 291 290
+# global_wiring_id=257 component=palm segment=palm_rectified finger=palm row=14 col=5 source_quad_id=2864
+f 272 273 292 291
+# global_wiring_id=258 component=palm segment=palm_rectified finger=palm row=14 col=6 source_quad_id=2866
+f 273 274 293 292
+# global_wiring_id=259 component=palm segment=palm_rectified finger=palm row=14 col=7 source_quad_id=2868
+f 274 275 294 293
+# global_wiring_id=260 component=palm segment=palm_rectified finger=palm row=14 col=8 source_quad_id=2870
+f 275 276 295 294
+# global_wiring_id=261 component=palm segment=palm_rectified finger=palm row=14 col=9 source_quad_id=2872
+f 276 277 296 295
+# global_wiring_id=262 component=palm segment=palm_rectified finger=palm row=14 col=10 source_quad_id=2874
+f 277 278 297 296
+# global_wiring_id=263 component=palm segment=palm_rectified finger=palm row=14 col=11 source_quad_id=3209
+f 278 279 298 297
+# global_wiring_id=264 component=palm segment=palm_rectified finger=palm row=14 col=12 source_quad_id=3211
+f 279 280 299 298
+# global_wiring_id=265 component=palm segment=palm_rectified finger=palm row=14 col=13 source_quad_id=3213
+f 280 281 300 299
+# global_wiring_id=266 component=palm segment=palm_rectified finger=palm row=14 col=14 source_quad_id=3215
+f 281 282 301 300
+# global_wiring_id=267 component=palm segment=palm_rectified finger=palm row=14 col=15 source_quad_id=3217
+f 282 283 302 301
+# global_wiring_id=268 component=palm segment=palm_rectified finger=palm row=14 col=16 source_quad_id=3219
+f 283 284 303 302
+# global_wiring_id=269 component=palm segment=palm_rectified finger=palm row=14 col=17 source_quad_id=3221
+f 284 285 304 303
+# global_wiring_id=270 component=palm segment=palm_rectified finger=palm row=15 col=0 source_quad_id=2850
+f 287 286 305 306
+# global_wiring_id=271 component=palm segment=palm_rectified finger=palm row=15 col=1 source_quad_id=2854
+f 286 288 307 305
+# global_wiring_id=272 component=palm segment=palm_rectified finger=palm row=15 col=2 source_quad_id=2859
+f 288 289 308 307
+# global_wiring_id=273 component=palm segment=palm_rectified finger=palm row=15 col=3 source_quad_id=2861
+f 289 290 309 308
+# global_wiring_id=274 component=palm segment=palm_rectified finger=palm row=15 col=4 source_quad_id=2863
+f 290 291 310 309
+# global_wiring_id=275 component=palm segment=palm_rectified finger=palm row=15 col=5 source_quad_id=2865
+f 291 292 311 310
+# global_wiring_id=276 component=palm segment=palm_rectified finger=palm row=15 col=6 source_quad_id=2867
+f 292 293 312 311
+# global_wiring_id=277 component=palm segment=palm_rectified finger=palm row=15 col=7 source_quad_id=2869
+f 293 294 313 312
+# global_wiring_id=278 component=palm segment=palm_rectified finger=palm row=15 col=8 source_quad_id=2871
+f 294 295 314 313
+# global_wiring_id=279 component=palm segment=palm_rectified finger=palm row=15 col=9 source_quad_id=2872
+f 295 296 315 314
+# global_wiring_id=280 component=palm segment=palm_rectified finger=palm row=15 col=10 source_quad_id=2874
+f 296 297 316 315
+# global_wiring_id=281 component=palm segment=palm_rectified finger=palm row=15 col=11 source_quad_id=2876
+f 297 298 317 316
+# global_wiring_id=282 component=palm segment=palm_rectified finger=palm row=15 col=12 source_quad_id=2878
+f 298 299 318 317
+# global_wiring_id=283 component=palm segment=palm_rectified finger=palm row=15 col=13 source_quad_id=6509
+f 299 300 319 318
+# global_wiring_id=284 component=palm segment=palm_rectified finger=palm row=15 col=14 source_quad_id=2885
+f 300 301 320 319
+# global_wiring_id=285 component=palm segment=palm_rectified finger=palm row=15 col=15 source_quad_id=2886
+f 301 302 321 320
+# global_wiring_id=286 component=palm segment=palm_rectified finger=palm row=15 col=16 source_quad_id=2888
+f 302 303 322 321
+# global_wiring_id=287 component=palm segment=palm_rectified finger=palm row=15 col=17 source_quad_id=2890
+f 303 304 323 322
+# global_wiring_id=288 component=palm segment=palm_rectified finger=palm row=16 col=0 source_quad_id=2850
+f 306 305 324 325
+# global_wiring_id=289 component=palm segment=palm_rectified finger=palm row=16 col=1 source_quad_id=2854
+f 305 307 326 324
+# global_wiring_id=290 component=palm segment=palm_rectified finger=palm row=16 col=2 source_quad_id=2405
+f 307 308 327 326
+# global_wiring_id=291 component=palm segment=palm_rectified finger=palm row=16 col=3 source_quad_id=2407
+f 308 309 328 327
+# global_wiring_id=292 component=palm segment=palm_rectified finger=palm row=16 col=4 source_quad_id=2409
+f 309 310 329 328
+# global_wiring_id=293 component=palm segment=palm_rectified finger=palm row=16 col=5 source_quad_id=2411
+f 310 311 330 329
+# global_wiring_id=294 component=palm segment=palm_rectified finger=palm row=16 col=6 source_quad_id=2413
+f 311 312 331 330
+# global_wiring_id=295 component=palm segment=palm_rectified finger=palm row=16 col=7 source_quad_id=2415
+f 312 313 332 331
+# global_wiring_id=296 component=palm segment=palm_rectified finger=palm row=16 col=8 source_quad_id=2871
+f 313 314 333 332
+# global_wiring_id=297 component=palm segment=palm_rectified finger=palm row=16 col=9 source_quad_id=2873
+f 314 315 334 333
+# global_wiring_id=298 component=palm segment=palm_rectified finger=palm row=16 col=10 source_quad_id=2875
+f 315 316 335 334
+# global_wiring_id=299 component=palm segment=palm_rectified finger=palm row=16 col=11 source_quad_id=2877
+f 316 317 336 335
+# global_wiring_id=300 component=palm segment=palm_rectified finger=palm row=16 col=12 source_quad_id=2879
+f 317 318 337 336
+# global_wiring_id=301 component=palm segment=palm_rectified finger=palm row=16 col=13 source_quad_id=2881
+f 318 319 338 337
+# global_wiring_id=302 component=palm segment=palm_rectified finger=palm row=16 col=14 source_quad_id=2883
+f 319 320 339 338
+# global_wiring_id=303 component=palm segment=palm_rectified finger=palm row=16 col=15 source_quad_id=2887
+f 320 321 340 339
+# global_wiring_id=304 component=palm segment=palm_rectified finger=palm row=16 col=16 source_quad_id=2889
+f 321 322 341 340
+# global_wiring_id=305 component=palm segment=palm_rectified finger=palm row=16 col=17 source_quad_id=2891
+f 322 323 342 341
+# global_wiring_id=306 component=palm segment=palm_rectified finger=palm row=17 col=0 source_quad_id=2851
+f 325 324 343 344
+# global_wiring_id=307 component=palm segment=palm_rectified finger=palm row=17 col=1 source_quad_id=2401
+f 324 326 345 343
+# global_wiring_id=308 component=palm segment=palm_rectified finger=palm row=17 col=2 source_quad_id=2406
+f 326 327 346 345
+# global_wiring_id=309 component=palm segment=palm_rectified finger=palm row=17 col=3 source_quad_id=2408
+f 327 328 347 346
+# global_wiring_id=310 component=palm segment=palm_rectified finger=palm row=17 col=4 source_quad_id=2410
+f 328 329 348 347
+# global_wiring_id=311 component=palm segment=palm_rectified finger=palm row=17 col=5 source_quad_id=2412
+f 329 330 349 348
+# global_wiring_id=312 component=palm segment=palm_rectified finger=palm row=17 col=6 source_quad_id=2414
+f 330 331 350 349
+# global_wiring_id=313 component=palm segment=palm_rectified finger=palm row=17 col=7 source_quad_id=2415
+f 331 332 351 350
+# global_wiring_id=314 component=palm segment=palm_rectified finger=palm row=17 col=8 source_quad_id=2417
+f 332 333 352 351
+# global_wiring_id=315 component=palm segment=palm_rectified finger=palm row=17 col=9 source_quad_id=2419
+f 333 334 353 352
+# global_wiring_id=316 component=palm segment=palm_rectified finger=palm row=17 col=10 source_quad_id=2421
+f 334 335 354 353
+# global_wiring_id=317 component=palm segment=palm_rectified finger=palm row=17 col=11 source_quad_id=2423
+f 335 336 355 354
+# global_wiring_id=318 component=palm segment=palm_rectified finger=palm row=17 col=12 source_quad_id=2880
+f 336 337 356 355
+# global_wiring_id=319 component=palm segment=palm_rectified finger=palm row=17 col=13 source_quad_id=2882
+f 337 338 357 356
+# global_wiring_id=320 component=palm segment=palm_rectified finger=palm row=17 col=14 source_quad_id=2884
+f 338 339 358 357
+# global_wiring_id=321 component=palm segment=palm_rectified finger=palm row=17 col=15 source_quad_id=2436
+f 339 340 359 358
+# global_wiring_id=322 component=palm segment=palm_rectified finger=palm row=17 col=16 source_quad_id=2437
+f 340 341 360 359
+# global_wiring_id=323 component=palm segment=palm_rectified finger=palm row=17 col=17 source_quad_id=2441
+f 341 342 361 360
+# global_wiring_id=324 component=palm segment=palm_rectified finger=palm row=18 col=0 source_quad_id=2399
+f 344 343 362 363
+# global_wiring_id=325 component=palm segment=palm_rectified finger=palm row=18 col=1 source_quad_id=2400
+f 343 345 364 362
+# global_wiring_id=326 component=palm segment=palm_rectified finger=palm row=18 col=2 source_quad_id=1846
+f 345 346 365 364
+# global_wiring_id=327 component=palm segment=palm_rectified finger=palm row=18 col=3 source_quad_id=1847
+f 346 347 366 365
+# global_wiring_id=328 component=palm segment=palm_rectified finger=palm row=18 col=4 source_quad_id=1849
+f 347 348 367 366
+# global_wiring_id=329 component=palm segment=palm_rectified finger=palm row=18 col=5 source_quad_id=2412
+f 348 349 368 367
+# global_wiring_id=330 component=palm segment=palm_rectified finger=palm row=18 col=6 source_quad_id=2414
+f 349 350 369 368
+# global_wiring_id=331 component=palm segment=palm_rectified finger=palm row=18 col=7 source_quad_id=2416
+f 350 351 370 369
+# global_wiring_id=332 component=palm segment=palm_rectified finger=palm row=18 col=8 source_quad_id=2418
+f 351 352 371 370
+# global_wiring_id=333 component=palm segment=palm_rectified finger=palm row=18 col=9 source_quad_id=2420
+f 352 353 372 371
+# global_wiring_id=334 component=palm segment=palm_rectified finger=palm row=18 col=10 source_quad_id=2422
+f 353 354 373 372
+# global_wiring_id=335 component=palm segment=palm_rectified finger=palm row=18 col=11 source_quad_id=2424
+f 354 355 374 373
+# global_wiring_id=336 component=palm segment=palm_rectified finger=palm row=18 col=12 source_quad_id=2426
+f 355 356 375 374
+# global_wiring_id=337 component=palm segment=palm_rectified finger=palm row=18 col=13 source_quad_id=2431
+f 356 357 376 375
+# global_wiring_id=338 component=palm segment=palm_rectified finger=palm row=18 col=14 source_quad_id=2432
+f 357 358 377 376
+# global_wiring_id=339 component=palm segment=palm_rectified finger=palm row=18 col=15 source_quad_id=2434
+f 358 359 378 377
+# global_wiring_id=340 component=palm segment=palm_rectified finger=palm row=18 col=16 source_quad_id=2438
+f 359 360 379 378
+# global_wiring_id=341 component=palm segment=palm_rectified finger=palm row=18 col=17 source_quad_id=2440
+f 360 361 380 379
+# global_wiring_id=342 component=palm segment=palm_rectified finger=palm row=19 col=0 source_quad_id=2397
+f 363 362 381 382
+# global_wiring_id=343 component=palm segment=palm_rectified finger=palm row=19 col=1 source_quad_id=2398
+f 362 364 383 381
+# global_wiring_id=344 component=palm segment=palm_rectified finger=palm row=19 col=2 source_quad_id=1845
+f 364 365 384 383
+# global_wiring_id=345 component=palm segment=palm_rectified finger=palm row=19 col=3 source_quad_id=1847
+f 365 366 385 384
+# global_wiring_id=346 component=palm segment=palm_rectified finger=palm row=19 col=4 source_quad_id=1849
+f 366 367 386 385
+# global_wiring_id=347 component=palm segment=palm_rectified finger=palm row=19 col=5 source_quad_id=1851
+f 367 368 387 386
+# global_wiring_id=348 component=palm segment=palm_rectified finger=palm row=19 col=6 source_quad_id=1853
+f 368 369 388 387
+# global_wiring_id=349 component=palm segment=palm_rectified finger=palm row=19 col=7 source_quad_id=1855
+f 369 370 389 388
+# global_wiring_id=350 component=palm segment=palm_rectified finger=palm row=19 col=8 source_quad_id=1857
+f 370 371 390 389
+# global_wiring_id=351 component=palm segment=palm_rectified finger=palm row=19 col=9 source_quad_id=1859
+f 371 372 391 390
+# global_wiring_id=352 component=palm segment=palm_rectified finger=palm row=19 col=10 source_quad_id=1861
+f 372 373 392 391
+# global_wiring_id=353 component=palm segment=palm_rectified finger=palm row=19 col=11 source_quad_id=2425
+f 373 374 393 392
+# global_wiring_id=354 component=palm segment=palm_rectified finger=palm row=19 col=12 source_quad_id=2427
+f 374 375 394 393
+# global_wiring_id=355 component=palm segment=palm_rectified finger=palm row=19 col=13 source_quad_id=2429
+f 375 376 395 394
+# global_wiring_id=356 component=palm segment=palm_rectified finger=palm row=19 col=14 source_quad_id=2433
+f 376 377 396 395
+# global_wiring_id=357 component=palm segment=palm_rectified finger=palm row=19 col=15 source_quad_id=2435
+f 377 378 397 396
+# global_wiring_id=358 component=palm segment=palm_rectified finger=palm row=19 col=16 source_quad_id=1880
+f 378 379 398 397
+# global_wiring_id=359 component=palm segment=palm_rectified finger=palm row=19 col=17 source_quad_id=1881
+f 379 380 399 398

@@ -1,0 +1,48 @@
+# hand0423g exported sensor coordinate geometry
+# Quad faces are generated from c0..c3 coordinates in the CSV.
+v 4.7919380 2.6900673 1.1771397
+v 4.8727012 2.5191222 1.2640282
+v 5.0436463 2.5998854 1.2430643
+v 4.9628831 2.7708305 1.1439431
+v 4.9534644 2.3481771 1.2837661
+v 5.1244095 2.4289403 1.2722638
+v 5.0342276 2.1772320 1.2166392
+v 5.2051727 2.2579952 1.2118761
+v 5.2145914 2.6806486 1.2026240
+v 5.1338282 2.8515937 1.0832419
+v 5.2953546 2.5097035 1.2362124
+v 5.3761178 2.3387584 1.1804283
+v 5.3855365 2.7614117 1.1399352
+v 5.3047733 2.9323568 0.9974819
+v 5.4662997 2.5904666 1.1808745
+v 5.5470629 2.4195216 1.1239279
+v 5.5564816 2.8421749 1.0525424
+v 5.4757184 3.0131200 0.8523493
+v 5.6372448 2.6712298 1.1050921
+v 5.7180080 2.5002847 1.0536099
+g finger_tip_third_thumb
+usemtl finger_tip_third
+# global_wiring_id=408 component=thumb segment=finger_tip_third finger=thumb row=0 col=0 source_quad_id=1306
+f 1 2 3 4
+# global_wiring_id=409 component=thumb segment=finger_tip_third finger=thumb row=0 col=1 source_quad_id=1310
+f 2 5 6 3
+# global_wiring_id=410 component=thumb segment=finger_tip_third finger=thumb row=0 col=2 source_quad_id=2090
+f 5 7 8 6
+# global_wiring_id=411 component=thumb segment=finger_tip_third finger=thumb row=1 col=0 source_quad_id=1364
+f 4 3 9 10
+# global_wiring_id=412 component=thumb segment=finger_tip_third finger=thumb row=1 col=1 source_quad_id=1309
+f 3 6 11 9
+# global_wiring_id=413 component=thumb segment=finger_tip_third finger=thumb row=1 col=2 source_quad_id=2091
+f 6 8 12 11
+# global_wiring_id=414 component=thumb segment=finger_tip_third finger=thumb row=2 col=0 source_quad_id=1363
+f 10 9 13 14
+# global_wiring_id=415 component=thumb segment=finger_tip_third finger=thumb row=2 col=1 source_quad_id=1362
+f 9 11 15 13
+# global_wiring_id=416 component=thumb segment=finger_tip_third finger=thumb row=2 col=2 source_quad_id=1316
+f 11 12 16 15
+# global_wiring_id=417 component=thumb segment=finger_tip_third finger=thumb row=3 col=0 source_quad_id=2157
+f 14 13 17 18
+# global_wiring_id=418 component=thumb segment=finger_tip_third finger=thumb row=3 col=1 source_quad_id=1358
+f 13 15 19 17
+# global_wiring_id=419 component=thumb segment=finger_tip_third finger=thumb row=3 col=2 source_quad_id=1315
+f 15 16 20 19

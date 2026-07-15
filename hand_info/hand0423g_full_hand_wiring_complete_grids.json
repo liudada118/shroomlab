@@ -1,0 +1,275 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_sensor_region_quads.csv",
+  "csv": "E:/shroomLab/hand_info/hand0423g_full_hand_wiring_complete_grids.csv",
+  "preview": "E:/shroomLab/hand_info/hand0423g_full_hand_wiring_complete_grids_preview.png",
+  "cell_size_xy": 0.18906326554038308,
+  "components": {
+    "palm": {
+      "kept_rows": 20,
+      "kept_cols": 18,
+      "cells": 360,
+      "source": "hand0423g_palm_final_complete_grid.csv",
+      "u_axis_xy": [
+        1,
+        0
+      ],
+      "v_axis_xy": [
+        0,
+        1
+      ],
+      "label": "??",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_palm.csv"
+    },
+    "thumb_connection": {
+      "u_axis_xy": [
+        0.9937054206319341,
+        0.1120247160528025
+      ],
+      "v_axis_xy": [
+        0.1120247160528025,
+        -0.9937054206319341
+      ],
+      "candidate_rows": 18,
+      "candidate_cols": 4,
+      "kept_row_source_range": [
+        9,
+        15
+      ],
+      "kept_col_source_range": [
+        1,
+        3
+      ],
+      "kept_rows": 7,
+      "kept_cols": 3,
+      "cells": 21,
+      "label": "????",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_thumb_connection.csv"
+    },
+    "thumb": {
+      "u_axis_xy": [
+        0.4271754426288104,
+        -0.9041687570442146
+      ],
+      "v_axis_xy": [
+        0.9041687570442146,
+        0.4271754426288104
+      ],
+      "candidate_rows": 15,
+      "candidate_cols": 5,
+      "kept_row_source_range": [
+        1,
+        13
+      ],
+      "kept_col_source_range": [
+        1,
+        3
+      ],
+      "kept_rows": 13,
+      "kept_cols": 3,
+      "cells": 39,
+      "label": "??",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_thumb.csv"
+    },
+    "index_connection": {
+      "u_axis_xy": [
+        1.0,
+        0.0
+      ],
+      "v_axis_xy": [
+        0.0,
+        1.0
+      ],
+      "candidate_rows": 6,
+      "candidate_cols": 2,
+      "kept_row_source_range": [
+        1,
+        5
+      ],
+      "kept_col_source_range": [
+        0,
+        0
+      ],
+      "kept_rows": 5,
+      "kept_cols": 1,
+      "cells": 5,
+      "label": "????",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_index_connection.csv"
+    },
+    "index": {
+      "u_axis_xy": [
+        0.9525734018390605,
+        -0.30430891230583407
+      ],
+      "v_axis_xy": [
+        0.30430891230583407,
+        0.9525734018390605
+      ],
+      "candidate_rows": 12,
+      "candidate_cols": 3,
+      "kept_row_source_range": [
+        0,
+        10
+      ],
+      "kept_col_source_range": [
+        0,
+        2
+      ],
+      "kept_rows": 11,
+      "kept_cols": 3,
+      "cells": 33,
+      "label": "??",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_index.csv"
+    },
+    "middle_connection": {
+      "u_axis_xy": [
+        1.0,
+        0.0
+      ],
+      "v_axis_xy": [
+        0.0,
+        1.0
+      ],
+      "candidate_rows": 9,
+      "candidate_cols": 7,
+      "kept_row_source_range": [
+        0,
+        5
+      ],
+      "kept_col_source_range": [
+        1,
+        5
+      ],
+      "kept_rows": 6,
+      "kept_cols": 5,
+      "cells": 30,
+      "label": "????",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_middle_connection.csv"
+    },
+    "middle": {
+      "u_axis_xy": [
+        0.9730876596671405,
+        -0.23043525468887613
+      ],
+      "v_axis_xy": [
+        0.23043525468887613,
+        0.9730876596671405
+      ],
+      "candidate_rows": 17,
+      "candidate_cols": 6,
+      "kept_row_source_range": [
+        1,
+        14
+      ],
+      "kept_col_source_range": [
+        0,
+        2
+      ],
+      "kept_rows": 14,
+      "kept_cols": 3,
+      "cells": 42,
+      "label": "??",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_middle.csv"
+    },
+    "ring_connection": {
+      "u_axis_xy": [
+        1.0,
+        0.0
+      ],
+      "v_axis_xy": [
+        0.0,
+        1.0
+      ],
+      "candidate_rows": 10,
+      "candidate_cols": 6,
+      "kept_row_source_range": [
+        1,
+        7
+      ],
+      "kept_col_source_range": [
+        0,
+        5
+      ],
+      "kept_rows": 7,
+      "kept_cols": 6,
+      "cells": 42,
+      "label": "?????",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_ring_connection.csv"
+    },
+    "ring": {
+      "u_axis_xy": [
+        0.9992835537581622,
+        -0.03784678570840805
+      ],
+      "v_axis_xy": [
+        0.03784678570840805,
+        0.9992835537581622
+      ],
+      "candidate_rows": 14,
+      "candidate_cols": 5,
+      "kept_row_source_range": [
+        0,
+        11
+      ],
+      "kept_col_source_range": [
+        0,
+        2
+      ],
+      "kept_rows": 12,
+      "kept_cols": 3,
+      "cells": 36,
+      "label": "???",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_ring.csv"
+    },
+    "pinky_connection": {
+      "u_axis_xy": [
+        1.0,
+        0.0
+      ],
+      "v_axis_xy": [
+        0.0,
+        1.0
+      ],
+      "candidate_rows": 9,
+      "candidate_cols": 3,
+      "kept_row_source_range": [
+        0,
+        5
+      ],
+      "kept_col_source_range": [
+        0,
+        2
+      ],
+      "kept_rows": 6,
+      "kept_cols": 3,
+      "cells": 18,
+      "label": "????",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_pinky_connection.csv"
+    },
+    "pinky": {
+      "u_axis_xy": [
+        0.999722372114638,
+        0.023562230231486847
+      ],
+      "v_axis_xy": [
+        -0.023562230231486847,
+        0.999722372114638
+      ],
+      "candidate_rows": 6,
+      "candidate_cols": 2,
+      "kept_row_source_range": [
+        0,
+        4
+      ],
+      "kept_col_source_range": [
+        0,
+        1
+      ],
+      "kept_rows": 5,
+      "kept_cols": 2,
+      "cells": 10,
+      "label": "??",
+      "csv": "E:/shroomLab/hand_info/wiring_regions/hand0423g_wiring_pinky.csv"
+    }
+  },
+  "note": "Every component is exported as a complete rectangular row/column grid. Palm uses the approved final 20 x 18 grid."
+}

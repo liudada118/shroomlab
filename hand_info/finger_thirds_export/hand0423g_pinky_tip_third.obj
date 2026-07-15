@@ -1,0 +1,21 @@
+# hand0423g exported sensor coordinate geometry
+# Quad faces are generated from c0..c3 coordinates in the CSV.
+v -1.2773880 6.2606103 1.1606087
+v -1.0883772 6.2650651 1.2430791
+v -1.0928320 6.4540759 1.2617910
+v -1.2818428 6.4496211 1.1705078
+v -0.8993665 6.2695198 1.1840535
+v -0.9038212 6.4585306 1.2023231
+v -1.0972867 6.6430866 1.2597786
+v -1.2862975 6.6386319 1.1498452
+v -0.9082760 6.6475414 1.1965681
+g finger_tip_third_pinky
+usemtl finger_tip_third
+# global_wiring_id=632 component=pinky segment=finger_tip_third finger=pinky row=0 col=0 source_quad_id=1517
+f 1 2 3 4
+# global_wiring_id=633 component=pinky segment=finger_tip_third finger=pinky row=0 col=1 source_quad_id=6598
+f 2 5 6 3
+# global_wiring_id=634 component=pinky segment=finger_tip_third finger=pinky row=1 col=0 source_quad_id=1568
+f 4 3 7 8
+# global_wiring_id=635 component=pinky segment=finger_tip_third finger=pinky row=1 col=1 source_quad_id=1524
+f 3 6 9 7

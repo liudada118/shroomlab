@@ -1,0 +1,40 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid_trimmed_extended.csv",
+  "csv": "E:/shroomLab/hand_info/hand0423g_palm_final_complete_grid.csv",
+  "preview": "E:/shroomLab/hand_info/hand0423g_palm_final_complete_grid_preview.png",
+  "purpose": "Final palm sensor coordinate grid with incomplete horizontal/vertical lines removed.",
+  "grid": {
+    "rows": 20,
+    "cols": 18,
+    "cells": 360,
+    "row_index_range": [
+      0,
+      19
+    ],
+    "col_index_range": [
+      0,
+      17
+    ],
+    "source_row_range": [
+      1,
+      20
+    ],
+    "source_col_range": [
+      0,
+      17
+    ],
+    "cell_size_xy": 0.18906326554038308
+  },
+  "coordinate_system": {
+    "x": "hand width",
+    "y": "wrist to fingertips",
+    "z": "+Z front/palm side"
+  },
+  "fields": {
+    "row_col": "clean final complete-grid coordinates, row-major from wrist side to finger side and left to right in +X",
+    "u_v": "normalized complete-grid coordinates",
+    "center_x_y_z": "cell center sampled on the palm/front surface",
+    "c0_c1_c2_c3": "four square cell corner coordinates sampled on source surface",
+    "source_quad_id": "original mesh/source quad used for projection back to hand0423g"
+  }
+}

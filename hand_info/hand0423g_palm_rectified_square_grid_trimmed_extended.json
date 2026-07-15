@@ -1,0 +1,23 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_sensor_region_quads.csv",
+  "csv": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid_trimmed_extended.csv",
+  "preview": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid_trimmed_extended_preview.png",
+  "purpose": "Trimmed wrist-side palm grid with a cleaner square layout, extended upward into long-finger connection regions.",
+  "source_regions": [
+    "index_connection",
+    "middle_connection",
+    "palm",
+    "pinky_connection",
+    "ring_connection"
+  ],
+  "grid": {
+    "candidate_cols": 20,
+    "candidate_rows": 22,
+    "kept_cells": 377,
+    "cell_size_xy": 0.18906326554038308,
+    "core_y_min": 0.28,
+    "core_y_max": 4.45
+  },
+  "clip_rule": "Every retained square cell has its center and all four corners inside palm or long-finger connection source faces.",
+  "mapping": "Each cell carries center xyz, four sampled corner xyz, source_quad_id, and source_region for projection back to the original mesh."
+}

@@ -1,0 +1,52 @@
+# hand0423g aligned OBJ export
+# Vertices are baked with the original GLB mesh node rotation/scale, so OBJ aligns with hand0423g.glb surface.
+# source_glb=D:/cad/blender/hand/hand0423g.glb
+# baked_scale=[-0.7999998927116394, -0.7999998927116394, -0.7999998927116394]
+# baked_rotation_xyzw=[-0.7071065902709961, 0.0, 0.0, 0.7071070075035095]
+mtllib hand0423g_finger_thirds_and_palm_aligned.mtl
+v 0.1612291 -0.9338721 5.7575997
+v 0.0100869 -1.0362035 5.7518753
+v 0.0043625 -1.0649613 5.9030175
+v 0.1555048 -0.9529224 5.9087419
+v -0.1410553 -1.0276444 5.7461510
+v -0.1467797 -1.0622021 5.8972932
+v -0.2921976 -0.9159516 5.7404267
+v -0.2979219 -0.9519767 5.8915689
+v -0.0013618 -1.0902730 6.0541597
+v 0.1497804 -0.9687207 6.0598842
+v -0.1525040 -1.0940509 6.0484354
+v -0.3036463 -0.9815920 6.0427111
+v -0.0070862 -1.1173816 6.2053020
+v 0.1440561 -0.9798726 6.2110264
+v -0.1582284 -1.1259326 6.1995776
+v -0.3093706 -1.0077513 6.1938533
+v -0.0128105 -1.1370252 6.3564442
+v 0.1383317 -0.9965929 6.3621686
+v -0.1639527 -1.1422337 6.3507198
+v -0.3150950 -1.0188534 6.3449956
+g finger_tip_third_ring
+usemtl finger_tip_third
+# global_wiring_id=596 component=ring segment=finger_tip_third finger=ring row=0 col=0 source_quad_id=217
+f 1 2 3 4
+# global_wiring_id=597 component=ring segment=finger_tip_third finger=ring row=0 col=1 source_quad_id=221
+f 2 5 6 3
+# global_wiring_id=598 component=ring segment=finger_tip_third finger=ring row=0 col=2 source_quad_id=6757
+f 5 7 8 6
+# global_wiring_id=599 component=ring segment=finger_tip_third finger=ring row=1 col=0 source_quad_id=296
+f 4 3 9 10
+# global_wiring_id=600 component=ring segment=finger_tip_third finger=ring row=1 col=1 source_quad_id=222
+f 3 6 11 9
+# global_wiring_id=601 component=ring segment=finger_tip_third finger=ring row=1 col=2 source_quad_id=6806
+f 6 8 12 11
+# global_wiring_id=602 component=ring segment=finger_tip_third finger=ring row=2 col=0 source_quad_id=295
+f 10 9 13 14
+# global_wiring_id=603 component=ring segment=finger_tip_third finger=ring row=2 col=1 source_quad_id=223
+f 9 11 15 13
+# global_wiring_id=604 component=ring segment=finger_tip_third finger=ring row=2 col=2 source_quad_id=227
+f 11 12 16 15
+# global_wiring_id=605 component=ring segment=finger_tip_third finger=ring row=3 col=0 source_quad_id=431
+f 14 13 17 18
+# global_wiring_id=606 component=ring segment=finger_tip_third finger=ring row=3 col=1 source_quad_id=291
+f 13 15 19 17
+# global_wiring_id=607 component=ring segment=finger_tip_third finger=ring row=3 col=2 source_quad_id=228
+f 15 16 20 19

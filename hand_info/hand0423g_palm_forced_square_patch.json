@@ -1,0 +1,21 @@
+{
+  "source_obj": "D:/cad/blender/hand/hand0423g_quads.obj",
+  "source_palm_csv": "E:/shroomLab/hand_info/hand0423g_palm_final_complete_grid.csv",
+  "patch_obj": "D:/cad/blender/hand/hand0423g_palm_forced_square_patch.obj",
+  "full_obj": "D:/cad/blender/hand/hand0423g_quads_palm_forced_square_full.obj",
+  "mtl": "D:/cad/blender/hand/hand0423g_palm_forced_square.mtl",
+  "csv": "E:/shroomLab/hand_info/hand0423g_palm_forced_square_patch.csv",
+  "purpose": "??2: keep the hand model, but force the palm sensor area into a flat true-square patch instead of following the curved palm surface.",
+  "z_plane": 1.3129909980117447,
+  "z_offset_from_original_max": 0.025,
+  "patch_vertices": 399,
+  "patch_quad_faces": 360,
+  "full_vertices": 8528,
+  "full_quad_faces": 7286,
+  "removed_original_quads": 727,
+  "edge_length_min": 0.18906319999999988,
+  "edge_length_max": 0.18906330000000016,
+  "unique_rounded_edge_lengths": 2,
+  "grid_rows": 20,
+  "grid_cols": 18
+}

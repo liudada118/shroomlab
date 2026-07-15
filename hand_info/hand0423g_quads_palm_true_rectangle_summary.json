@@ -1,0 +1,23 @@
+{
+  "output": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_true_rectangle.obj",
+  "vertices": 8167,
+  "quad_faces": 8121,
+  "non_quad_faces": 0,
+  "rectangle_rows": 28,
+  "rectangle_cols": 29,
+  "rectangle_quads": 812,
+  "rectangle_bounds": {
+    "xmin": -1.27671007799,
+    "xmax": 2.08167389799,
+    "ymin": 0.32806978,
+    "ymax": 3.22560862,
+    "z": 0.923513417
+  },
+  "cell_width": 0.11580634399931033,
+  "cell_height": 0.10348353,
+  "right_edge_constant_x": true,
+  "top_edge_constant_y": true,
+  "rectangle_corners_90_degrees": true,
+  "transition_is_welded": true,
+  "preview": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_true_rectangle_preview.png"
+}

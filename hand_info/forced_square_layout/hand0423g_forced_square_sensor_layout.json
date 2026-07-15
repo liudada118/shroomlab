@@ -1,0 +1,123 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_full_hand_wiring_complete_grids.csv",
+  "obj": "E:/shroomLab/hand_info/forced_square_layout/hand0423g_forced_square_sensor_layout.obj",
+  "mtl": "E:/shroomLab/hand_info/forced_square_layout/hand0423g_forced_square_sensor_layout.mtl",
+  "csv": "E:/shroomLab/hand_info/forced_square_layout/hand0423g_forced_square_sensor_layout.csv",
+  "purpose": "Flat forced-square sensor layout. No hand mesh, no surface projection. Every quad is a real square.",
+  "cell_size": 0.18906326554038308,
+  "total_cells": 636,
+  "obj_vertices": 772,
+  "obj_quad_faces": 636,
+  "components": {
+    "palm": {
+      "rows": 20,
+      "cols": 18,
+      "cells": 360,
+      "origin_xy": [
+        0.0,
+        0.0
+      ],
+      "orientation": "vertical"
+    },
+    "thumb_connection": {
+      "rows": 7,
+      "cols": 3,
+      "cells": 21,
+      "origin_xy": [
+        3.4031387797268953,
+        1.3234428587826816
+      ],
+      "orientation": "horizontal"
+    },
+    "thumb": {
+      "rows": 13,
+      "cols": 3,
+      "cells": 39,
+      "origin_xy": [
+        4.726581638509577,
+        1.3234428587826816
+      ],
+      "orientation": "horizontal"
+    },
+    "index_connection": {
+      "rows": 5,
+      "cols": 1,
+      "cells": 5,
+      "origin_xy": [
+        2.8359489831057463,
+        3.7812653108076617
+      ],
+      "orientation": "vertical"
+    },
+    "index": {
+      "rows": 11,
+      "cols": 3,
+      "cells": 33,
+      "origin_xy": [
+        2.6468857175653633,
+        4.726581638509577
+      ],
+      "orientation": "vertical"
+    },
+    "middle_connection": {
+      "rows": 6,
+      "cols": 5,
+      "cells": 30,
+      "origin_xy": [
+        1.7015693898634476,
+        3.7812653108076617
+      ],
+      "orientation": "vertical"
+    },
+    "middle": {
+      "rows": 14,
+      "cols": 3,
+      "cells": 42,
+      "origin_xy": [
+        1.8906326554038309,
+        4.91564490404996
+      ],
+      "orientation": "vertical"
+    },
+    "ring_connection": {
+      "rows": 7,
+      "cols": 6,
+      "cells": 42,
+      "origin_xy": [
+        0.6617214293913408,
+        3.7812653108076617
+      ],
+      "orientation": "vertical"
+    },
+    "ring": {
+      "rows": 12,
+      "cols": 3,
+      "cells": 36,
+      "origin_xy": [
+        0.9453163277019154,
+        5.104708169590343
+      ],
+      "orientation": "vertical"
+    },
+    "pinky_connection": {
+      "rows": 6,
+      "cols": 3,
+      "cells": 18,
+      "origin_xy": [
+        0.09453163277019154,
+        3.7812653108076617
+      ],
+      "orientation": "vertical"
+    },
+    "pinky": {
+      "rows": 5,
+      "cols": 2,
+      "cells": 10,
+      "origin_xy": [
+        0.18906326554038308,
+        4.91564490404996
+      ],
+      "orientation": "vertical"
+    }
+  }
+}

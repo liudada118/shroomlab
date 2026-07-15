@@ -1,0 +1,15 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_sensor_region_quads.csv",
+  "csv": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid_strict.csv",
+  "preview": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid_strict_preview.png",
+  "purpose": "Stricter rectified palm square grid; every retained cell has all four corners inside the source palm surface.",
+  "grid": {
+    "candidate_cols": 18,
+    "candidate_rows": 18,
+    "kept_cells": 298,
+    "cell_size_xy": 0.190273208235287,
+    "core_y_min": -0.15,
+    "core_y_max": 3.32
+  },
+  "mapping": "Each rectified cell includes center xyz, four corner xyz, and source original palm quad ids for projection back to the mesh."
+}

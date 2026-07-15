@@ -1,0 +1,30 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_sensor_region_quads.csv",
+  "csv": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid.csv",
+  "preview": "E:/shroomLab/hand_info/hand0423g_palm_rectified_square_grid_preview.png",
+  "purpose": "Rectified, more orthogonal palm grid for sensor mapping. It references original palm quad ids so values can be projected back to the model.",
+  "coordinate_system": {
+    "x": "hand width",
+    "y": "wrist to fingertips",
+    "z": "+Z front/palm side"
+  },
+  "grid": {
+    "requested_cols": 20,
+    "requested_rows": 22,
+    "cell_size_xy": 0.18963788246566599,
+    "origin_centered_bounds": {
+      "x_min": -1.542879367416555,
+      "x_max": 2.2498782818967644,
+      "y_min": -0.7967101782560349,
+      "y_max": 3.375323235988617
+    },
+    "kept_cells": 415
+  },
+  "clip_rule": "keep a regular square grid cell when its center is inside a source palm quad, or within 0.7 cell_size of the nearest source palm quad center",
+  "source_palm_quad_count": 458,
+  "mapping_fields": {
+    "source_quad_id": "nearest/containing original palm quad",
+    "c0..c3": "rectified grid corner xyz sampled from original palm surface",
+    "u/v": "regular grid normalized row/column position"
+  }
+}

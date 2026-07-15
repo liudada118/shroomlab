@@ -1,0 +1,92 @@
+# hand0423g exported sensor coordinate geometry
+# Quad faces are generated from c0..c3 coordinates in the CSV.
+v -1.2640238 5.6935780 1.1156192
+v -1.0750130 5.6980328 1.1818801
+v -1.0794677 5.8870435 1.2046251
+v -1.2684785 5.8825888 1.1313452
+v -0.8860022 5.7024875 1.1333814
+v -0.8904570 5.8914983 1.1569230
+v -1.0839225 6.0760543 1.2200854
+v -1.2729333 6.0715996 1.1451027
+v -0.8949117 6.0805091 1.1619891
+v -1.0883772 6.2650651 1.2430791
+v -1.2773880 6.2606103 1.1606087
+v -0.8993665 6.2695198 1.1840535
+v -1.2358284 3.6047184 1.0456296
+v -1.0467651 3.6047184 1.1521846
+v -1.0467651 3.7937816 1.1606384
+v -1.2358284 3.7937816 1.0534689
+v -0.8577018 3.6047184 1.1814961
+v -0.8577018 3.7937816 1.1907786
+v -0.6686386 3.6047184 1.1736513
+v -0.6686386 3.7937816 1.1842081
+v -1.0467651 3.9828449 1.1492577
+v -1.2358284 3.9828449 1.0494806
+v -0.8577018 3.9828449 1.1833620
+v -0.6686386 3.9828449 1.1816875
+v -1.0467651 4.1719081 1.1292949
+v -1.2358284 4.1719081 1.0405560
+v -0.8577018 4.1719081 1.1625613
+v -0.6686386 4.1719081 1.1627534
+v -1.0467651 4.3609714 1.1080871
+v -1.2358284 4.3609714 1.0294106
+v -0.8577018 4.3609714 1.1246851
+v -0.6686386 4.3609714 1.1209084
+v -1.0467651 4.5500347 1.0951725
+v -1.2358284 4.5500347 1.0302232
+v -0.8577018 4.5500347 1.0914625
+v -0.6686386 4.5500347 1.0795788
+v -1.0467651 4.7390979 1.1143813
+v -1.2358284 4.7390979 1.0653476
+v -0.8577018 4.7390979 1.0637092
+v -0.6686386 4.7390979 1.0285791
+g finger_to_palm_pinky
+usemtl finger_to_palm
+# global_wiring_id=626 component=pinky segment=finger_to_palm finger=pinky row=0 col=0 source_quad_id=6604
+f 1 2 3 4
+# global_wiring_id=627 component=pinky segment=finger_to_palm finger=pinky row=0 col=1 source_quad_id=2317
+f 2 5 6 3
+# global_wiring_id=628 component=pinky segment=finger_to_palm finger=pinky row=1 col=0 source_quad_id=1515
+f 4 3 7 8
+# global_wiring_id=629 component=pinky segment=finger_to_palm finger=pinky row=1 col=1 source_quad_id=2318
+f 3 6 9 7
+# global_wiring_id=630 component=pinky segment=finger_to_palm finger=pinky row=2 col=0 source_quad_id=1516
+f 8 7 10 11
+# global_wiring_id=631 component=pinky segment=finger_to_palm finger=pinky row=2 col=1 source_quad_id=6599
+f 7 9 12 10
+# global_wiring_id=608 component=pinky_connection segment=finger_to_palm finger=pinky row=0 col=0 source_quad_id=2401
+f 13 14 15 16
+# global_wiring_id=609 component=pinky_connection segment=finger_to_palm finger=pinky row=0 col=1 source_quad_id=2402
+f 14 17 18 15
+# global_wiring_id=610 component=pinky_connection segment=finger_to_palm finger=pinky row=0 col=2 source_quad_id=2406
+f 17 19 20 18
+# global_wiring_id=611 component=pinky_connection segment=finger_to_palm finger=pinky row=1 col=0 source_quad_id=2400
+f 16 15 21 22
+# global_wiring_id=612 component=pinky_connection segment=finger_to_palm finger=pinky row=1 col=1 source_quad_id=2403
+f 15 18 23 21
+# global_wiring_id=613 component=pinky_connection segment=finger_to_palm finger=pinky row=1 col=2 source_quad_id=2406
+f 18 20 24 23
+# global_wiring_id=614 component=pinky_connection segment=finger_to_palm finger=pinky row=2 col=0 source_quad_id=2398
+f 22 21 25 26
+# global_wiring_id=615 component=pinky_connection segment=finger_to_palm finger=pinky row=2 col=1 source_quad_id=1844
+f 21 23 27 25
+# global_wiring_id=616 component=pinky_connection segment=finger_to_palm finger=pinky row=2 col=2 source_quad_id=1846
+f 23 24 28 27
+# global_wiring_id=617 component=pinky_connection segment=finger_to_palm finger=pinky row=3 col=0 source_quad_id=2396
+f 26 25 29 30
+# global_wiring_id=618 component=pinky_connection segment=finger_to_palm finger=pinky row=3 col=1 source_quad_id=1844
+f 25 27 31 29
+# global_wiring_id=619 component=pinky_connection segment=finger_to_palm finger=pinky row=3 col=2 source_quad_id=1845
+f 27 28 32 31
+# global_wiring_id=620 component=pinky_connection segment=finger_to_palm finger=pinky row=4 col=0 source_quad_id=2394
+f 30 29 33 34
+# global_wiring_id=621 component=pinky_connection segment=finger_to_palm finger=pinky row=4 col=1 source_quad_id=1842
+f 29 31 35 33
+# global_wiring_id=622 component=pinky_connection segment=finger_to_palm finger=pinky row=4 col=2 source_quad_id=1843
+f 31 32 36 35
+# global_wiring_id=623 component=pinky_connection segment=finger_to_palm finger=pinky row=5 col=0 source_quad_id=2390
+f 34 33 37 38
+# global_wiring_id=624 component=pinky_connection segment=finger_to_palm finger=pinky row=5 col=1 source_quad_id=2391
+f 33 35 39 37
+# global_wiring_id=625 component=pinky_connection segment=finger_to_palm finger=pinky row=5 col=2 source_quad_id=1839
+f 35 36 40 39

@@ -1,0 +1,15 @@
+{
+  "output": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_vertices_straightened_strong.obj",
+  "topology_unchanged": true,
+  "vertices": 8129,
+  "quad_faces": 7653,
+  "palm_faces_adjusted": 458,
+  "fixed_boundary_nodes": 114,
+  "z_unchanged": true,
+  "flipped_palm_faces": 0,
+  "strength_factor_after_flip_check": 1.0,
+  "max_move": 0.34,
+  "axis_error_before": 0.1988586168717391,
+  "axis_error_after": 0.18311314394923373,
+  "preview": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_straightening_compare.png"
+}

@@ -1,0 +1,17 @@
+{
+  "output": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_maximum_straight.obj",
+  "vertices": 8129,
+  "quad_faces": 7653,
+  "non_quad_faces": 0,
+  "face_topology_unchanged": true,
+  "palm_faces_adjusted": 458,
+  "boundary_nodes_fixed": 114,
+  "target_grid_spacing": 0.18281590999999997,
+  "applied_maximum_factor": 1.0,
+  "max_vertex_move": 0.38441559828679556,
+  "mean_moved_vertex_move": 0.11235840786711167,
+  "axis_error_before": 0.1988586168717391,
+  "axis_error_after": 0.17918769458480896,
+  "flipped_palm_faces": 0,
+  "z_unchanged": true
+}

@@ -1,0 +1,62 @@
+# hand0423g aligned OBJ export
+# Vertices are baked with the original GLB mesh node rotation/scale, so OBJ aligns with hand0423g.glb surface.
+# source_glb=D:/cad/blender/hand/hand0423g.glb
+# baked_scale=[-0.7999998927116394, -0.7999998927116394, -0.7999998927116394]
+# baked_rotation_xyzw=[-0.7071065902709961, 0.0, 0.0, 0.7071070075035095]
+mtllib hand0423g_finger_thirds_and_palm_aligned.mtl
+v -1.1242418 -0.8414959 5.9580914
+v -1.2714219 -0.9260343 5.9232379
+v -1.3062754 -0.9479513 6.0704180
+v -1.1590953 -0.8590923 6.1052715
+v -1.4186020 -0.9096942 5.8883845
+v -1.4534555 -0.9393319 6.0355645
+v -1.5657821 -0.7834447 5.8535311
+v -1.6006355 -0.8121514 6.0007111
+v -1.3411288 -0.9692660 6.2175981
+v -1.1939488 -0.8765042 6.2524516
+v -1.4883089 -0.9658806 6.1827446
+v -1.6354890 -0.8392568 6.1478912
+v -1.3759823 -0.9949567 6.3647782
+v -1.2288022 -0.8944930 6.3996317
+v -1.5231624 -0.9925649 6.3299247
+v -1.6703425 -0.8672613 6.2950713
+v -1.4108358 -1.0157235 6.5119582
+v -1.2636557 -0.9141708 6.5468118
+v -1.5580159 -1.0130163 6.4771048
+v -1.7051959 -0.8915161 6.4422514
+v -1.4456892 -1.0226705 6.6591383
+v -1.2985092 -0.9227300 6.6939919
+v -1.5928693 -1.0194691 6.6242849
+v -1.7400494 -0.9022626 6.5894315
+g finger_tip_third_middle
+usemtl finger_tip_third
+# global_wiring_id=515 component=middle segment=finger_tip_third finger=middle row=0 col=0 source_quad_id=7021
+f 1 2 3 4
+# global_wiring_id=516 component=middle segment=finger_tip_third finger=middle row=0 col=1 source_quad_id=7020
+f 2 5 6 3
+# global_wiring_id=517 component=middle segment=finger_tip_third finger=middle row=0 col=2 source_quad_id=841
+f 5 7 8 6
+# global_wiring_id=518 component=middle segment=finger_tip_third finger=middle row=1 col=0 source_quad_id=7099
+f 4 3 9 10
+# global_wiring_id=519 component=middle segment=finger_tip_third finger=middle row=1 col=1 source_quad_id=7016
+f 3 6 11 9
+# global_wiring_id=520 component=middle segment=finger_tip_third finger=middle row=1 col=2 source_quad_id=837
+f 6 8 12 11
+# global_wiring_id=521 component=middle segment=finger_tip_third finger=middle row=2 col=0 source_quad_id=7100
+f 10 9 13 14
+# global_wiring_id=522 component=middle segment=finger_tip_third finger=middle row=2 col=1 source_quad_id=7015
+f 9 11 15 13
+# global_wiring_id=523 component=middle segment=finger_tip_third finger=middle row=2 col=2 source_quad_id=836
+f 11 12 16 15
+# global_wiring_id=524 component=middle segment=finger_tip_third finger=middle row=3 col=0 source_quad_id=7101
+f 14 13 17 18
+# global_wiring_id=525 component=middle segment=finger_tip_third finger=middle row=3 col=1 source_quad_id=7104
+f 13 15 19 17
+# global_wiring_id=526 component=middle segment=finger_tip_third finger=middle row=3 col=2 source_quad_id=7011
+f 15 16 20 19
+# global_wiring_id=527 component=middle segment=finger_tip_third finger=middle row=4 col=0 source_quad_id=6973
+f 18 17 21 22
+# global_wiring_id=528 component=middle segment=finger_tip_third finger=middle row=4 col=1 source_quad_id=7105
+f 17 19 23 21
+# global_wiring_id=529 component=middle segment=finger_tip_third finger=middle row=4 col=2 source_quad_id=7006
+f 19 20 24 23

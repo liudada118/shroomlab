@@ -1,0 +1,89 @@
+{
+  "source": "E:/shroomLab/hand_info/hand0423g_full_hand_wiring_complete_grids.csv",
+  "csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_finger_thirds_and_palm.csv",
+  "preview": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_finger_thirds_and_palm_preview.png",
+  "rule": {
+    "finger_tip_third": "For each finger body, take the distal last round(rows/3) complete rows. Row direction follows the existing complete wiring grid from palm/base to fingertip.",
+    "finger_to_palm": "For each finger, take remaining non-tip finger body rows plus the corresponding finger_connection component.",
+    "palm_rectified": "Use the approved final rectified palm grid, 20 x 18."
+  },
+  "fingers": {
+    "thumb": {
+      "label": "??",
+      "body_rows": 13,
+      "body_cols": 3,
+      "tip_row_start": 9,
+      "tip_row_count": 4,
+      "tip_cell_count": 12,
+      "to_palm_body_cell_count": 27,
+      "connection_component": "thumb_connection",
+      "connection_cell_count": 21,
+      "to_palm_total_cell_count": 48,
+      "tip_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_thumb_tip_third.csv",
+      "to_palm_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_thumb_to_palm.csv"
+    },
+    "index": {
+      "label": "??",
+      "body_rows": 11,
+      "body_cols": 3,
+      "tip_row_start": 7,
+      "tip_row_count": 4,
+      "tip_cell_count": 12,
+      "to_palm_body_cell_count": 21,
+      "connection_component": "index_connection",
+      "connection_cell_count": 5,
+      "to_palm_total_cell_count": 26,
+      "tip_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_index_tip_third.csv",
+      "to_palm_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_index_to_palm.csv"
+    },
+    "middle": {
+      "label": "??",
+      "body_rows": 14,
+      "body_cols": 3,
+      "tip_row_start": 9,
+      "tip_row_count": 5,
+      "tip_cell_count": 15,
+      "to_palm_body_cell_count": 27,
+      "connection_component": "middle_connection",
+      "connection_cell_count": 30,
+      "to_palm_total_cell_count": 57,
+      "tip_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_middle_tip_third.csv",
+      "to_palm_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_middle_to_palm.csv"
+    },
+    "ring": {
+      "label": "???",
+      "body_rows": 12,
+      "body_cols": 3,
+      "tip_row_start": 8,
+      "tip_row_count": 4,
+      "tip_cell_count": 12,
+      "to_palm_body_cell_count": 24,
+      "connection_component": "ring_connection",
+      "connection_cell_count": 42,
+      "to_palm_total_cell_count": 66,
+      "tip_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_ring_tip_third.csv",
+      "to_palm_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_ring_to_palm.csv"
+    },
+    "pinky": {
+      "label": "??",
+      "body_rows": 5,
+      "body_cols": 2,
+      "tip_row_start": 3,
+      "tip_row_count": 2,
+      "tip_cell_count": 4,
+      "to_palm_body_cell_count": 6,
+      "connection_component": "pinky_connection",
+      "connection_cell_count": 18,
+      "to_palm_total_cell_count": 24,
+      "tip_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_pinky_tip_third.csv",
+      "to_palm_csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_pinky_to_palm.csv"
+    }
+  },
+  "palm": {
+    "label": "??",
+    "rows": 20,
+    "cols": 18,
+    "cell_count": 360,
+    "csv": "E:/shroomLab/hand_info/finger_thirds_export/hand0423g_palm_rectified_coordinates.csv"
+  }
+}

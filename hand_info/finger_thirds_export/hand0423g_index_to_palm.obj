@@ -1,0 +1,100 @@
+# hand0423g exported sensor coordinate geometry
+# Quad faces are generated from c0..c3 coordinates in the CSV.
+v 2.3816966 5.7124086 0.8112021
+v 2.5617932 5.6548749 0.8837596
+v 2.6193268 5.8349716 0.9009000
+v 2.4392302 5.8925052 0.8212301
+v 2.7418898 5.5973413 0.8623911
+v 2.7994235 5.7774379 0.8812708
+v 2.9219865 5.5398077 0.7369894
+v 2.9795201 5.7199043 0.7525264
+v 2.6768605 6.0150682 0.9223053
+v 2.4967638 6.0726019 0.8330714
+v 2.8569571 5.9575346 0.9035617
+v 3.0370538 5.9000009 0.7777494
+v 2.7343941 6.1951649 0.9323303
+v 2.5542975 6.2526985 0.8455227
+v 2.9144908 6.1376312 0.9147419
+v 3.0945874 6.0800976 0.7953591
+v 2.7919278 6.3752615 0.9381275
+v 2.6118311 6.4327951 0.8465858
+v 2.9720244 6.3177279 0.9250199
+v 3.1521210 6.2601942 0.8005950
+v 2.8494614 6.5553581 0.9603969
+v 2.6693648 6.6128918 0.8661028
+v 3.0295580 6.4978245 0.9454942
+v 3.2096547 6.4402909 0.8232585
+v 2.9069950 6.7354548 0.9896983
+v 2.7268984 6.7929884 0.8886312
+v 3.0870917 6.6779211 0.9749860
+v 3.2671883 6.6203875 0.8504299
+v 2.9645287 6.9155514 1.0294618
+v 2.7844320 6.9730850 0.9215309
+v 3.1446253 6.8580178 1.0166236
+v 3.3247219 6.8004841 0.8900694
+v 2.4567412 4.4604481 0.7153964
+v 2.6458045 4.4604481 0.5812678
+v 2.6458045 4.6495114 0.6581475
+v 2.4567412 4.6495114 0.7597516
+v 2.6458045 4.8385746 0.7280176
+v 2.4567412 4.8385746 0.8014214
+v 2.6458045 5.0276379 0.7842142
+v 2.4567412 5.0276379 0.8343529
+v 2.6458045 5.2167012 0.8306809
+v 2.4567412 5.2167012 0.8603285
+v 2.6458045 5.4057644 0.8625185
+v 2.4567412 5.4057644 0.8673198
+g finger_to_palm_index
+usemtl finger_to_palm
+# global_wiring_id=425 component=index segment=finger_to_palm finger=index row=0 col=0 source_quad_id=1059
+f 1 2 3 4
+# global_wiring_id=426 component=index segment=finger_to_palm finger=index row=0 col=1 source_quad_id=933
+f 2 5 6 3
+# global_wiring_id=427 component=index segment=finger_to_palm finger=index row=0 col=2 source_quad_id=937
+f 5 7 8 6
+# global_wiring_id=428 component=index segment=finger_to_palm finger=index row=1 col=0 source_quad_id=1058
+f 4 3 9 10
+# global_wiring_id=429 component=index segment=finger_to_palm finger=index row=1 col=1 source_quad_id=1057
+f 3 6 11 9
+# global_wiring_id=430 component=index segment=finger_to_palm finger=index row=1 col=2 source_quad_id=938
+f 6 8 12 11
+# global_wiring_id=431 component=index segment=finger_to_palm finger=index row=2 col=0 source_quad_id=1122
+f 10 9 13 14
+# global_wiring_id=432 component=index segment=finger_to_palm finger=index row=2 col=1 source_quad_id=1053
+f 9 11 15 13
+# global_wiring_id=433 component=index segment=finger_to_palm finger=index row=2 col=2 source_quad_id=939
+f 11 12 16 15
+# global_wiring_id=434 component=index segment=finger_to_palm finger=index row=3 col=0 source_quad_id=1123
+f 14 13 17 18
+# global_wiring_id=435 component=index segment=finger_to_palm finger=index row=3 col=1 source_quad_id=1052
+f 13 15 19 17
+# global_wiring_id=436 component=index segment=finger_to_palm finger=index row=3 col=2 source_quad_id=1051
+f 15 16 20 19
+# global_wiring_id=437 component=index segment=finger_to_palm finger=index row=4 col=0 source_quad_id=1124
+f 18 17 21 22
+# global_wiring_id=438 component=index segment=finger_to_palm finger=index row=4 col=1 source_quad_id=1128
+f 17 19 23 21
+# global_wiring_id=439 component=index segment=finger_to_palm finger=index row=4 col=2 source_quad_id=1047
+f 19 20 24 23
+# global_wiring_id=440 component=index segment=finger_to_palm finger=index row=5 col=0 source_quad_id=1191
+f 22 21 25 26
+# global_wiring_id=441 component=index segment=finger_to_palm finger=index row=5 col=1 source_quad_id=1129
+f 21 23 27 25
+# global_wiring_id=442 component=index segment=finger_to_palm finger=index row=5 col=2 source_quad_id=1046
+f 23 24 28 27
+# global_wiring_id=443 component=index segment=finger_to_palm finger=index row=6 col=0 source_quad_id=1187
+f 26 25 29 30
+# global_wiring_id=444 component=index segment=finger_to_palm finger=index row=6 col=1 source_quad_id=1130
+f 25 27 31 29
+# global_wiring_id=445 component=index segment=finger_to_palm finger=index row=6 col=2 source_quad_id=6882
+f 27 28 32 31
+# global_wiring_id=420 component=index_connection segment=finger_to_palm finger=index row=0 col=0 source_quad_id=1892
+f 33 34 35 36
+# global_wiring_id=421 component=index_connection segment=finger_to_palm finger=index row=1 col=0 source_quad_id=1893
+f 36 35 37 38
+# global_wiring_id=422 component=index_connection segment=finger_to_palm finger=index row=2 col=0 source_quad_id=6688
+f 38 37 39 40
+# global_wiring_id=423 component=index_connection segment=finger_to_palm finger=index row=3 col=0 source_quad_id=6684
+f 40 39 41 42
+# global_wiring_id=424 component=index_connection segment=finger_to_palm finger=index row=4 col=0 source_quad_id=931
+f 42 41 43 44

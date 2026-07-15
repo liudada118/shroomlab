@@ -1,0 +1,14 @@
+{
+  "source": "D:\\cad\\blender\\hand\\hand0423g_quads.obj",
+  "output": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_shape_preserved.obj",
+  "vertices": 8129,
+  "quad_faces": 7653,
+  "non_quad_faces": 0,
+  "same_face_topology": true,
+  "source_face_hash": "bd4989d4222220253b9b7eedcb75c299f2f98c5726bc2b8651cd1b9189c91516",
+  "output_face_hash": "bd4989d4222220253b9b7eedcb75c299f2f98c5726bc2b8651cd1b9189c91516",
+  "z_coordinates_unchanged": true,
+  "max_xy_move": 0.3844155982465404,
+  "moved_vertices": 421,
+  "no_faces_deleted": true
+}

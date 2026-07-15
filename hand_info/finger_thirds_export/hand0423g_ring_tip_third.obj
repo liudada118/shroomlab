@@ -1,0 +1,48 @@
+# hand0423g exported sensor coordinate geometry
+# Quad faces are generated from c0..c3 coordinates in the CSV.
+v -0.2015364 7.1970009 1.1673363
+v -0.0126086 7.1898454 1.2952506
+v -0.0054532 7.3787732 1.3311977
+v -0.1943810 7.3859287 1.1911491
+v 0.1763192 7.1826900 1.2845517
+v 0.1834746 7.3716178 1.3277487
+v 0.3652470 7.1755346 1.1449358
+v 0.3724024 7.3644624 1.1899670
+v 0.0017023 7.5677010 1.3628372
+v -0.1872256 7.5748565 1.2108969
+v 0.1906301 7.5605456 1.3675597
+v 0.3795579 7.5533902 1.2269860
+v 0.0088577 7.7566289 1.3967230
+v -0.1800701 7.7637843 1.2248367
+v 0.1977855 7.7494734 1.4074116
+v 0.3867133 7.7423180 1.2596851
+v 0.0160131 7.9455567 1.4212773
+v -0.1729147 7.9527121 1.2457370
+v 0.2049409 7.9384012 1.4277879
+v 0.3938688 7.9312458 1.2735626
+g finger_tip_third_ring
+usemtl finger_tip_third
+# global_wiring_id=596 component=ring segment=finger_tip_third finger=ring row=0 col=0 source_quad_id=217
+f 1 2 3 4
+# global_wiring_id=597 component=ring segment=finger_tip_third finger=ring row=0 col=1 source_quad_id=221
+f 2 5 6 3
+# global_wiring_id=598 component=ring segment=finger_tip_third finger=ring row=0 col=2 source_quad_id=6757
+f 5 7 8 6
+# global_wiring_id=599 component=ring segment=finger_tip_third finger=ring row=1 col=0 source_quad_id=296
+f 4 3 9 10
+# global_wiring_id=600 component=ring segment=finger_tip_third finger=ring row=1 col=1 source_quad_id=222
+f 3 6 11 9
+# global_wiring_id=601 component=ring segment=finger_tip_third finger=ring row=1 col=2 source_quad_id=6806
+f 6 8 12 11
+# global_wiring_id=602 component=ring segment=finger_tip_third finger=ring row=2 col=0 source_quad_id=295
+f 10 9 13 14
+# global_wiring_id=603 component=ring segment=finger_tip_third finger=ring row=2 col=1 source_quad_id=223
+f 9 11 15 13
+# global_wiring_id=604 component=ring segment=finger_tip_third finger=ring row=2 col=2 source_quad_id=227
+f 11 12 16 15
+# global_wiring_id=605 component=ring segment=finger_tip_third finger=ring row=3 col=0 source_quad_id=431
+f 14 13 17 18
+# global_wiring_id=606 component=ring segment=finger_tip_third finger=ring row=3 col=1 source_quad_id=291
+f 13 15 19 17
+# global_wiring_id=607 component=ring segment=finger_tip_third finger=ring row=3 col=2 source_quad_id=228
+f 15 16 20 19

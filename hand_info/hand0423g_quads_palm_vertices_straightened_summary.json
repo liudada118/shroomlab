@@ -1,0 +1,19 @@
+{
+  "source": "D:\\cad\\blender\\hand\\hand0423g_quads.obj",
+  "output": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_vertices_straightened.obj",
+  "preview": "D:\\cad\\blender\\hand\\hand0423g_quads_palm_vertices_straightened_preview.png",
+  "topology_unchanged": true,
+  "vertices": 8129,
+  "quad_faces": 7653,
+  "palm_faces_adjusted": 458,
+  "welded_palm_nodes": 516,
+  "fixed_boundary_nodes": 114,
+  "grid_target_xy": 0.18281590999999997,
+  "moved_vertex_records": 421,
+  "max_vertex_move": 0.22,
+  "mean_moved_vertex_move": 0.07338819336635508,
+  "z_coordinates_unchanged": true,
+  "flipped_palm_faces": 0,
+  "mean_axis_error_before": 0.1988586168717391,
+  "mean_axis_error_after": 0.18539840693205664
+}
