@@ -44,6 +44,12 @@ out/
 .env.*
 !.env.example
 
+# Private keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+
 # OS files
 .DS_Store
 Thumbs.db
