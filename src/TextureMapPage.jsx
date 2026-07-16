@@ -53,98 +53,19 @@ function paintPressureTexture(context, matrix, colorDepth, palette) {
   const matrixSize = matrix.length || SENSOR_MATRIX_SIZE;
   const cellSize = TEXTURE_SIZE / matrixSize;
   context.clearRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
-  context.fillStyle = '#0bb8c8';
+  context.fillStyle = '#062a33';
   context.fillRect(0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
 
   for (let row = 0; row < matrixSize; row += 1) {
     for (let col = 0; col < matrixSize; col += 1) {
       const pressure = matrix[row][col];
       const color = colorForPressure(pressure, colorDepth, palette);
-      const alpha = pressure > 0 ? 0.46 + clamp01(pressure * colorDepth) * 0.54 : 0.28;
+      const alpha = pressure > 0 ? 0.5 + clamp01(pressure * colorDepth) * 0.5 : 0.18;
 
       context.fillStyle = `rgba(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)}, ${alpha})`;
       context.fillRect(col * cellSize, row * cellSize, Math.ceil(cellSize) + 0.5, Math.ceil(cellSize) + 0.5);
     }
   }
-}
-
-function normalizeModel(model) {
-  const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
-  const scale = 7.8 / (Math.max(size.x, size.y, size.z) || 1);
-
-  model.scale.setScalar(scale);
-  model.position.copy(center).multiplyScalar(-scale);
-  model.rotation.set(0.1, -0.45, 2.25);
-  model.updateMatrixWorld(true);
-
-  const finalCenter = new THREE.Box3().setFromObject(model).getCenter(new THREE.Vector3());
-  model.position.sub(finalCenter);
-}
-
-function modelBoundsFromMeshes(model) {
-  const box = new THREE.Box3();
-  const rootInverse = new THREE.Matrix4().copy(model.matrixWorld).invert();
-  const vertex = new THREE.Vector3();
-
-  model.traverse((child) => {
-    if (!child.isMesh || !child.geometry?.attributes?.position) {
-      return;
-    }
-
-    const position = child.geometry.attributes.position;
-    for (let i = 0; i < position.count; i += 1) {
-      vertex
-        .set(position.getX(i), position.getY(i), position.getZ(i))
-        .applyMatrix4(child.matrixWorld)
-        .applyMatrix4(rootInverse);
-      box.expandByPoint(vertex);
-    }
-  });
-
-  return box;
-}
-
-function applyPlanarPressureUv(model) {
-  model.updateMatrixWorld(true);
-  const bounds = modelBoundsFromMeshes(model);
-  const size = bounds.getSize(new THREE.Vector3());
-  const rootInverse = new THREE.Matrix4().copy(model.matrixWorld).invert();
-  const vertex = new THREE.Vector3();
-  const uv = new THREE.Vector2();
-  const createdGeometries = [];
-
-  model.traverse((child) => {
-    if (!child.isMesh || !child.geometry?.attributes?.position) {
-      return;
-    }
-
-    const geometry = child.geometry.clone();
-    const position = geometry.attributes.position;
-    const uvs = [];
-
-    for (let i = 0; i < position.count; i += 1) {
-      vertex
-        .set(position.getX(i), position.getY(i), position.getZ(i))
-        .applyMatrix4(child.matrixWorld)
-        .applyMatrix4(rootInverse);
-      uv.set(
-        size.x > 0 ? (vertex.x - bounds.min.x) / size.x : 0.5,
-        size.y > 0 ? 1 - (vertex.y - bounds.min.y) / size.y : 0.5,
-      );
-      uvs.push(clamp01(uv.x), clamp01(uv.y));
-    }
-
-    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-    child.geometry = geometry;
-    child.frustumCulled = false;
-    createdGeometries.push(geometry);
-  });
-
-  return () => {
-    createdGeometries.forEach((geometry) => geometry.dispose());
-  };
 }
 
 function applyGeometryPlanarPressureUv(geometry) {
@@ -172,12 +93,84 @@ function normalizeGeometryMesh(mesh) {
   const box = mesh.geometry.boundingBox;
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
-  const scale = 7.8 / (Math.max(size.x, size.y, size.z) || 1);
+  const scale = 4.8 / (Math.max(size.x, size.y, size.z) || 1);
 
   mesh.geometry.translate(-center.x, -center.y, -center.z);
   mesh.scale.setScalar(scale);
   mesh.rotation.set(0.1, -0.45, 2.25);
   mesh.frustumCulled = false;
+}
+
+function buildSampledPointGeometry(sourceGeometry, stride = 8) {
+  const sourcePosition = sourceGeometry.attributes.position;
+  const positions = [];
+
+  for (let i = 0; i < sourcePosition.count; i += stride) {
+    positions.push(sourcePosition.getX(i), sourcePosition.getY(i), sourcePosition.getZ(i));
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.computeBoundingSphere();
+  return geometry;
+}
+
+function buildSampledTriangleGeometry(sourceGeometry, triangleStride = 10) {
+  const sourcePosition = sourceGeometry.attributes.position;
+  const sourceIndex = sourceGeometry.index;
+  const positions = [];
+  const triangleCount = sourceIndex
+    ? Math.floor(sourceIndex.count / 3)
+    : Math.floor(sourcePosition.count / 3);
+
+  const vertexIndexAt = (triangleIndex, cornerIndex) => {
+    const index = triangleIndex * 3 + cornerIndex;
+    return sourceIndex ? sourceIndex.getX(index) : index;
+  };
+
+  for (let triangleIndex = 0; triangleIndex < triangleCount; triangleIndex += triangleStride) {
+    for (let cornerIndex = 0; cornerIndex < 3; cornerIndex += 1) {
+      const vertexIndex = vertexIndexAt(triangleIndex, cornerIndex);
+      positions.push(
+        sourcePosition.getX(vertexIndex),
+        sourcePosition.getY(vertexIndex),
+        sourcePosition.getZ(vertexIndex),
+      );
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function buildTriangleLineGeometry(sourceGeometry) {
+  const position = sourceGeometry.attributes.position;
+  const lines = [];
+
+  for (let i = 0; i < position.count; i += 3) {
+    const ax = position.getX(i);
+    const ay = position.getY(i);
+    const az = position.getZ(i);
+    const bx = position.getX(i + 1);
+    const by = position.getY(i + 1);
+    const bz = position.getZ(i + 1);
+    const cx = position.getX(i + 2);
+    const cy = position.getY(i + 2);
+    const cz = position.getZ(i + 2);
+
+    lines.push(
+      ax, ay, az, bx, by, bz,
+      bx, by, bz, cx, cy, cz,
+      cx, cy, cz, ax, ay, az,
+    );
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(lines, 3));
+  geometry.computeBoundingSphere();
+  return geometry;
 }
 
 function applyTextureLook(model, texture, opacity, showWire) {
@@ -189,11 +182,11 @@ function applyTextureLook(model, texture, opacity, showWire) {
     }
 
     const material = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
+      color: 0x52e6f3,
       map: texture,
       transparent: true,
-      opacity,
-      wireframe: showWire,
+      opacity: Math.min(opacity, 0.68),
+      wireframe: false,
       side: THREE.DoubleSide,
       depthTest: true,
       depthWrite: false,
@@ -207,13 +200,13 @@ function applyTextureLook(model, texture, opacity, showWire) {
   return {
     setOpacity(nextOpacity) {
       materials.forEach((material) => {
-        material.opacity = nextOpacity;
+        material.opacity = Math.min(nextOpacity, 0.68);
         material.needsUpdate = true;
       });
     },
-    setWireframe(nextShowWire) {
+    setWireframe() {
       materials.forEach((material) => {
-        material.wireframe = nextShowWire;
+        material.wireframe = false;
         material.needsUpdate = true;
       });
     },
@@ -234,21 +227,28 @@ function disposeObject(object) {
 export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, videoPoints, pressurePalette }) {
   const mountRef = useRef(null);
   const modelLookRef = useRef(null);
+  const pointOverlayRef = useRef(null);
+  const lineOverlayRef = useRef(null);
+  const dataSourceRef = useRef(dataSource);
   const settingsRef = useRef({
     autoRotate: false,
     colorDepth: 1.25,
     opacity: 0.82,
-    showWire: false,
+    showWire: true,
     sourcePoints,
     videoPoints,
     pressurePalette,
   });
   const [autoRotate, setAutoRotate] = useState(false);
-  const [showWire, setShowWire] = useState(false);
+  const [showWire, setShowWire] = useState(true);
   const [colorDepth, setColorDepth] = useState(1.25);
   const [opacity, setOpacity] = useState(0.82);
   const [loadState, setLoadState] = useState('Loading');
   const [readout, setReadout] = useState({ source: 'SIM', peak: 0, frameAge: 'none' });
+
+  useEffect(() => {
+    dataSourceRef.current = dataSource;
+  }, [dataSource]);
 
   useEffect(() => {
     settingsRef.current = {
@@ -262,6 +262,12 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
     };
     modelLookRef.current?.setOpacity(opacity);
     modelLookRef.current?.setWireframe(showWire);
+    if (pointOverlayRef.current) {
+      pointOverlayRef.current.visible = showWire;
+    }
+    if (lineOverlayRef.current) {
+      lineOverlayRef.current.visible = showWire;
+    }
   }, [autoRotate, colorDepth, opacity, pressurePalette, showWire, sourcePoints, videoPoints]);
 
   useEffect(() => {
@@ -335,7 +341,7 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
           return;
         }
 
-        const geometry = sourceMesh.geometry.clone();
+        const geometry = buildSampledTriangleGeometry(sourceMesh.geometry, 20);
         applyGeometryPlanarPressureUv(geometry);
         model = new THREE.Mesh(geometry);
         normalizeGeometryMesh(model);
@@ -345,10 +351,46 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
           settingsRef.current.opacity,
           settingsRef.current.showWire,
         );
-        rig.add(model);
+        const pointGeometry = buildSampledPointGeometry(geometry, 8);
+        const pointOverlay = new THREE.Points(
+          pointGeometry,
+          new THREE.PointsMaterial({
+            color: 0x8ffcff,
+            size: 0.075,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.95,
+            depthWrite: false,
+          }),
+        );
+        pointOverlay.renderOrder = 7;
+        pointOverlay.frustumCulled = false;
+        pointOverlay.visible = settingsRef.current.showWire;
+        pointOverlay.position.copy(model.position);
+        pointOverlay.rotation.copy(model.rotation);
+        pointOverlay.scale.copy(model.scale);
+        pointOverlayRef.current = pointOverlay;
 
-        const debugBox = new THREE.Box3().setFromObject(model);
-        setLoadState(`1 mesh / ${Math.round(debugBox.getSize(new THREE.Vector3()).length() * 10) / 10}`);
+        const lineOverlay = new THREE.LineSegments(
+          buildTriangleLineGeometry(geometry),
+          new THREE.LineBasicMaterial({
+            color: 0x9bffff,
+            transparent: true,
+            opacity: 0.78,
+            depthWrite: false,
+          }),
+        );
+        lineOverlay.renderOrder = 8;
+        lineOverlay.frustumCulled = false;
+        lineOverlay.visible = settingsRef.current.showWire;
+        lineOverlay.position.copy(model.position);
+        lineOverlay.rotation.copy(model.rotation);
+        lineOverlay.scale.copy(model.scale);
+        lineOverlayRef.current = lineOverlay;
+
+        rig.add(model, pointOverlay, lineOverlay);
+
+        setLoadState('1 mesh / texture');
         disposeObject(gltf.scene);
       },
       undefined,
@@ -388,7 +430,7 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
 
       if (performance.now() - lastReadoutAt > 240) {
         lastReadoutAt = performance.now();
-        const snapshot = dataSource?.snapshot;
+        const snapshot = dataSourceRef.current?.snapshot;
         const peak = frame.points.reduce((max, point) => Math.max(max, point.value), 0);
         setReadout({
           source: snapshot ? (snapshot.source === 'manual' ? 'MANUAL' : 'LIVE') : 'SIM',
@@ -409,6 +451,12 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', resize);
       controls.dispose();
+      pointOverlayRef.current?.geometry?.dispose();
+      pointOverlayRef.current?.material?.dispose();
+      pointOverlayRef.current = null;
+      lineOverlayRef.current?.geometry?.dispose();
+      lineOverlayRef.current?.material?.dispose();
+      lineOverlayRef.current = null;
       modelLookRef.current?.dispose();
       modelLookRef.current = null;
       if (model) {
@@ -420,7 +468,7 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [dataSource]);
+  }, []);
 
   return (
     <main className="texture-map-page">
