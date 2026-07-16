@@ -22,6 +22,7 @@ const DEFAULT_CALIBRATION = Object.freeze([
 const FINGER_BEND_AXIS = new THREE.Vector3(0, 0, 1);
 const DEFAULT_LINE_COLOR = '#6dfaff';
 const LINE_COLOR_PRESETS = ['#6dfaff', '#00fff7', '#ff8157', '#ffe66d', '#a88cff'];
+const DEFAULT_REGION_LABEL = 'regions';
 const REGION_COLORS = {
   palm: 0x00ff00,
   thumb: 0xff0000,
@@ -30,6 +31,17 @@ const REGION_COLORS = {
   ring: 0x0088ff,
   pinky: 0xff8800,
 };
+const NEW147_FINGER_KEYS = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+const NEW147_FINGER_ROW_COUNT = 4;
+const NEW147_FINGER_COL_COUNT = 3;
+const NEW147_FINGER_VALUE_COUNT = NEW147_FINGER_KEYS.length * NEW147_FINGER_ROW_COUNT * NEW147_FINGER_COL_COUNT;
+const NEW147_IGNORED_FINGER_BASE_COUNT = 15;
+const NEW147_PALM_ROW_COUNTS = [12, 15, 15, 15, 15];
+const NEW147_PALM_VALUE_COUNT = NEW147_PALM_ROW_COUNTS.reduce((sum, count) => sum + count, 0);
+const PRESSURE_BASE_COLOR = new THREE.Color(0x073c46);
+const PRESSURE_CYAN = new THREE.Color(0x00fff7);
+const PRESSURE_YELLOW = new THREE.Color(0xffe66d);
+const PRESSURE_RED = new THREE.Color(0xff2f2f);
 
 function readStoredCalibration(handSide) {
   if (typeof localStorage === 'undefined') {
@@ -67,6 +79,45 @@ function writeStoredCalibration(handSide, calibration) {
 
 function clamp01(value) {
   return Math.max(0, Math.min(1, value));
+}
+
+function clampIndex(value, maxExclusive) {
+  return Math.max(0, Math.min(maxExclusive - 1, value));
+}
+
+function normalizeRange(value, bounds) {
+  if (!Array.isArray(bounds) || bounds.length < 2 || bounds[0] === bounds[1]) {
+    return 0;
+  }
+
+  return clamp01((value - bounds[0]) / (bounds[1] - bounds[0]));
+}
+
+function normalizePressureValue(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return 0;
+  }
+
+  return clamp01(numericValue / 255);
+}
+
+function setPressureColor(attribute, vertexIndex, value) {
+  const normalizedValue = normalizePressureValue(value);
+
+  if (normalizedValue <= 0.01) {
+    attribute.setXYZ(vertexIndex, PRESSURE_BASE_COLOR.r, PRESSURE_BASE_COLOR.g, PRESSURE_BASE_COLOR.b);
+    return;
+  }
+
+  const color = PRESSURE_CYAN.clone();
+  if (normalizedValue < 0.55) {
+    color.lerp(PRESSURE_YELLOW, normalizedValue / 0.55);
+  } else {
+    color.copy(PRESSURE_YELLOW).lerp(PRESSURE_RED, (normalizedValue - 0.55) / 0.45);
+  }
+
+  attribute.setXYZ(vertexIndex, color.r, color.g, color.b);
 }
 
 function isUsableRotate(rotate) {
@@ -259,13 +310,132 @@ function ensureVertexColorAttribute(geometry, baseColor = 0x0b5f6a) {
   return geometry.attributes.color;
 }
 
-function applyRegionColors(model, regionData) {
+function shouldColorRegionLine(lineIndex, regionData, options) {
+  if (!options?.distributionParts) {
+    return true;
+  }
+
+  const part = regionData.lineDistributionParts?.[lineIndex] || null;
+  return options.distributionParts.includes(part);
+}
+
+function getLineCenterXZ(position, lineIndex, verticesPerLine) {
+  const firstVertex = lineIndex * verticesPerLine;
+  const maxVertex = position.count - 1;
+  let x = 0;
+  let z = 0;
+  let count = 0;
+
+  for (let i = 0; i < verticesPerLine; i += 1) {
+    const vertexIndex = firstVertex + i;
+    if (vertexIndex > maxVertex) {
+      continue;
+    }
+
+    x += position.getX(vertexIndex);
+    z += position.getZ(vertexIndex);
+    count += 1;
+  }
+
+  if (!count) {
+    return null;
+  }
+
+  return { x: x / count, z: z / count };
+}
+
+function projectXZ(point, rect) {
+  return {
+    u: point.x * rect.axisU[0] + point.z * rect.axisU[1],
+    v: point.x * rect.axisV[0] + point.z * rect.axisV[1],
+  };
+}
+
+function new147PalmStartIndex(dataLength) {
+  if (dataLength >= NEW147_FINGER_VALUE_COUNT + NEW147_IGNORED_FINGER_BASE_COUNT + NEW147_PALM_VALUE_COUNT) {
+    return NEW147_FINGER_VALUE_COUNT + NEW147_IGNORED_FINGER_BASE_COUNT;
+  }
+
+  return NEW147_FINGER_VALUE_COUNT;
+}
+
+function new147FingerValueIndex(regionKey, point, layout) {
+  const fingerIndex = NEW147_FINGER_KEYS.indexOf(regionKey);
+  const rect = layout?.fingerRectangles?.[regionKey]?.tip;
+
+  if (fingerIndex < 0 || !rect?.axisU || !rect?.axisV) {
+    return null;
+  }
+
+  const projected = projectXZ(point, rect);
+  const uNorm = normalizeRange(projected.u, rect.uBounds);
+  const vNorm = normalizeRange(projected.v, rect.vBounds);
+  const row = clampIndex(Math.floor((1 - uNorm) * NEW147_FINGER_ROW_COUNT), NEW147_FINGER_ROW_COUNT);
+  const col = clampIndex(Math.floor(vNorm * NEW147_FINGER_COL_COUNT), NEW147_FINGER_COL_COUNT);
+
+  return row * (NEW147_FINGER_KEYS.length * NEW147_FINGER_COL_COUNT) + fingerIndex * NEW147_FINGER_COL_COUNT + col;
+}
+
+function getPalmBounds(layout) {
+  const corners = layout?.palmSquareXZ;
+  if (!Array.isArray(corners) || corners.length < 4) {
+    return null;
+  }
+
+  const xs = corners.map((corner) => corner[0]);
+  const zs = corners.map((corner) => corner[1]);
+  return {
+    x: [Math.min(...xs), Math.max(...xs)],
+    z: [Math.min(...zs), Math.max(...zs)],
+  };
+}
+
+function new147PalmValueIndex(point, layout) {
+  const bounds = getPalmBounds(layout);
+  if (!bounds) {
+    return null;
+  }
+
+  const xNorm = normalizeRange(point.x, bounds.x);
+  const zNorm = normalizeRange(point.z, bounds.z);
+  const row = clampIndex(Math.floor((1 - zNorm) * NEW147_PALM_ROW_COUNTS.length), NEW147_PALM_ROW_COUNTS.length);
+  const rowColCount = NEW147_PALM_ROW_COUNTS[row];
+  const col = clampIndex(Math.floor(xNorm * rowColCount), rowColCount);
+  const rowOffset = NEW147_PALM_ROW_COUNTS.slice(0, row).reduce((sum, count) => sum + count, 0);
+
+  return { palmOffset: rowOffset + col };
+}
+
+function buildNew147PressureMapping(region, lineIndex, regionData, position, verticesPerLine) {
+  const part = regionData.lineDistributionParts?.[lineIndex] || null;
+  const point = getLineCenterXZ(position, lineIndex, verticesPerLine);
+
+  if (!point) {
+    return null;
+  }
+
+  if (part === 'tip') {
+    const valueIndex = new147FingerValueIndex(region.key, point, regionData.distributionLayout);
+    return valueIndex == null ? null : { lineIndex, valueIndex };
+  }
+
+  if (part === 'palm_square') {
+    const mapping = new147PalmValueIndex(point, regionData.distributionLayout);
+    return mapping == null ? null : { lineIndex, palmOffset: mapping.palmOffset };
+  }
+
+  return null;
+}
+
+function applyRegionColors(model, regionData, options = {}) {
   const handMesh = findRegionColorMesh(model, regionData);
   const verticesPerLine = regionData.verticesPerLine || 8;
   const regions = Array.isArray(regionData.regions) ? regionData.regions : [];
+  const pressureMappings = [];
+  let coloredLineCount = 0;
 
   if (!handMesh?.geometry?.attributes?.position) {
-    return false;
+    return { colored: false, lineCount: 0 };
   }
 
   handMesh.userData.regionColored = true;
@@ -280,12 +450,34 @@ function applyRegionColors(model, regionData) {
 
     const color = new THREE.Color(REGION_COLORS[region.key]);
     region.lineIndices.forEach((lineIndex) => {
+      if (!shouldColorRegionLine(lineIndex, regionData, options)) {
+        return;
+      }
+
       const firstVertex = lineIndex * verticesPerLine;
+      let coloredLine = false;
 
       for (let i = 0; i < verticesPerLine; i += 1) {
         const vertexIndex = firstVertex + i;
         if (vertexIndex <= maxVertex) {
           attribute.setXYZ(vertexIndex, color.r, color.g, color.b);
+          coloredLine = true;
+        }
+      }
+
+      if (coloredLine) {
+        coloredLineCount += 1;
+        if (options.pressureMapping === 'new147TipPalm') {
+          const pressureMapping = buildNew147PressureMapping(
+            region,
+            lineIndex,
+            regionData,
+            geometry.attributes.position,
+            verticesPerLine,
+          );
+          if (pressureMapping) {
+            pressureMappings.push(pressureMapping);
+          }
         }
       }
     });
@@ -300,7 +492,59 @@ function applyRegionColors(model, regionData) {
     material.needsUpdate = true;
   });
 
-  return true;
+  return {
+    colored: coloredLineCount > 0,
+    lineCount: coloredLineCount,
+    pressureRuntime: pressureMappings.length
+      ? { attribute, mappings: pressureMappings, verticesPerLine }
+      : null,
+  };
+}
+
+function updateNew147PressureColors(runtime, mappedPressureData) {
+  if (!runtime || !Array.isArray(mappedPressureData)) {
+    return false;
+  }
+
+  const palmStartIndex = new147PalmStartIndex(mappedPressureData.length);
+  const maxVertex = runtime.attribute.count - 1;
+  let updated = false;
+
+  runtime.mappings.forEach((mapping) => {
+    const valueIndex = mapping.palmOffset == null ? mapping.valueIndex : palmStartIndex + mapping.palmOffset;
+    if (!Number.isInteger(valueIndex) || valueIndex < 0 || valueIndex >= mappedPressureData.length) {
+      return;
+    }
+
+    const firstVertex = mapping.lineIndex * runtime.verticesPerLine;
+    for (let i = 0; i < runtime.verticesPerLine; i += 1) {
+      const vertexIndex = firstVertex + i;
+      if (vertexIndex <= maxVertex) {
+        setPressureColor(runtime.attribute, vertexIndex, mappedPressureData[valueIndex]);
+        updated = true;
+      }
+    }
+  });
+
+  if (updated) {
+    runtime.attribute.needsUpdate = true;
+  }
+
+  return updated;
+}
+
+function resolveRegionData(regionDataSource) {
+  if (regionDataSource && typeof regionDataSource === 'object') {
+    return Promise.resolve(regionDataSource);
+  }
+
+  const regionDataUrl = regionDataSource || REGION_DATA_URL;
+  return fetch(regionDataUrl).then((response) => {
+    if (!response.ok) {
+      throw new Error(`Region data request failed: ${response.status}`);
+    }
+    return response.json();
+  });
 }
 
 function disposeObject(object) {
@@ -336,7 +580,17 @@ function formatQuaternion(quaternion) {
     .join(' / ');
 }
 
-export default function GloveMotionPage({ onNavigate }) {
+export default function GloveMotionPage({
+  onNavigate,
+  pageKey = 'gloveMotion',
+  eyebrow = 'Glove Motion',
+  title = 'Quaternion + Finger Bend',
+  regionDataSource = REGION_DATA_URL,
+  regionColorOptions,
+  regionLabel = DEFAULT_REGION_LABEL,
+  modelUrl = MODEL_URL,
+  modelLabel = MODEL_URL,
+}) {
   const mountRef = useRef(null);
   const motionGroupRef = useRef(null);
   const modelRef = useRef(null);
@@ -356,6 +610,7 @@ export default function GloveMotionPage({ onNavigate }) {
   const lineColorRef = useRef(DEFAULT_LINE_COLOR);
   const activeHandSideRef = useRef('right');
   const skeletonHelperRef = useRef(null);
+  const pressureRuntimeRef = useRef(null);
   const dataSource = useWebSocketPressureSource();
   const [useLiveData, setUseLiveData] = useState(true);
   const [bendGain, setBendGain] = useState(1);
@@ -447,6 +702,7 @@ export default function GloveMotionPage({ onNavigate }) {
     let frameId = 0;
     let disposed = false;
     let lastReadoutAt = 0;
+    let lastPressureFrameAt = -1;
     let elapsed = 0;
     const clock = new THREE.Clock();
     const liveFingerPoints = [0, 0, 0, 0, 0];
@@ -462,7 +718,7 @@ export default function GloveMotionPage({ onNavigate }) {
     };
 
     new GLTFLoader().load(
-      MODEL_URL,
+      modelUrl,
       (gltf) => {
         if (disposed) {
           disposeObject(gltf.scene);
@@ -503,19 +759,18 @@ export default function GloveMotionPage({ onNavigate }) {
         });
         setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin`);
 
-        fetch(REGION_DATA_URL)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`Region data request failed: ${response.status}`);
-            }
-            return response.json();
-          })
+        resolveRegionData(regionDataSource)
           .then((regionData) => {
             if (disposed || !model) return;
 
-            const colored = applyRegionColors(model, regionData);
+            const result = applyRegionColors(model, regionData, regionColorOptions);
+            pressureRuntimeRef.current = result.pressureRuntime;
             applyLineColor(model, skeletonHelper, lineColorRef.current);
-            setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin / ${colored ? 'regions' : 'no regions'}`);
+            setLoadState(
+              `${bones.length} bones / ${skinnedMeshCount.length} skin / ${
+                result.colored ? `${result.lineCount} ${regionLabel}` : `no ${regionLabel}`
+              }`,
+            );
           })
           .catch((error) => {
             console.error('Failed to apply hand region colors:', error);
@@ -547,6 +802,12 @@ export default function GloveMotionPage({ onNavigate }) {
       const delta = Math.min(clock.getDelta(), 0.05);
       elapsed += delta;
       const snapshot = snapshotRef.current;
+      const pressureFrameAt = snapshot?.timestamp || 0;
+      if (pressureFrameAt !== lastPressureFrameAt) {
+        lastPressureFrameAt = pressureFrameAt;
+        updateNew147PressureColors(pressureRuntimeRef.current, snapshot?.mappedPressureData);
+      }
+
       const liveRotate = snapshot?.rotate;
       const hasMappedFingerPoints = extractFingerRootPoints(snapshot?.mappedPressureData, liveFingerPoints);
       const hasLivePose = useLiveRef.current && isUsableRotate(liveRotate);
@@ -606,6 +867,7 @@ export default function GloveMotionPage({ onNavigate }) {
         skeletonHelperRef.current.parent.remove(skeletonHelperRef.current);
       }
       skeletonHelperRef.current = null;
+      pressureRuntimeRef.current = null;
       if (model) disposeObject(model);
       modelRef.current = null;
       grid.geometry.dispose();
@@ -617,7 +879,7 @@ export default function GloveMotionPage({ onNavigate }) {
       bonesRef.current = new Map();
       originalQuaternionsRef.current = new Map();
     };
-  }, []);
+  }, [modelUrl, regionColorOptions, regionDataSource, regionLabel]);
 
   const resetQuaternionBase = () => {
     quaternionStateRef.current = { base: null, baseInv: null };
@@ -640,19 +902,20 @@ export default function GloveMotionPage({ onNavigate }) {
 
   return (
     <main className="glove-motion-page">
-      <nav className="app-nav" style={{ '--nav-count': 6 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 7 }} aria-label="Page view">
         <button type="button" onClick={() => onNavigate('terrain')}>Pressure</button>
         <button type="button" onClick={() => onNavigate('hand')}>Wireframe</button>
         <button type="button" onClick={() => onNavigate('obj')}>OBJ</button>
         <button type="button" onClick={() => onNavigate('bones')}>Bones</button>
-        <button className="active" type="button" onClick={() => onNavigate('gloveMotion')}>Motion</button>
+        <button className={pageKey === 'gloveMotion' ? 'active' : ''} type="button" onClick={() => onNavigate('gloveMotion')}>Motion</button>
+        <button className={pageKey === 'motion2' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2')}>Motion2</button>
         <button type="button" onClick={() => onNavigate('points')}>Points</button>
       </nav>
 
       <header className="glove-motion-title">
-        <span>Glove Motion</span>
-        <h1>Quaternion + Finger Bend</h1>
-        <p>{MODEL_URL} / {loadState}</p>
+        <span>{eyebrow}</span>
+        <h1>{title}</h1>
+        <p>{modelLabel} / {loadState}</p>
       </header>
 
       <section className="glove-motion-panel" aria-label="Glove motion controls">

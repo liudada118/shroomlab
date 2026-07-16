@@ -3,6 +3,7 @@ import BoneControlPage from './BoneControlPage.jsx';
 import GloveMotionPage from './GloveMotionPage.jsx';
 import HandWireframePage from './HandWireframePage.jsx';
 import LightStudyPage from './LightStudyPage.jsx';
+import Motion2Page from './Motion2Page.jsx';
 import ObjModelPage from './ObjModelPage.jsx';
 import PointEditorPage, { getInitialEditorPoints, sanitizeEditorPoints } from './PointEditorPage.jsx';
 import PressureTerrain from './PressureTerrain.jsx';
@@ -42,6 +43,9 @@ function pageFromHash() {
   }
   if (window.location.hash === '#/glove-motion') {
     return 'gloveMotion';
+  }
+  if (window.location.hash === '#/motion2') {
+    return 'motion2';
   }
   if (window.location.hash === '#/point-editor') {
     return 'points';
@@ -436,6 +440,7 @@ function App() {
       lightStudy: '/light-study',
       bones: '/glb-bones',
       gloveMotion: '/glove-motion',
+      motion2: '/motion2',
       obj: '/obj-model',
       points: '/point-editor',
       pressure2: '/texture-map',
@@ -466,6 +471,10 @@ function App() {
 
   if (page === 'gloveMotion') {
     return <GloveMotionPage onNavigate={navigate} />;
+  }
+
+  if (page === 'motion2') {
+    return <Motion2Page onNavigate={navigate} />;
   }
 
   if (page === 'points') {
@@ -502,7 +511,7 @@ function App() {
 
   return (
     <main className="dashboard-shell dashboard-shell-with-editor">
-      <nav className="app-nav" style={{ '--nav-count': 9 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 10 }} aria-label="Page view">
         <button className="active" type="button" onClick={() => navigate('terrain')}>
           Pressure
         </button>
@@ -520,6 +529,9 @@ function App() {
         </button>
         <button type="button" onClick={() => navigate('gloveMotion')}>
           Motion
+        </button>
+        <button type="button" onClick={() => navigate('motion2')}>
+          Motion2
         </button>
         <button type="button" onClick={() => navigate('points')}>
           Points
