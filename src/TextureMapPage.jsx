@@ -14,6 +14,8 @@ import {
 
 const MODEL_URL = '/model/hand0423g_cyan_tube_wireframe.glb';
 const TEXTURE_SIZE = 256;
+const VERTEX_PRESSURE_GAIN = 4.8;
+const VERTEX_PRESSURE_CUTOFF = 0.006;
 
 function clamp01(value) {
   return Math.max(0, Math.min(1, value));
@@ -68,6 +70,59 @@ function paintPressureTexture(context, matrix, colorDepth, palette) {
   }
 }
 
+function samplePressureMatrix(matrix, row, col) {
+  const matrixSize = matrix.length || SENSOR_MATRIX_SIZE;
+  const clampedRow = Math.max(0, Math.min(matrixSize - 1, row));
+  const clampedCol = Math.max(0, Math.min(matrixSize - 1, col));
+  const row0 = Math.floor(clampedRow);
+  const col0 = Math.floor(clampedCol);
+  const row1 = Math.min(matrixSize - 1, row0 + 1);
+  const col1 = Math.min(matrixSize - 1, col0 + 1);
+  const rowT = clampedRow - row0;
+  const colT = clampedCol - col0;
+  const top = matrix[row0][col0] + (matrix[row0][col1] - matrix[row0][col0]) * colT;
+  const bottom = matrix[row1][col0] + (matrix[row1][col1] - matrix[row1][col0]) * colT;
+
+  return top + (bottom - top) * rowT;
+}
+
+function initializeVertexColors(geometry) {
+  const position = geometry.attributes.position;
+  const colors = [];
+  const baseColor = new THREE.Color(0x0c5b66);
+
+  for (let i = 0; i < position.count; i += 1) {
+    colors.push(baseColor.r, baseColor.g, baseColor.b);
+  }
+
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+}
+
+function updatePressureVertexColors(geometry, matrix, colorDepth, palette, fallbackPressure = 0) {
+  const uv = geometry.attributes.uv;
+  const colors = geometry.attributes.color;
+  const matrixSize = matrix.length || SENSOR_MATRIX_SIZE;
+  const baseColor = new THREE.Color(0x0c5b66);
+
+  if (!uv || !colors) {
+    return;
+  }
+
+  for (let i = 0; i < uv.count; i += 1) {
+    const row = uv.getY(i) * (matrixSize - 1);
+    const col = uv.getX(i) * (matrixSize - 1);
+    const pressure = Math.max(samplePressureMatrix(matrix, row, col), fallbackPressure);
+    const boosted = clamp01(pressure * VERTEX_PRESSURE_GAIN);
+    const color = boosted > VERTEX_PRESSURE_CUTOFF
+      ? colorForPressure(boosted, colorDepth, palette)
+      : baseColor;
+
+    colors.setXYZ(i, color.r, color.g, color.b);
+  }
+
+  colors.needsUpdate = true;
+}
+
 function applyGeometryPlanarPressureUv(geometry) {
   geometry.computeBoundingBox();
   const bounds = geometry.boundingBox;
@@ -103,14 +158,23 @@ function normalizeGeometryMesh(mesh) {
 
 function buildSampledPointGeometry(sourceGeometry, stride = 8) {
   const sourcePosition = sourceGeometry.attributes.position;
+  const sourceUv = sourceGeometry.attributes.uv;
   const positions = [];
+  const uvs = [];
 
   for (let i = 0; i < sourcePosition.count; i += stride) {
     positions.push(sourcePosition.getX(i), sourcePosition.getY(i), sourcePosition.getZ(i));
+    if (sourceUv) {
+      uvs.push(sourceUv.getX(i), sourceUv.getY(i));
+    }
   }
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  if (uvs.length) {
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  }
+  initializeVertexColors(geometry);
   geometry.computeBoundingSphere();
   return geometry;
 }
@@ -147,7 +211,9 @@ function buildSampledTriangleGeometry(sourceGeometry, triangleStride = 10) {
 
 function buildTriangleLineGeometry(sourceGeometry) {
   const position = sourceGeometry.attributes.position;
+  const uv = sourceGeometry.attributes.uv;
   const lines = [];
+  const uvs = [];
 
   for (let i = 0; i < position.count; i += 3) {
     const ax = position.getX(i);
@@ -165,10 +231,29 @@ function buildTriangleLineGeometry(sourceGeometry) {
       bx, by, bz, cx, cy, cz,
       cx, cy, cz, ax, ay, az,
     );
+
+    if (uv) {
+      const au = uv.getX(i);
+      const av = uv.getY(i);
+      const bu = uv.getX(i + 1);
+      const bv = uv.getY(i + 1);
+      const cu = uv.getX(i + 2);
+      const cv = uv.getY(i + 2);
+
+      uvs.push(
+        au, av, bu, bv,
+        bu, bv, cu, cv,
+        cu, cv, au, av,
+      );
+    }
   }
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(lines, 3));
+  if (uvs.length) {
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  }
+  initializeVertexColors(geometry);
   geometry.computeBoundingSphere();
   return geometry;
 }
@@ -182,10 +267,11 @@ function applyTextureLook(model, texture, opacity, showWire) {
     }
 
     const material = new THREE.MeshBasicMaterial({
-      color: 0x52e6f3,
+      color: 0xffffff,
       map: texture,
+      vertexColors: THREE.VertexColors,
       transparent: true,
-      opacity: Math.min(opacity, 0.68),
+      opacity: Math.min(opacity, 0.92),
       wireframe: false,
       side: THREE.DoubleSide,
       depthTest: true,
@@ -200,7 +286,7 @@ function applyTextureLook(model, texture, opacity, showWire) {
   return {
     setOpacity(nextOpacity) {
       materials.forEach((material) => {
-        material.opacity = Math.min(nextOpacity, 0.68);
+        material.opacity = Math.min(nextOpacity, 0.92);
         material.needsUpdate = true;
       });
     },
@@ -232,7 +318,7 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
   const dataSourceRef = useRef(dataSource);
   const settingsRef = useRef({
     autoRotate: false,
-    colorDepth: 1.25,
+    colorDepth: 2.4,
     opacity: 0.82,
     showWire: true,
     sourcePoints,
@@ -241,7 +327,7 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
   });
   const [autoRotate, setAutoRotate] = useState(false);
   const [showWire, setShowWire] = useState(true);
-  const [colorDepth, setColorDepth] = useState(1.25);
+  const [colorDepth, setColorDepth] = useState(2.4);
   const [opacity, setOpacity] = useState(0.82);
   const [loadState, setLoadState] = useState('Loading');
   const [readout, setReadout] = useState({ source: 'SIM', peak: 0, frameAge: 'none' });
@@ -343,6 +429,7 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
 
         const geometry = buildSampledTriangleGeometry(sourceMesh.geometry, 20);
         applyGeometryPlanarPressureUv(geometry);
+        initializeVertexColors(geometry);
         model = new THREE.Mesh(geometry);
         normalizeGeometryMesh(model);
         modelLookRef.current = applyTextureLook(
@@ -355,7 +442,8 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
         const pointOverlay = new THREE.Points(
           pointGeometry,
           new THREE.PointsMaterial({
-            color: 0x8ffcff,
+            color: 0xffffff,
+            vertexColors: THREE.VertexColors,
             size: 0.075,
             sizeAttenuation: true,
             transparent: true,
@@ -374,9 +462,10 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
         const lineOverlay = new THREE.LineSegments(
           buildTriangleLineGeometry(geometry),
           new THREE.LineBasicMaterial({
-            color: 0x9bffff,
+            color: 0xffffff,
+            vertexColors: THREE.VertexColors,
             transparent: true,
-            opacity: 0.78,
+            opacity: 0.82,
             depthWrite: false,
           }),
         );
@@ -421,7 +510,36 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
         sourcePoints: currentSettings.sourcePoints,
         videoPoints: currentSettings.videoPoints,
       });
+      const peak = frame.points.reduce((max, point) => Math.max(max, point.value), 0);
+      const fallbackPressure = peak * 0.16;
       paintPressureTexture(context, frame.matrix, currentSettings.colorDepth, currentSettings.pressurePalette);
+      if (model?.geometry) {
+        updatePressureVertexColors(
+          model.geometry,
+          frame.matrix,
+          currentSettings.colorDepth,
+          currentSettings.pressurePalette,
+          fallbackPressure,
+        );
+      }
+      if (pointOverlayRef.current?.geometry) {
+        updatePressureVertexColors(
+          pointOverlayRef.current.geometry,
+          frame.matrix,
+          currentSettings.colorDepth,
+          currentSettings.pressurePalette,
+          fallbackPressure,
+        );
+      }
+      if (lineOverlayRef.current?.geometry) {
+        updatePressureVertexColors(
+          lineOverlayRef.current.geometry,
+          frame.matrix,
+          currentSettings.colorDepth,
+          currentSettings.pressurePalette,
+          fallbackPressure,
+        );
+      }
       texture.needsUpdate = true;
       controls.autoRotate = currentSettings.autoRotate;
       heatLight.intensity = 0.86 + Math.sin(elapsed * 1.15) * 0.12;
@@ -431,7 +549,6 @@ export default function TextureMapPage({ onNavigate, dataSource, sourcePoints, v
       if (performance.now() - lastReadoutAt > 240) {
         lastReadoutAt = performance.now();
         const snapshot = dataSourceRef.current?.snapshot;
-        const peak = frame.points.reduce((max, point) => Math.max(max, point.value), 0);
         setReadout({
           source: snapshot ? (snapshot.source === 'manual' ? 'MANUAL' : 'LIVE') : 'SIM',
           peak,
