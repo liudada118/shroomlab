@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useWebSocketPressureSource } from './webSocketPressureSource.js';
 
 const MODEL_URL = '/model/hand1_wrist_cut_cyan_rigged_wireframe.glb';
+const REGION_DATA_URL = '/hand1_wrist_cut_wire_regions.json';
 const FINGER_NAMES = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
 const FINGER_BONE_CHAINS = [
   ['Finger_01', 'Finger_02'],
@@ -21,6 +22,14 @@ const DEFAULT_CALIBRATION = Object.freeze([
 const FINGER_BEND_AXIS = new THREE.Vector3(0, 0, 1);
 const DEFAULT_LINE_COLOR = '#6dfaff';
 const LINE_COLOR_PRESETS = ['#6dfaff', '#00fff7', '#ff8157', '#ffe66d', '#a88cff'];
+const REGION_COLORS = {
+  palm: 0x00ff00,
+  thumb: 0xff0000,
+  index: 0xffff00,
+  middle: 0xff00ff,
+  ring: 0x0088ff,
+  pinky: 0xff8800,
+};
 
 function readStoredCalibration(handSide) {
   if (typeof localStorage === 'undefined') {
@@ -180,6 +189,13 @@ function applyLineColor(model, skeletonHelper, lineColor) {
 
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     materials.filter(Boolean).forEach((material) => {
+      if (child.userData.regionColored) {
+        if (material.color) material.color.set(0xffffff);
+        material.vertexColors = true;
+        material.needsUpdate = true;
+        return;
+      }
+
       if (material.color) material.color.copy(color);
       if ('emissive' in material) material.emissive.copy(emissive);
       material.needsUpdate = true;
@@ -205,6 +221,86 @@ function applyModelLook(model, lineColor) {
   });
 
   applyLineColor(model, null, lineColor);
+}
+
+function findRegionColorMesh(model, regionData) {
+  const requiredVertexCount = (regionData.lineCount || 0) * (regionData.verticesPerLine || 0);
+  let fallbackMesh = null;
+
+  model.traverse((child) => {
+    if (!child.isMesh || !child.geometry?.attributes?.position) return;
+
+    const vertexCount = child.geometry.attributes.position.count;
+    if (!fallbackMesh || vertexCount > fallbackMesh.geometry.attributes.position.count) {
+      fallbackMesh = child;
+    }
+
+    if (requiredVertexCount > 0 && vertexCount >= requiredVertexCount) {
+      fallbackMesh = child;
+    }
+  });
+
+  return fallbackMesh;
+}
+
+function ensureVertexColorAttribute(geometry, baseColor = 0x0b5f6a) {
+  const position = geometry.attributes.position;
+  const colors = new Float32Array(position.count * 3);
+  const color = new THREE.Color(baseColor);
+
+  for (let index = 0; index < position.count; index += 1) {
+    const offset = index * 3;
+    colors[offset] = color.r;
+    colors[offset + 1] = color.g;
+    colors[offset + 2] = color.b;
+  }
+
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geometry.attributes.color;
+}
+
+function applyRegionColors(model, regionData) {
+  const handMesh = findRegionColorMesh(model, regionData);
+  const verticesPerLine = regionData.verticesPerLine || 8;
+  const regions = Array.isArray(regionData.regions) ? regionData.regions : [];
+
+  if (!handMesh?.geometry?.attributes?.position) {
+    return false;
+  }
+
+  handMesh.userData.regionColored = true;
+  const geometry = handMesh.geometry;
+  const attribute = ensureVertexColorAttribute(geometry);
+  const maxVertex = geometry.attributes.position.count - 1;
+
+  regions.forEach((region) => {
+    if (!region?.editable || !(region.key in REGION_COLORS) || !Array.isArray(region.lineIndices)) {
+      return;
+    }
+
+    const color = new THREE.Color(REGION_COLORS[region.key]);
+    region.lineIndices.forEach((lineIndex) => {
+      const firstVertex = lineIndex * verticesPerLine;
+
+      for (let i = 0; i < verticesPerLine; i += 1) {
+        const vertexIndex = firstVertex + i;
+        if (vertexIndex <= maxVertex) {
+          attribute.setXYZ(vertexIndex, color.r, color.g, color.b);
+        }
+      }
+    });
+  });
+
+  attribute.needsUpdate = true;
+
+  const materials = Array.isArray(handMesh.material) ? handMesh.material : [handMesh.material];
+  materials.filter(Boolean).forEach((material) => {
+    if (material.color) material.color.set(0xffffff);
+    material.vertexColors = true;
+    material.needsUpdate = true;
+  });
+
+  return true;
 }
 
 function disposeObject(object) {
@@ -406,6 +502,27 @@ export default function GloveMotionPage({ onNavigate }) {
           if (child.isSkinnedMesh) skinnedMeshCount.push(child);
         });
         setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin`);
+
+        fetch(REGION_DATA_URL)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Region data request failed: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((regionData) => {
+            if (disposed || !model) return;
+
+            const colored = applyRegionColors(model, regionData);
+            applyLineColor(model, skeletonHelper, lineColorRef.current);
+            setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin / ${colored ? 'regions' : 'no regions'}`);
+          })
+          .catch((error) => {
+            console.error('Failed to apply hand region colors:', error);
+            if (!disposed) {
+              setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin / region failed`);
+            }
+          });
       },
       undefined,
       (error) => {
