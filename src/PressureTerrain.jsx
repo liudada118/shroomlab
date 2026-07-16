@@ -280,8 +280,8 @@ export function updateSurfaceGrid(geometry, pressureMatrix, heightScale, gaussia
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 }
 
-function buildPressureMatrix(time, matrixSize, gaussianKernelSize, sourcePoints) {
-  return buildHandPressureFrame(time, { matrixSize, gaussianKernelSize, sourcePoints }).matrix;
+function buildPressureMatrix(time, matrixSize, gaussianKernelSize, sourcePoints, videoPoints) {
+  return buildHandPressureFrame(time, { matrixSize, gaussianKernelSize, sourcePoints, videoPoints }).matrix;
 }
 
 function makeBasePlate() {
@@ -324,6 +324,7 @@ export default function PressureTerrain({
   gaussianKernelSize = DEFAULT_GAUSSIAN_KERNEL_SIZE,
   pressurePalette = DEFAULT_PRESSURE_PALETTE,
   sourcePoints,
+  videoPoints,
 }) {
   const mountRef = useRef(null);
   const settingsRef = useRef({
@@ -333,6 +334,7 @@ export default function PressureTerrain({
     gaussianKernelSize,
     pressurePalette,
     sourcePoints,
+    videoPoints,
     sourcePointsSignature: pointsSignature(sourcePoints),
   });
 
@@ -344,9 +346,10 @@ export default function PressureTerrain({
       gaussianKernelSize,
       pressurePalette,
       sourcePoints,
+      videoPoints,
       sourcePointsSignature: pointsSignature(sourcePoints),
     };
-  }, [colorDepth, gaussianKernelSize, heightScale, matrixSize, pressurePalette, sourcePoints]);
+  }, [colorDepth, gaussianKernelSize, heightScale, matrixSize, pressurePalette, sourcePoints, videoPoints]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -404,6 +407,7 @@ export default function PressureTerrain({
       matrixSize,
       initialSettings.gaussianKernelSize,
       initialSettings.sourcePoints,
+      initialSettings.videoPoints,
     );
     updateTerrain(
       geometry,
@@ -474,6 +478,7 @@ export default function PressureTerrain({
         matrixSize,
         currentSettings.gaussianKernelSize,
         currentSettings.sourcePoints,
+        currentSettings.videoPoints,
       );
       updateTerrain(
         geometry,

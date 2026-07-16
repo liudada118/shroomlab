@@ -1,7 +1,11 @@
+import { SERIAL_PRESSURE_GRID_SIZE, SERIAL_PRESSURE_POINT_COUNT } from './serialProtocol.js';
+import { getSerialPressureSnapshot } from './serialPressureStore.js';
+
 const SOURCE_MATRIX_SIZE = 32;
 export const SENSOR_MATRIX_SIZE = 64;
 export const MATRIX_SIZE_OPTIONS = [32, 64];
 export const DEFAULT_GAUSSIAN_KERNEL_SIZE = 5;
+const RAW_PRESSURE_MAX_VALUE = 255;
 const INTERPOLATED_POINT_THRESHOLD = 0.015;
 const GAUSSIAN_BLEND = 0.48;
 const PALM_ROW_MIN = 15;
@@ -11,39 +15,30 @@ const PALM_COL_MAX = 28;
 const MAX_PALM_GAP = 2;
 const MAX_PALM_ROW_GAP = 4;
 
+export const HAND_R_ADC_ORDER = Object.freeze([
+  240, 239, 238, 256, 255, 254, 16, 15, 14, 32, 31, 30,
+  237, 236, 235, 253, 252, 251, 13, 12, 11, 29, 28, 27,
+  234, 233, 232, 250, 249, 248, 10, 9, 8, 26, 25, 24,
+  231, 230, 229, 247, 246, 245, 7, 6, 5, 23, 22, 21,
+  228, 227, 226, 244, 243, 242, 4, 3, 2, 20, 19, 18,
+  0, 47, 0, 0, 44, 0, 0, 41, 0, 0, 38, 0, 0, 35, 0, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50,
+  80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66,
+  96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82,
+  112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 101, 100, 99, 98,
+  128, 127, 126, 125, 124, 123, 122, 121, 120, 119, 118, 117, 116, 115, 114,
+]);
+
 export const HAND_R_VIDEO_POINTS = Object.freeze([
-  [0, 17], [1, 16], [1, 17], [1, 18], [1, 21], [2, 13], [2, 16], [2, 17],
-  [2, 18], [2, 20], [2, 21], [2, 22], [3, 12], [3, 13], [3, 14], [3, 16],
-  [3, 17], [3, 18], [3, 20], [3, 21], [3, 22], [3, 25], [4, 12], [4, 13],
-  [4, 14], [4, 16], [4, 17], [4, 18], [4, 20], [4, 21], [4, 22], [4, 24],
-  [4, 25], [4, 26], [5, 12], [5, 13], [5, 14], [5, 16], [5, 17], [5, 18],
-  [5, 21], [5, 24], [5, 25], [5, 26], [6, 12], [6, 13], [6, 14], [6, 16],
-  [6, 17], [6, 18], [6, 20], [6, 22], [6, 24], [6, 25], [6, 26], [7, 12],
-  [7, 13], [7, 14], [7, 21], [7, 22], [7, 25], [8, 12], [8, 13], [8, 14],
-  [8, 17], [8, 21], [8, 22], [8, 24], [8, 25], [9, 17], [9, 18], [9, 20],
-  [9, 21], [9, 22], [9, 24], [9, 25], [9, 26], [10, 12], [10, 13], [10, 14],
-  [10, 17], [10, 18], [10, 20], [10, 21], [10, 22], [10, 24], [10, 25], [10, 26],
-  [11, 12], [11, 13], [11, 14], [11, 17], [11, 18], [11, 20], [11, 21], [11, 22],
-  [11, 24], [11, 25], [12, 13], [12, 14], [12, 15], [12, 17], [12, 18], [12, 20],
-  [12, 21], [12, 22], [12, 25], [12, 26], [13, 13], [13, 14], [13, 15], [13, 17],
-  [13, 18], [13, 20], [13, 21], [13, 22], [13, 24], [13, 26], [14, 13], [14, 14],
-  [14, 15], [14, 17], [14, 18], [14, 21], [14, 25], [14, 26], [15, 4], [15, 5],
-  [15, 6], [15, 13], [15, 14], [15, 15], [15, 16], [15, 17], [15, 18], [15, 19],
-  [15, 20], [15, 21], [15, 22], [15, 23], [15, 24], [15, 25], [15, 26], [16, 5],
-  [16, 6], [16, 7], [16, 13], [17, 5], [17, 6], [17, 7], [17, 8], [17, 9],
-  [17, 15], [17, 16], [17, 17], [17, 18], [17, 19], [17, 20], [17, 21], [17, 22],
-  [17, 23], [17, 24], [17, 25], [17, 26], [17, 27], [18, 6], [18, 7], [18, 8],
-  [18, 9], [18, 10], [18, 13], [19, 8], [19, 9], [19, 10], [19, 13], [19, 15],
-  [19, 16], [19, 17], [19, 18], [19, 19], [19, 20], [19, 21], [19, 22], [19, 23],
-  [19, 24], [19, 25], [19, 26], [19, 27], [20, 10], [20, 11], [21, 9], [21, 10],
-  [21, 11], [21, 12], [21, 14], [21, 15], [21, 16], [21, 17], [21, 18], [21, 19],
-  [21, 20], [21, 21], [21, 22], [21, 23], [21, 24], [21, 25], [21, 26], [22, 9],
-  [22, 10], [22, 11], [22, 12], [22, 13], [23, 11], [23, 12], [23, 13], [23, 15],
-  [23, 16], [23, 17], [23, 18], [23, 19], [23, 20], [23, 21], [23, 22], [23, 23],
-  [23, 24], [23, 25], [24, 13], [24, 14], [24, 16], [24, 18], [24, 19], [24, 20],
-  [24, 21], [24, 22], [25, 14], [25, 15], [25, 16], [25, 19], [25, 21], [25, 22],
-  [25, 24], [26, 18], [26, 19], [26, 20], [26, 21], [26, 23], [27, 15], [27, 17],
-  [27, 18], [27, 19], [27, 20], [27, 22],
+  [21, 3], [20, 3], [19, 3], [3, 10], [3, 11], [3, 12], [0, 15], [0, 16], [0, 17], [2, 23], [2, 24], [2, 25], [7, 27], [7, 28], [7, 29],
+  [21, 4], [20, 4], [19, 4], [4, 10], [4, 11], [4, 12], [1, 15], [1, 16], [1, 17], [3, 23], [3, 24], [3, 25], [8, 27], [8, 28], [8, 29],
+  [22, 5], [21, 5], [20, 5], [5, 10], [5, 11], [5, 12], [2, 16], [2, 17], [2, 18], [4, 23], [4, 24], [4, 25], [9, 27], [9, 28], [9, 29],
+  [22, 6], [21, 6], [20, 6], [6, 11], [6, 12], [6, 13], [3, 16], [3, 17], [3, 18], [5, 23], [5, 24], [5, 25], [10, 27], [10, 28], [10, 29],
+  [23, 8], [22, 8], [21, 8], [10, 12], [10, 13], [10, 14], [9, 17], [9, 18], [9, 19], [9, 22], [9, 23], [9, 24], [12, 26], [12, 27], [12, 28],
+  [15, 18], [15, 18], [15, 19], [15, 20], [15, 21], [15, 22], [15, 23], [15, 24], [15, 25], [15, 26], [15, 27], [15, 28],
+  [17, 15], [17, 15], [17, 16], [17, 17], [17, 18], [17, 19], [17, 20], [17, 21], [17, 22], [17, 23], [17, 24], [17, 25], [17, 26], [17, 27], [17, 28],
+  [19, 15], [19, 15], [19, 16], [19, 17], [19, 18], [19, 19], [19, 20], [19, 21], [19, 22], [19, 23], [19, 24], [19, 25], [19, 26], [19, 27], [19, 28],
+  [21, 15], [21, 15], [21, 16], [21, 17], [21, 18], [21, 19], [21, 20], [21, 21], [21, 22], [21, 23], [21, 24], [21, 25], [21, 26], [21, 27], [21, 28],
+  [23, 15], [23, 15], [23, 16], [23, 17], [23, 18], [23, 19], [23, 20], [23, 21], [23, 22], [23, 23], [23, 24], [23, 25], [23, 26], [23, 27], [23, 28],
 ]);
 
 export const HAND_R_VIDEO_POINT_SET = new Set(
@@ -206,18 +201,170 @@ function fillPalmInternalGaps(matrix) {
 }
 
 function sampleSourceMatrix(matrix, row, col) {
-  const clampedRow = Math.max(0, Math.min(SOURCE_MATRIX_SIZE - 1, row));
-  const clampedCol = Math.max(0, Math.min(SOURCE_MATRIX_SIZE - 1, col));
+  const matrixSize = matrix.length || SOURCE_MATRIX_SIZE;
+  const clampedRow = Math.max(0, Math.min(matrixSize - 1, row));
+  const clampedCol = Math.max(0, Math.min(matrixSize - 1, col));
   const row0 = Math.floor(clampedRow);
   const col0 = Math.floor(clampedCol);
-  const row1 = Math.min(SOURCE_MATRIX_SIZE - 1, row0 + 1);
-  const col1 = Math.min(SOURCE_MATRIX_SIZE - 1, col0 + 1);
+  const row1 = Math.min(matrixSize - 1, row0 + 1);
+  const col1 = Math.min(matrixSize - 1, col0 + 1);
   const rowT = clampedRow - row0;
   const colT = clampedCol - col0;
   const top = lerp(matrix[row0][col0], matrix[row0][col1], colT);
   const bottom = lerp(matrix[row1][col0], matrix[row1][col1], colT);
 
   return lerp(top, bottom, rowT);
+}
+
+function normalizeRawPressureValue(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return 0;
+  }
+
+  return clamp01(numericValue / RAW_PRESSURE_MAX_VALUE);
+}
+
+function normalizeRawPressureData(rawPressureData) {
+  if (!Array.isArray(rawPressureData) || rawPressureData.length !== SERIAL_PRESSURE_POINT_COUNT) {
+    return null;
+  }
+
+  return rawPressureData.map(normalizeRawPressureValue);
+}
+
+function normalizeVideoPoints(videoPoints = HAND_R_VIDEO_POINTS) {
+  if (!Array.isArray(videoPoints) || !videoPoints.length) {
+    return HAND_R_VIDEO_POINTS;
+  }
+
+  return videoPoints.map((point, index) => {
+    if (
+      Array.isArray(point) &&
+      point.length === 2 &&
+      Number.isInteger(point[0]) &&
+      Number.isInteger(point[1]) &&
+      point[0] >= 0 &&
+      point[0] < SOURCE_MATRIX_SIZE &&
+      point[1] >= 0 &&
+      point[1] < SOURCE_MATRIX_SIZE
+    ) {
+      return [point[0], point[1]];
+    }
+
+    return HAND_R_VIDEO_POINTS[index] || [0, 0];
+  });
+}
+
+function normalizeMappedPressureData(mappedPressureData, videoPoints) {
+  if (!Array.isArray(mappedPressureData) || mappedPressureData.length !== videoPoints.length) {
+    return null;
+  }
+
+  return mappedPressureData.map(normalizeRawPressureValue);
+}
+
+function buildVideoPointPressureSourceMatrix(mappedPressureData, handSide = 'right', videoPoints = HAND_R_VIDEO_POINTS) {
+  const normalizedVideoPoints = handSide === 'right' ? normalizeVideoPoints(videoPoints) : null;
+  if (!normalizedVideoPoints) {
+    return null;
+  }
+
+  const normalizedData = normalizeMappedPressureData(mappedPressureData, normalizedVideoPoints);
+  if (!normalizedData) {
+    return null;
+  }
+
+  const sourceMatrix = Array.from({ length: SOURCE_MATRIX_SIZE }, () => Array(SOURCE_MATRIX_SIZE).fill(0));
+
+  for (let index = 0; index < normalizedVideoPoints.length; index += 1) {
+    const point = normalizedVideoPoints[index];
+    if (!Array.isArray(point) || point.length !== 2) {
+      continue;
+    }
+
+    const [row, col] = point;
+    if (row < 0 || row >= SOURCE_MATRIX_SIZE || col < 0 || col >= SOURCE_MATRIX_SIZE) {
+      continue;
+    }
+
+    sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], normalizedData[index]);
+  }
+
+  fillPalmInternalGaps(sourceMatrix);
+  return sourceMatrix;
+}
+
+function buildMappedPressureSourceMatrix(rawPressureData, handSide = 'right') {
+  const normalizedData = normalizeRawPressureData(rawPressureData);
+  if (!normalizedData) {
+    return null;
+  }
+
+  const sourceMatrix = Array.from({ length: SOURCE_MATRIX_SIZE }, () => Array(SOURCE_MATRIX_SIZE).fill(0));
+  const adcOrder = handSide === 'right' ? HAND_R_ADC_ORDER : null;
+  const videoPoints = handSide === 'right' ? HAND_R_VIDEO_POINTS : null;
+
+  if (!adcOrder || !videoPoints) {
+    return null;
+  }
+
+  const mappedCount = Math.min(adcOrder.length, videoPoints.length);
+  for (let index = 0; index < mappedCount; index += 1) {
+    const adcIndex = adcOrder[index] - 1;
+    const point = videoPoints[index];
+
+    if (
+      adcIndex < 0 ||
+      adcIndex >= normalizedData.length ||
+      !Array.isArray(point) ||
+      point.length !== 2
+    ) {
+      continue;
+    }
+
+    const [row, col] = point;
+    if (row < 0 || row >= SOURCE_MATRIX_SIZE || col < 0 || col >= SOURCE_MATRIX_SIZE) {
+      continue;
+    }
+
+    sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], normalizedData[adcIndex]);
+  }
+
+  fillPalmInternalGaps(sourceMatrix);
+  return sourceMatrix;
+}
+
+function buildSerialPressureSourceMatrix(rawPressureData, mappedPressureData, handSide = 'right', videoPoints = HAND_R_VIDEO_POINTS) {
+  const videoPointMatrix = buildVideoPointPressureSourceMatrix(mappedPressureData, handSide, videoPoints);
+  if (videoPointMatrix) {
+    return videoPointMatrix;
+  }
+
+  const mappedMatrix = buildMappedPressureSourceMatrix(rawPressureData, handSide);
+  if (mappedMatrix) {
+    return mappedMatrix;
+  }
+
+  const normalizedData = normalizeRawPressureData(rawPressureData);
+  if (!normalizedData) {
+    return null;
+  }
+
+  const serialMatrix = Array.from({ length: SERIAL_PRESSURE_GRID_SIZE }, (_, row) =>
+    normalizedData.slice(row * SERIAL_PRESSURE_GRID_SIZE, (row + 1) * SERIAL_PRESSURE_GRID_SIZE),
+  );
+  const sourceMatrix = Array.from({ length: SOURCE_MATRIX_SIZE }, () => Array(SOURCE_MATRIX_SIZE).fill(0));
+
+  for (let row = 0; row < SOURCE_MATRIX_SIZE; row += 1) {
+    for (let col = 0; col < SOURCE_MATRIX_SIZE; col += 1) {
+      const serialRow = (row / (SOURCE_MATRIX_SIZE - 1)) * (SERIAL_PRESSURE_GRID_SIZE - 1);
+      const serialCol = (col / (SOURCE_MATRIX_SIZE - 1)) * (SERIAL_PRESSURE_GRID_SIZE - 1);
+      sourceMatrix[row][col] = sampleSourceMatrix(serialMatrix, serialRow, serialCol);
+    }
+  }
+
+  return sourceMatrix;
 }
 
 function gaussianSmoothMatrix(matrix, gaussianKernelSize) {
@@ -288,9 +435,14 @@ export function buildHandPressureFrame(time = 0, options = {}) {
   const matrixSize = normalizeMatrixSize(options.matrixSize ?? SENSOR_MATRIX_SIZE);
   const gaussianKernelSize = normalizeGaussianKernelSize(options.gaussianKernelSize ?? DEFAULT_GAUSSIAN_KERNEL_SIZE);
   const sourcePoints = normalizeSourcePoints(options.sourcePoints ?? HAND_R_VIDEO_POINTS);
+  const serialSnapshot = options.useSerialData === false ? null : getSerialPressureSnapshot();
+  const rawPressureData = options.rawPressureData ?? serialSnapshot?.pressureData;
+  const mappedPressureData = options.mappedPressureData ?? serialSnapshot?.mappedPressureData;
+  const handSide = options.handSide ?? serialSnapshot?.handSide ?? 'right';
+  const videoPoints = normalizeVideoPoints(options.videoPoints ?? HAND_R_VIDEO_POINTS);
   const points = [];
   const matrix = Array.from({ length: matrixSize }, () => Array(matrixSize).fill(0));
-  const sourceMatrix = buildSourcePressureMatrix(time, sourcePoints);
+  const sourceMatrix = buildSerialPressureSourceMatrix(rawPressureData, mappedPressureData, handSide, videoPoints) || buildSourcePressureMatrix(time, sourcePoints);
 
   for (let row = 0; row < matrixSize; row += 1) {
     for (let col = 0; col < matrixSize; col += 1) {

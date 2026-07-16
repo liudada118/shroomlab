@@ -30,12 +30,12 @@ const DEFAULT_COORD_FILTER = Object.freeze({
   zMax: HAND_MODEL_Z_MAX,
 });
 const BASE_SURFACE_COLOR = new THREE.Color(0xaef4ef);
-const BASE_GRID_COLOR = new THREE.Color(0x00fff7);
-const LOW_PRESSURE_COLOR = new THREE.Color(0x00d8ff);
-const MID_PRESSURE_COLOR = new THREE.Color(0xffe600);
-const HIGH_PRESSURE_COLOR = new THREE.Color(0xff2438);
-const PRESSURE_COLOR_GAIN = 1.55;
-const PRESSURE_COLOR_CUTOFF = 0.025;
+const DEFAULT_BASE_GRID_COLOR = '#00fff7';
+const DEFAULT_LOW_PRESSURE_COLOR = '#00d8ff';
+const DEFAULT_MID_PRESSURE_COLOR = '#ffe600';
+const DEFAULT_HIGH_PRESSURE_COLOR = '#ff2438';
+const DEFAULT_PRESSURE_COLOR_GAIN = 3.2;
+const DEFAULT_PRESSURE_COLOR_CUTOFF = 0.006;
 
 function normalizeObjModelName(value) {
   const trimmed = value.trim().replace(/\\/g, '/').replace(/^\/+/, '');
@@ -140,14 +140,17 @@ function sampleMatrix(matrix, row, col) {
   return lerp(top, bottom, rowT);
 }
 
-function colorForPressure(value) {
+function colorForPressure(value, pressureStyle) {
   const pressure = clamp01(value);
+  const lowColor = pressureStyle.lowColor;
+  const midColor = pressureStyle.midColor;
+  const highColor = pressureStyle.highColor;
 
   if (pressure < 0.5) {
-    return LOW_PRESSURE_COLOR.clone().lerp(MID_PRESSURE_COLOR, pressure / 0.5);
+    return lowColor.clone().lerp(midColor, pressure / 0.5);
   }
 
-  return MID_PRESSURE_COLOR.clone().lerp(HIGH_PRESSURE_COLOR, (pressure - 0.5) / 0.5);
+  return midColor.clone().lerp(highColor, (pressure - 0.5) / 0.5);
 }
 
 function modelToSourceCoordinate(x, y) {
@@ -440,8 +443,8 @@ function buildObjFaceGridGeometries(objText, edgeGranularity) {
 
   lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
   pointGeometry.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
-  setGeometryBaseColors(lineGeometry, BASE_GRID_COLOR);
-  setGeometryBaseColors(pointGeometry, BASE_GRID_COLOR);
+  setGeometryBaseColors(lineGeometry, new THREE.Color(DEFAULT_BASE_GRID_COLOR));
+  setGeometryBaseColors(pointGeometry, new THREE.Color(DEFAULT_BASE_GRID_COLOR));
 
   return { lineGeometry, pointGeometry };
 }
@@ -590,20 +593,20 @@ function setBaseVertexColors(model) {
   });
 }
 
-function gridColorForPosition(x, y, z, pressureMatrix, showPressureData, selectedPointKeys) {
+function gridColorForPosition(x, y, z, pressureMatrix, showPressureData, selectedPointKeys, pressureStyle) {
   const matrixSize = pressureMatrix.length || SENSOR_MATRIX_SIZE;
 
   if (!showPressureData || !selectedPointKeys.has(pointKeyForPosition(x, y, z))) {
-    return BASE_GRID_COLOR;
+    return pressureStyle.baseColor;
   }
 
   const sample = vertexToHandSample(x, y, matrixSize);
-  const pressure = clamp01(sampleMatrix(pressureMatrix, sample.row, sample.col) * PRESSURE_COLOR_GAIN);
+  const pressure = clamp01(sampleMatrix(pressureMatrix, sample.row, sample.col) * pressureStyle.colorGain);
 
-  return pressure > PRESSURE_COLOR_CUTOFF ? colorForPressure(pressure) : BASE_GRID_COLOR;
+  return pressure > pressureStyle.cutoff ? colorForPressure(pressure, pressureStyle) : pressureStyle.baseColor;
 }
 
-function updatePressureGeometryColors(geometry, pressureMatrix, showPressureData, selectedPointKeys) {
+function updatePressureGeometryColors(geometry, pressureMatrix, showPressureData, selectedPointKeys, pressureStyle) {
   const position = geometry.attributes.position;
   const colors = geometry.attributes.color;
 
@@ -615,6 +618,7 @@ function updatePressureGeometryColors(geometry, pressureMatrix, showPressureData
       pressureMatrix,
       showPressureData,
       selectedPointKeys,
+      pressureStyle,
     );
     colors.setXYZ(i, color.r, color.g, color.b);
   }
@@ -622,13 +626,13 @@ function updatePressureGeometryColors(geometry, pressureMatrix, showPressureData
   colors.needsUpdate = true;
 }
 
-function updatePalmPressureGridColors(gridObjects, pressureMatrix, showPressureData, selectedPointKeys) {
+function updatePalmPressureGridColors(gridObjects, pressureMatrix, showPressureData, selectedPointKeys, pressureStyle) {
   if (!gridObjects) {
     return;
   }
 
-  updatePressureGeometryColors(gridObjects.lineGeometry, pressureMatrix, showPressureData, selectedPointKeys);
-  updatePressureGeometryColors(gridObjects.pointGeometry, pressureMatrix, showPressureData, selectedPointKeys);
+  updatePressureGeometryColors(gridObjects.lineGeometry, pressureMatrix, showPressureData, selectedPointKeys, pressureStyle);
+  updatePressureGeometryColors(gridObjects.pointGeometry, pressureMatrix, showPressureData, selectedPointKeys, pressureStyle);
 }
 
 function applyModelLook(model, faceGridGeometries, { showSurface, showWireframe }) {
@@ -691,8 +695,16 @@ function applyModelLook(model, faceGridGeometries, { showSurface, showWireframe 
   };
 }
 
-export default function ObjModelPage({ onNavigate }) {
+export default function ObjModelPage({ onNavigate, videoPoints }) {
   const mountRef = useRef(null);
+  const pressureStyleRef = useRef({
+    colorGain: DEFAULT_PRESSURE_COLOR_GAIN,
+    cutoff: DEFAULT_PRESSURE_COLOR_CUTOFF,
+    baseColor: new THREE.Color(DEFAULT_BASE_GRID_COLOR),
+    lowColor: new THREE.Color(DEFAULT_LOW_PRESSURE_COLOR),
+    midColor: new THREE.Color(DEFAULT_MID_PRESSURE_COLOR),
+    highColor: new THREE.Color(DEFAULT_HIGH_PRESSURE_COLOR),
+  });
   const selectionModeRef = useRef(false);
   const selectionApiRef = useRef({
     clear: () => {},
@@ -705,6 +717,12 @@ export default function ObjModelPage({ onNavigate }) {
   const [showWireframe, setShowWireframe] = useState(true);
   const [autoRotate, setAutoRotate] = useState(false);
   const [showPalmPressure, setShowPalmPressure] = useState(true);
+  const [pressureColorGain, setPressureColorGain] = useState(DEFAULT_PRESSURE_COLOR_GAIN);
+  const [pressureColorCutoff, setPressureColorCutoff] = useState(DEFAULT_PRESSURE_COLOR_CUTOFF);
+  const [baseGridColor, setBaseGridColor] = useState(DEFAULT_BASE_GRID_COLOR);
+  const [lowPressureColor, setLowPressureColor] = useState(DEFAULT_LOW_PRESSURE_COLOR);
+  const [midPressureColor, setMidPressureColor] = useState(DEFAULT_MID_PRESSURE_COLOR);
+  const [highPressureColor, setHighPressureColor] = useState(DEFAULT_HIGH_PRESSURE_COLOR);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
   const [selectionBox, setSelectionBox] = useState(null);
@@ -715,6 +733,17 @@ export default function ObjModelPage({ onNavigate }) {
   const [modelNameInput, setModelNameInput] = useState(DEFAULT_OBJ_MODEL_NAME);
   const [activeModelName, setActiveModelName] = useState(DEFAULT_OBJ_MODEL_NAME);
   const activeModelUrl = buildObjModelUrl(activeModelName);
+
+  useEffect(() => {
+    pressureStyleRef.current = {
+      colorGain: pressureColorGain,
+      cutoff: pressureColorCutoff,
+      baseColor: new THREE.Color(baseGridColor),
+      lowColor: new THREE.Color(lowPressureColor),
+      midColor: new THREE.Color(midPressureColor),
+      highColor: new THREE.Color(highPressureColor),
+    };
+  }, [baseGridColor, highPressureColor, lowPressureColor, midPressureColor, pressureColorCutoff, pressureColorGain]);
 
   const updateEdgeGranularity = (event) => {
     setEdgeGranularity(Number(event.target.value));
@@ -1041,8 +1070,15 @@ export default function ObjModelPage({ onNavigate }) {
         const pressureMatrix = buildHandPressureFrame(clock.getElapsedTime(), {
           matrixSize: SENSOR_MATRIX_SIZE,
           gaussianKernelSize: DEFAULT_GAUSSIAN_KERNEL_SIZE,
+          videoPoints,
         }).matrix;
-        updatePalmPressureGridColors(gridObjects, pressureMatrix, showPalmPressure, selectedPointKeys);
+        updatePalmPressureGridColors(
+          gridObjects,
+          pressureMatrix,
+          showPalmPressure,
+          selectedPointKeys,
+          pressureStyleRef.current,
+        );
       }
       controls.update();
       renderer.render(scene, camera);
@@ -1076,7 +1112,7 @@ export default function ObjModelPage({ onNavigate }) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [activeModelUrl, autoRotate, edgeGranularity, showPalmPressure, showSurface, showWireframe]);
+  }, [activeModelUrl, autoRotate, edgeGranularity, showPalmPressure, showSurface, showWireframe, videoPoints]);
 
   return (
     <main className="obj-model-page">
@@ -1139,6 +1175,66 @@ export default function ObjModelPage({ onNavigate }) {
           />
           <span>Data</span>
         </label>
+        <label className="obj-pressure-control">
+          <span>Gain</span>
+          <input
+            type="range"
+            min="0.5"
+            max="10"
+            step="0.1"
+            value={pressureColorGain}
+            onChange={(event) => setPressureColorGain(Number(event.target.value))}
+            onInput={(event) => setPressureColorGain(Number(event.target.value))}
+          />
+          <strong>{pressureColorGain.toFixed(1)}</strong>
+        </label>
+        <label className="obj-pressure-control">
+          <span>Cutoff</span>
+          <input
+            type="range"
+            min="0"
+            max="0.12"
+            step="0.002"
+            value={pressureColorCutoff}
+            onChange={(event) => setPressureColorCutoff(Number(event.target.value))}
+            onInput={(event) => setPressureColorCutoff(Number(event.target.value))}
+          />
+          <strong>{pressureColorCutoff.toFixed(3)}</strong>
+        </label>
+        <div className="obj-color-controls" aria-label="OBJ pressure colors">
+          <label title="Base wire color">
+            <span>Base</span>
+            <input
+              type="color"
+              value={baseGridColor}
+              onChange={(event) => setBaseGridColor(event.target.value)}
+            />
+          </label>
+          <label title="Low pressure color">
+            <span>Low</span>
+            <input
+              type="color"
+              value={lowPressureColor}
+              onChange={(event) => setLowPressureColor(event.target.value)}
+            />
+          </label>
+          <label title="Mid pressure color">
+            <span>Mid</span>
+            <input
+              type="color"
+              value={midPressureColor}
+              onChange={(event) => setMidPressureColor(event.target.value)}
+            />
+          </label>
+          <label title="High pressure color">
+            <span>High</span>
+            <input
+              type="color"
+              value={highPressureColor}
+              onChange={(event) => setHighPressureColor(event.target.value)}
+            />
+          </label>
+        </div>
         <label className="obj-toggle-control">
           <input
             type="checkbox"

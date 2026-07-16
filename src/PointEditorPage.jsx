@@ -69,6 +69,48 @@ export function formatPointArray(points) {
   return `const HAND_R_VIDEO_POINTS = Object.freeze([\n  ${lines.join(',\n  ')}${lines.length ? ',' : ''}\n]);`;
 }
 
+function parsePointArrayText(text) {
+  if (typeof text !== 'string' || !text.trim()) {
+    return null;
+  }
+
+  const trimmed = text.trim();
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Array.isArray(parsed) ? sanitizeEditorPoints(parsed) : null;
+  } catch {
+    // Continue with JS array extraction below.
+  }
+
+  const startIndex = trimmed.indexOf('[');
+  const endIndex = trimmed.lastIndexOf(']');
+  if (startIndex >= 0 && endIndex > startIndex) {
+    try {
+      const parsed = Function(`"use strict"; return (${trimmed.slice(startIndex, endIndex + 1)});`)();
+      return Array.isArray(parsed) ? sanitizeEditorPoints(parsed) : null;
+    } catch {
+      // Continue with numeric pair parsing below.
+    }
+  }
+
+  const numbers = trimmed
+    .split(/[,\s\[\]]+/)
+    .map(Number)
+    .filter((value) => Number.isFinite(value));
+
+  if (numbers.length < 2 || numbers.length % 2 !== 0) {
+    return null;
+  }
+
+  const points = [];
+  for (let index = 0; index < numbers.length; index += 2) {
+    points.push([numbers[index], numbers[index + 1]]);
+  }
+
+  return sanitizeEditorPoints(points);
+}
+
 function readLocalStorage(key) {
   if (typeof window === 'undefined') {
     return null;
@@ -177,6 +219,8 @@ export default function PointEditorPage({
   const [versionName, setVersionName] = useState('');
   const [selectedVersionId, setSelectedVersionId] = useState('');
   const [lastPoint, setLastPoint] = useState(null);
+  const [arrayInput, setArrayInput] = useState('');
+  const [arrayInputStatus, setArrayInputStatus] = useState('');
   const [pointCellSize, setPointCellSize] = useState(readStoredCellSize);
   const points = useMemo(
     () => (isControlled ? sanitizeEditorPoints(controlledPoints) : internalPoints),
@@ -200,6 +244,10 @@ export default function PointEditorPage({
   useEffect(() => {
     writeLocalStorage(POINT_CELL_SIZE_STORAGE_KEY, pointCellSize);
   }, [pointCellSize]);
+
+  useEffect(() => {
+    setArrayInput(output);
+  }, [output]);
 
   const commitPoints = (nextPoints) => {
     const sanitizedPoints = sanitizeEditorPoints(nextPoints);
@@ -235,7 +283,20 @@ export default function PointEditorPage({
   const copyOutput = async () => {
     if (navigator.clipboard) {
       await navigator.clipboard.writeText(output);
+      setArrayInputStatus('Copied');
     }
+  };
+
+  const applyArrayInput = () => {
+    const parsedPoints = parsePointArrayText(arrayInput);
+    if (!parsedPoints) {
+      setArrayInputStatus('Invalid array');
+      return;
+    }
+
+    commitPoints(parsedPoints);
+    setLastPoint(null);
+    setArrayInputStatus(`Applied ${parsedPoints.length}`);
   };
 
   const saveVersion = () => {
@@ -412,6 +473,9 @@ export default function PointEditorPage({
             <button type="button" onClick={copyOutput}>
               Copy
             </button>
+            <button type="button" onClick={applyArrayInput}>
+              Apply
+            </button>
             <button type="button" onClick={resetPoints}>
               Reset
             </button>
@@ -423,7 +487,12 @@ export default function PointEditorPage({
 
         <section className="point-editor-card output-card">
           <h2>Array Output</h2>
-          <textarea readOnly value={output} spellCheck="false" />
+          <textarea
+            value={arrayInput}
+            spellCheck="false"
+            onChange={(event) => setArrayInput(event.target.value)}
+          />
+          <span className="point-array-status">{arrayInputStatus || 'Editable'}</span>
         </section>
       </aside>
     </section>
