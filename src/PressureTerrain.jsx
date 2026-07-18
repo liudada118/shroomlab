@@ -280,8 +280,14 @@ export function updateSurfaceGrid(geometry, pressureMatrix, heightScale, gaussia
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 }
 
-function buildPressureMatrix(time, matrixSize, gaussianKernelSize, sourcePoints, videoPoints) {
-  return buildHandPressureFrame(time, { matrixSize, gaussianKernelSize, sourcePoints, videoPoints }).matrix;
+function buildPressureMatrix(time, matrixSize, gaussianKernelSize, sourcePoints, videoPoints, prePressureValue) {
+  return buildHandPressureFrame(time, {
+    matrixSize,
+    gaussianKernelSize,
+    sourcePoints,
+    videoPoints,
+    prePressureValue,
+  }).matrix;
 }
 
 function makeBasePlate() {
@@ -320,8 +326,10 @@ function makeBasePlate() {
 export default function PressureTerrain({
   heightScale = 1.85,
   colorDepth = 1.25,
+  backgroundColor = '#071018',
   matrixSize = SENSOR_MATRIX_SIZE,
   gaussianKernelSize = DEFAULT_GAUSSIAN_KERNEL_SIZE,
+  prePressureValue,
   pressurePalette = DEFAULT_PRESSURE_PALETTE,
   sourcePoints,
   videoPoints,
@@ -330,8 +338,10 @@ export default function PressureTerrain({
   const settingsRef = useRef({
     heightScale,
     colorDepth,
+    backgroundColor,
     matrixSize,
     gaussianKernelSize,
+    prePressureValue,
     pressurePalette,
     sourcePoints,
     videoPoints,
@@ -342,23 +352,25 @@ export default function PressureTerrain({
     settingsRef.current = {
       heightScale,
       colorDepth,
+      backgroundColor,
       matrixSize,
       gaussianKernelSize,
+      prePressureValue,
       pressurePalette,
       sourcePoints,
       videoPoints,
       sourcePointsSignature: pointsSignature(sourcePoints),
     };
-  }, [colorDepth, gaussianKernelSize, heightScale, matrixSize, pressurePalette, sourcePoints, videoPoints]);
+  }, [backgroundColor, colorDepth, gaussianKernelSize, heightScale, matrixSize, prePressureValue, pressurePalette, sourcePoints, videoPoints]);
 
   useEffect(() => {
     const mount = mountRef.current;
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x071018, 10, 26);
+    scene.fog = new THREE.Fog(backgroundColor, 10, 26);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(backgroundColor, 1);
     mount.appendChild(renderer.domElement);
 
     const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 80);
@@ -408,6 +420,7 @@ export default function PressureTerrain({
       initialSettings.gaussianKernelSize,
       initialSettings.sourcePoints,
       initialSettings.videoPoints,
+      initialSettings.prePressureValue,
     );
     updateTerrain(
       geometry,
@@ -465,6 +478,8 @@ export default function PressureTerrain({
     const animate = () => {
       const elapsed = clock.getElapsedTime();
       const currentSettings = settingsRef.current;
+      renderer.setClearColor(currentSettings.backgroundColor, 1);
+      scene.fog.color.set(currentSettings.backgroundColor);
 
       if (currentSettings.sourcePointsSignature !== currentRegionSignature) {
         const nextGeometry = buildRegionBaseGeometry(matrixSize, currentSettings.sourcePoints);
@@ -479,6 +494,7 @@ export default function PressureTerrain({
         currentSettings.gaussianKernelSize,
         currentSettings.sourcePoints,
         currentSettings.videoPoints,
+        currentSettings.prePressureValue,
       );
       updateTerrain(
         geometry,

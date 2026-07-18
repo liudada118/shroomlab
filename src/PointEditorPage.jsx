@@ -1,13 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { HAND_R_VIDEO_POINTS } from './handPressureData.js';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  HAND_R_VIDEO_POINTS,
+  SOURCE_MATRIX_SIZE,
+  VIDEO_POINT_BLOCK_SIZE,
+  VIDEO_POINT_MATRIX_SIZE,
+} from './handPressureData.js';
 
-const EDITOR_MATRIX_SIZE = 32;
-const POINT_DRAFT_STORAGE_KEY = 'shroomLab.handPointEditor.draft.v1';
+const EDITOR_MATRIX_SIZE = SOURCE_MATRIX_SIZE;
+const POINT_DRAFT_STORAGE_KEY = 'shroomLab.handPointEditor.draft.v4';
 const POINT_VERSIONS_STORAGE_KEY = 'shroomLab.handPointEditor.versions.v1';
 const POINT_CELL_SIZE_STORAGE_KEY = 'shroomLab.handPointEditor.cellSize.v1';
-const DEFAULT_POINT_CELL_SIZE = 9;
-const MIN_POINT_CELL_SIZE = 6;
-const MAX_POINT_CELL_SIZE = 18;
+const POINT_GRID_SIZE_STORAGE_KEY = 'shroomLab.handPointEditor.gridSize.v1';
+const DEFAULT_POINT_CELL_SIZE = 5;
+const MIN_POINT_CELL_SIZE = 3;
+const MAX_POINT_CELL_SIZE = 10;
 
 function pointKey(row, col) {
   return `${row}:${col}`;
@@ -15,6 +21,51 @@ function pointKey(row, col) {
 
 function sortPoints(points) {
   return [...points].sort(([rowA, colA], [rowB, colB]) => rowA - rowB || colA - colB);
+}
+
+function scaleCoordinate(value, fromSize, toSize) {
+  if (fromSize === VIDEO_POINT_MATRIX_SIZE && toSize === EDITOR_MATRIX_SIZE) {
+    return Math.max(0, Math.min(toSize - 1, value * VIDEO_POINT_BLOCK_SIZE));
+  }
+
+  return Math.round((value / Math.max(1, fromSize - 1)) * (toSize - 1));
+}
+
+function scalePoint(point, fromSize, toSize) {
+  return [scaleCoordinate(point[0], fromSize, toSize), scaleCoordinate(point[1], fromSize, toSize)];
+}
+
+function videoPointToEditorBlock(point) {
+  const startRow = scaleCoordinate(point[0], VIDEO_POINT_MATRIX_SIZE, EDITOR_MATRIX_SIZE);
+  const startCol = scaleCoordinate(point[1], VIDEO_POINT_MATRIX_SIZE, EDITOR_MATRIX_SIZE);
+  const blockPoints = [];
+
+  for (let rowOffset = 0; rowOffset < VIDEO_POINT_BLOCK_SIZE; rowOffset += 1) {
+    for (let colOffset = 0; colOffset < VIDEO_POINT_BLOCK_SIZE; colOffset += 1) {
+      blockPoints.push([
+        Math.min(EDITOR_MATRIX_SIZE - 1, startRow + rowOffset),
+        Math.min(EDITOR_MATRIX_SIZE - 1, startCol + colOffset),
+      ]);
+    }
+  }
+
+  return blockPoints;
+}
+
+export function scaleVideoPointsToEditorPoints(points) {
+  return sanitizeEditorPoints((Array.isArray(points) ? points : HAND_R_VIDEO_POINTS).flatMap((point) => (
+    Array.isArray(point) && point.length === 2
+      ? videoPointToEditorBlock(point)
+      : [0, 0]
+  )));
+}
+
+function migratePointsToEditorSize(points, fromSize = VIDEO_POINT_MATRIX_SIZE) {
+  if (fromSize === EDITOR_MATRIX_SIZE) {
+    return points;
+  }
+
+  return points.map((point) => scalePoint(point, fromSize, EDITOR_MATRIX_SIZE));
 }
 
 function isValidPoint(point) {
@@ -54,8 +105,8 @@ export function sanitizeEditorPoints(points) {
   return sortPoints(sanitized);
 }
 
-function uniqueInitialPoints() {
-  return sanitizeEditorPoints(HAND_R_VIDEO_POINTS);
+function uniqueInitialPoints(videoPoints = HAND_R_VIDEO_POINTS) {
+  return scaleVideoPointsToEditorPoints(videoPoints);
 }
 
 export function formatPointArray(points) {
@@ -66,7 +117,7 @@ export function formatPointArray(points) {
     lines.push(sorted.slice(i, i + 8).map(([row, col]) => `[${row}, ${col}]`).join(', '));
   }
 
-  return `const HAND_R_VIDEO_POINTS = Object.freeze([\n  ${lines.join(',\n  ')}${lines.length ? ',' : ''}\n]);`;
+  return `const HAND_COORDINATE_POINTS = Object.freeze([\n  ${lines.join(',\n  ')}${lines.length ? ',' : ''}\n]);`;
 }
 
 function parsePointArrayText(text) {
@@ -136,13 +187,22 @@ function writeLocalStorage(key, value) {
   }
 }
 
-export function readStoredDraft() {
+export function readStoredDraft(fallbackPoints = uniqueInitialPoints()) {
   const draft = readLocalStorage(POINT_DRAFT_STORAGE_KEY);
-  return Array.isArray(draft) ? sanitizeEditorPoints(draft) : uniqueInitialPoints();
+  if (!Array.isArray(draft)) {
+    return sanitizeEditorPoints(fallbackPoints);
+  }
+
+  const storedGridSize = Number(readLocalStorage(POINT_GRID_SIZE_STORAGE_KEY) ?? VIDEO_POINT_MATRIX_SIZE);
+  const points = Number.isFinite(storedGridSize) && storedGridSize > 0 && storedGridSize !== EDITOR_MATRIX_SIZE
+    ? migratePointsToEditorSize(draft, storedGridSize)
+    : draft;
+
+  return sanitizeEditorPoints(points);
 }
 
-export function getInitialEditorPoints() {
-  return readStoredDraft();
+export function getInitialEditorPoints(videoPoints = HAND_R_VIDEO_POINTS) {
+  return readStoredDraft(uniqueInitialPoints(videoPoints));
 }
 
 function readStoredCellSize() {
@@ -159,6 +219,10 @@ function sanitizeVersion(version, index) {
   }
 
   const points = sanitizeEditorPoints(version.points);
+  const gridSize = Number(version.gridSize ?? VIDEO_POINT_MATRIX_SIZE);
+  const migratedPoints = Number.isFinite(gridSize) && gridSize > 0 && gridSize !== EDITOR_MATRIX_SIZE
+    ? sanitizeEditorPoints(migratePointsToEditorSize(points, gridSize))
+    : points;
 
   const fallbackDate = new Date().toISOString();
   const id = typeof version.id === 'string' && version.id ? version.id : `stored-${index}`;
@@ -170,7 +234,8 @@ function sanitizeVersion(version, index) {
   return {
     id,
     name,
-    points,
+    points: migratedPoints,
+    gridSize: EDITOR_MATRIX_SIZE,
     createdAt: typeof version.createdAt === 'string' ? version.createdAt : fallbackDate,
     updatedAt: typeof version.updatedAt === 'string' ? version.updatedAt : fallbackDate,
   };
@@ -212,9 +277,12 @@ export default function PointEditorPage({
   embedded = false,
   points: controlledPoints,
   onPointsChange,
+  baseVideoPoints,
+  onProjectVideoPoints,
 }) {
+  const initialEditorPoints = useMemo(() => uniqueInitialPoints(baseVideoPoints), [baseVideoPoints]);
   const isControlled = Array.isArray(controlledPoints) && typeof onPointsChange === 'function';
-  const [internalPoints, setInternalPoints] = useState(readStoredDraft);
+  const [internalPoints, setInternalPoints] = useState(() => readStoredDraft(initialEditorPoints));
   const [versions, setVersions] = useState(readStoredVersions);
   const [versionName, setVersionName] = useState('');
   const [selectedVersionId, setSelectedVersionId] = useState('');
@@ -222,6 +290,10 @@ export default function PointEditorPage({
   const [arrayInput, setArrayInput] = useState('');
   const [arrayInputStatus, setArrayInputStatus] = useState('');
   const [pointCellSize, setPointCellSize] = useState(readStoredCellSize);
+  const [expandedEditorOpen, setExpandedEditorOpen] = useState(false);
+  const [expandedPointCellSize, setExpandedPointCellSize] = useState(7);
+  const dragRef = useRef({ active: false, mode: 'add', touched: new Set() });
+  const pointsRef = useRef([]);
   const points = useMemo(
     () => (isControlled ? sanitizeEditorPoints(controlledPoints) : internalPoints),
     [controlledPoints, internalPoints, isControlled],
@@ -234,7 +306,12 @@ export default function PointEditorPage({
   );
 
   useEffect(() => {
+    pointsRef.current = points;
+  }, [points]);
+
+  useEffect(() => {
     writeLocalStorage(POINT_DRAFT_STORAGE_KEY, points);
+    writeLocalStorage(POINT_GRID_SIZE_STORAGE_KEY, EDITOR_MATRIX_SIZE);
   }, [points]);
 
   useEffect(() => {
@@ -251,11 +328,40 @@ export default function PointEditorPage({
 
   const commitPoints = (nextPoints) => {
     const sanitizedPoints = sanitizeEditorPoints(nextPoints);
+    pointsRef.current = sanitizedPoints;
     if (isControlled) {
       onPointsChange(sanitizedPoints);
     } else {
       setInternalPoints(sanitizedPoints);
     }
+  };
+
+  const paintPoint = (row, col, mode) => {
+    const key = pointKey(row, col);
+    const dragState = dragRef.current;
+    if (dragState.touched.has(key)) {
+      return;
+    }
+
+    dragState.touched.add(key);
+    const currentPoints = pointsRef.current;
+    const exists = currentPoints.some(([pointRow, pointCol]) => pointRow === row && pointCol === col);
+
+    if (mode === 'add' && exists) {
+      return;
+    }
+
+    if (mode === 'remove' && !exists) {
+      return;
+    }
+
+    const nextPoints =
+      mode === 'add'
+        ? sortPoints([...currentPoints, [row, col]])
+        : currentPoints.filter(([pointRow, pointCol]) => pointRow !== row || pointCol !== col);
+
+    commitPoints(nextPoints);
+    setLastPoint({ row, col, action: mode === 'add' ? 'added' : 'removed' });
   };
 
   const togglePoint = (row, col) => {
@@ -271,7 +377,7 @@ export default function PointEditorPage({
   };
 
   const resetPoints = () => {
-    commitPoints(uniqueInitialPoints());
+    commitPoints(initialEditorPoints);
     setLastPoint(null);
   };
 
@@ -305,6 +411,7 @@ export default function PointEditorPage({
       id: createVersionId(),
       name: versionName.trim() || `Version ${versions.length + 1}`,
       points: sanitizeEditorPoints(points),
+      gridSize: EDITOR_MATRIX_SIZE,
       createdAt: now,
       updatedAt: now,
     };
@@ -356,52 +463,133 @@ export default function PointEditorPage({
     setVersionName('');
   };
 
+  const cellFromElement = (element, gridElement) => {
+    const cellElement = element?.closest?.('.point-cell');
+    if (!cellElement || !gridElement.contains(cellElement)) {
+      return null;
+    }
+
+    const row = Number(cellElement.dataset.row);
+    const col = Number(cellElement.dataset.col);
+    return Number.isInteger(row) && Number.isInteger(col) ? { row, col } : null;
+  };
+
+  const startPointDrag = (event) => {
+    if (event.button !== undefined && event.button !== 0) {
+      return;
+    }
+
+    const cell = cellFromElement(event.target, event.currentTarget);
+    if (!cell) {
+      return;
+    }
+
+    event.preventDefault();
+    const mode = pointSet.has(pointKey(cell.row, cell.col)) ? 'remove' : 'add';
+    dragRef.current = {
+      active: true,
+      mode,
+      touched: new Set(),
+      startRow: cell.row,
+      startCol: cell.col,
+    };
+    paintPoint(cell.row, cell.col, mode);
+  };
+
+  const movePointDrag = (event) => {
+    const dragState = dragRef.current;
+    if (!dragState.active) {
+      return;
+    }
+
+    event.preventDefault();
+    const element = document.elementFromPoint(event.clientX, event.clientY);
+    const cell = cellFromElement(element, event.currentTarget);
+    if (cell) {
+      paintPoint(cell.row, cell.col, dragState.mode);
+    }
+  };
+
+  const endPointDrag = () => {
+    const dragState = dragRef.current;
+    if (!dragState.active) {
+      return;
+    }
+
+    dragRef.current = { active: false, mode: 'add', touched: new Set() };
+  };
+
+  useEffect(() => {
+    window.addEventListener('pointerup', endPointDrag);
+    window.addEventListener('pointercancel', endPointDrag);
+    return () => {
+      window.removeEventListener('pointerup', endPointDrag);
+      window.removeEventListener('pointercancel', endPointDrag);
+    };
+  }, []);
+
+  const renderPointGrid = (cellSize, extraClassName = '') => (
+    <div className="point-grid-scroll">
+      <div
+        className={`point-grid${extraClassName ? ` ${extraClassName}` : ''}`}
+        aria-label={`${EDITOR_MATRIX_SIZE}x${EDITOR_MATRIX_SIZE} point editor`}
+        style={{
+          '--point-cell-size': `${cellSize}px`,
+          '--point-grid-size': `${EDITOR_MATRIX_SIZE}`,
+        }}
+        onPointerDown={startPointDrag}
+        onPointerMove={movePointDrag}
+        onPointerLeave={endPointDrag}
+      >
+        {Array.from({ length: EDITOR_MATRIX_SIZE }, (_, row) =>
+          Array.from({ length: EDITOR_MATRIX_SIZE }, (_, col) => {
+            const active = pointSet.has(pointKey(row, col));
+
+            return (
+              <button
+                key={`${row}-${col}`}
+                className={`point-cell${active ? ' active' : ''}`}
+                type="button"
+                title={`[${row}, ${col}]`}
+                aria-pressed={active}
+                data-row={row}
+                data-col={col}
+              />
+            );
+          }),
+        )}
+      </div>
+    </div>
+  );
+
   const editorContent = (
     <section className={`point-editor-shell${embedded ? ' embedded-point-editor-shell' : ''}`}>
       <div className="point-editor-board-panel">
         <header className="point-editor-header">
           <div>
             <h1>Hand Coordinate Modeler</h1>
-            <p>32x32 sensor coordinate grid</p>
+            <p>{EDITOR_MATRIX_SIZE}x{EDITOR_MATRIX_SIZE} sensor coordinate grid</p>
           </div>
-          <label className="point-cell-size-control">
-            <span>Cell size</span>
-            <input
-              type="range"
-              min={MIN_POINT_CELL_SIZE}
-              max={MAX_POINT_CELL_SIZE}
-              step="1"
-              value={pointCellSize}
-              onChange={(event) => setPointCellSize(Number(event.target.value))}
-            />
-            <strong>{pointCellSize}px</strong>
-          </label>
+          <div className="point-editor-header-controls">
+            <button type="button" onClick={() => setExpandedEditorOpen(true)}>
+              Expand
+            </button>
+            <label className="point-cell-size-control">
+              <span>Cell size</span>
+              <input
+                type="range"
+                min={MIN_POINT_CELL_SIZE}
+                max={MAX_POINT_CELL_SIZE}
+                step="1"
+                value={pointCellSize}
+                onChange={(event) => setPointCellSize(Number(event.target.value))}
+              />
+              <strong>{pointCellSize}px</strong>
+            </label>
+          </div>
         </header>
 
-        <div className="point-grid-scroll">
-          <div
-            className="point-grid"
-            aria-label="32x32 point editor"
-            style={{ '--point-cell-size': `${pointCellSize}px` }}
-          >
-            {Array.from({ length: EDITOR_MATRIX_SIZE }, (_, row) =>
-              Array.from({ length: EDITOR_MATRIX_SIZE }, (_, col) => {
-                const active = pointSet.has(pointKey(row, col));
-
-                return (
-                  <button
-                    key={`${row}-${col}`}
-                    className={`point-cell${active ? ' active' : ''}`}
-                    type="button"
-                    title={`[${row}, ${col}]`}
-                    aria-pressed={active}
-                    onClick={() => togglePoint(row, col)}
-                  />
-                );
-              }),
-            )}
-          </div>
-        </div>
+        {renderPointGrid(pointCellSize)}
       </div>
 
       <aside className="point-editor-side">
@@ -410,7 +598,7 @@ export default function PointEditorPage({
           <dl className="point-editor-stats">
             <div>
               <dt>Matrix</dt>
-              <dd>32x32</dd>
+              <dd>{EDITOR_MATRIX_SIZE}x{EDITOR_MATRIX_SIZE}</dd>
             </div>
             <div>
               <dt>Points</dt>
@@ -476,6 +664,11 @@ export default function PointEditorPage({
             <button type="button" onClick={applyArrayInput}>
               Apply
             </button>
+            {onProjectVideoPoints ? (
+              <button type="button" onClick={onProjectVideoPoints}>
+                Project 147
+              </button>
+            ) : null}
             <button type="button" onClick={resetPoints}>
               Reset
             </button>
@@ -495,6 +688,41 @@ export default function PointEditorPage({
           <span className="point-array-status">{arrayInputStatus || 'Editable'}</span>
         </section>
       </aside>
+
+      {expandedEditorOpen ? (
+        <div className="point-editor-modal-backdrop" role="presentation" onMouseDown={() => setExpandedEditorOpen(false)}>
+          <section
+            className="point-editor-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Expanded hand coordinate modeler"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <header>
+              <div>
+                <h2>Hand Coordinate Modeler</h2>
+                <p>{points.length} points · {EDITOR_MATRIX_SIZE}x{EDITOR_MATRIX_SIZE}</p>
+              </div>
+              <div className="point-editor-modal-controls">
+                <label className="point-cell-size-control">
+                  <span>Zoom</span>
+                  <input
+                    type="range"
+                    min="3"
+                    max="12"
+                    step="1"
+                    value={expandedPointCellSize}
+                    onChange={(event) => setExpandedPointCellSize(Number(event.target.value))}
+                  />
+                  <strong>{expandedPointCellSize}px</strong>
+                </label>
+                <button type="button" onClick={() => setExpandedEditorOpen(false)}>Close</button>
+              </div>
+            </header>
+            {renderPointGrid(expandedPointCellSize, 'expanded-point-grid')}
+          </section>
+        </div>
+      ) : null}
     </section>
   );
 

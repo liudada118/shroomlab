@@ -20,6 +20,7 @@ export default function Motion2Page({ onNavigate }) {
       regionLabel="tip/palm lines"
       modelUrl={motion2ModelUrl}
       modelLabel="json/hand1_wrist_cut_cyan_rigged_wireframe.glb / json/hand1_wrist_cut_wire_regions.json"
+      enableWujiBridgeByDefault
     />
   );
 }

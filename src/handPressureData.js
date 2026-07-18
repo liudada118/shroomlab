@@ -1,19 +1,23 @@
 import { SERIAL_PRESSURE_GRID_SIZE, SERIAL_PRESSURE_POINT_COUNT } from './serialProtocol.js';
 import { getSerialPressureSnapshot } from './serialPressureStore.js';
 
-const SOURCE_MATRIX_SIZE = 32;
+export const SOURCE_MATRIX_SIZE = 64;
+export const VIDEO_POINT_MATRIX_SIZE = 32;
+export const VIDEO_POINT_BLOCK_SIZE = SOURCE_MATRIX_SIZE / VIDEO_POINT_MATRIX_SIZE;
 export const SENSOR_MATRIX_SIZE = 64;
 export const MATRIX_SIZE_OPTIONS = [32, 64];
 export const DEFAULT_GAUSSIAN_KERNEL_SIZE = 5;
 const RAW_PRESSURE_MAX_VALUE = 255;
+export const DEFAULT_PRE_PRESSURE_VALUE = 0.02;
 const INTERPOLATED_POINT_THRESHOLD = 0.015;
+const SOURCE_CONTOUR_MASK_THRESHOLD = 0.018;
 const GAUSSIAN_BLEND = 0.48;
-const PALM_ROW_MIN = 15;
-const PALM_ROW_MAX = 23;
-const PALM_COL_MIN = 12;
-const PALM_COL_MAX = 28;
-const MAX_PALM_GAP = 2;
-const MAX_PALM_ROW_GAP = 4;
+const PALM_ROW_MIN = 30;
+const PALM_ROW_MAX = 46;
+const PALM_COL_MIN = 24;
+const PALM_COL_MAX = 56;
+const MAX_PALM_GAP = 4;
+const MAX_PALM_ROW_GAP = 8;
 
 export const HAND_R_ADC_ORDER = Object.freeze([
   240, 239, 238, 256, 255, 254, 16, 15, 14, 32, 31, 30,
@@ -45,9 +49,48 @@ export const HAND_R_VIDEO_POINT_SET = new Set(
   HAND_R_VIDEO_POINTS.map(([row, col]) => `${row}:${col}`),
 );
 
-function normalizeSourcePoints(sourcePoints = HAND_R_VIDEO_POINTS) {
+function scaleCoordinate(value, fromSize, toSize) {
+  if (fromSize === VIDEO_POINT_MATRIX_SIZE && toSize === SOURCE_MATRIX_SIZE) {
+    return Math.max(0, Math.min(toSize - 1, value * VIDEO_POINT_BLOCK_SIZE));
+  }
+
+  return Math.round((value / Math.max(1, fromSize - 1)) * (toSize - 1));
+}
+
+function videoPointToSourcePoint(point) {
+  return [
+    scaleCoordinate(point[0], VIDEO_POINT_MATRIX_SIZE, SOURCE_MATRIX_SIZE),
+    scaleCoordinate(point[1], VIDEO_POINT_MATRIX_SIZE, SOURCE_MATRIX_SIZE),
+  ];
+}
+
+function videoPointToSourceBlock(point) {
+  const [startRow, startCol] = videoPointToSourcePoint(point);
+  const blockPoints = [];
+
+  for (let rowOffset = 0; rowOffset < VIDEO_POINT_BLOCK_SIZE; rowOffset += 1) {
+    for (let colOffset = 0; colOffset < VIDEO_POINT_BLOCK_SIZE; colOffset += 1) {
+      blockPoints.push([
+        Math.min(SOURCE_MATRIX_SIZE - 1, startRow + rowOffset),
+        Math.min(SOURCE_MATRIX_SIZE - 1, startCol + colOffset),
+      ]);
+    }
+  }
+
+  return blockPoints;
+}
+
+function sourceCoordinateToVideoScale(value) {
+  return value / VIDEO_POINT_BLOCK_SIZE;
+}
+
+function defaultSourcePoints() {
+  return HAND_R_VIDEO_POINTS.flatMap(videoPointToSourceBlock);
+}
+
+function normalizeSourcePoints(sourcePoints) {
   if (!Array.isArray(sourcePoints)) {
-    return HAND_R_VIDEO_POINTS;
+    return defaultSourcePoints();
   }
 
   const seen = new Set();
@@ -78,7 +121,7 @@ function normalizeSourcePoints(sourcePoints = HAND_R_VIDEO_POINTS) {
   return points.sort(([rowA, colA], [rowB, colB]) => rowA - rowB || colA - colB);
 }
 
-function buildSourcePointSet(sourcePoints = HAND_R_VIDEO_POINTS) {
+function buildSourcePointSet(sourcePoints) {
   return new Set(normalizeSourcePoints(sourcePoints).map(([row, col]) => `${row}:${col}`));
 }
 
@@ -87,11 +130,13 @@ function clamp01(value) {
 }
 
 function pressureValueForSourcePoint(row, col, time) {
-  const fingerZone = row <= 12 ? 0.72 : 0.48;
-  const palmZone = row >= 15 && col >= 15 ? 0.34 : 0;
-  const columnPeak = Math.exp(-((col - 18) ** 2) / 96) * 0.2;
-  const rowPeak = Math.exp(-((row - 5) ** 2) / 80) * 0.18;
-  const pulse = 0.86 + Math.sin(time * 1.1 + row * 0.39 + col * 0.23) * 0.14;
+  const row32 = sourceCoordinateToVideoScale(row);
+  const col32 = sourceCoordinateToVideoScale(col);
+  const fingerZone = row32 <= 12 ? 0.72 : 0.48;
+  const palmZone = row32 >= 15 && col32 >= 15 ? 0.34 : 0;
+  const columnPeak = Math.exp(-((col32 - 18) ** 2) / 96) * 0.2;
+  const rowPeak = Math.exp(-((row32 - 5) ** 2) / 80) * 0.18;
+  const pulse = 0.86 + Math.sin(time * 1.1 + row32 * 0.39 + col32 * 0.23) * 0.14;
 
   return clamp01((fingerZone + palmZone + columnPeak + rowPeak) * pulse);
 }
@@ -118,7 +163,7 @@ function normalizeGaussianKernelSize(kernelSize) {
   return rounded % 2 === 0 ? Math.max(1, rounded - 1) : rounded;
 }
 
-function buildSourcePressureMatrix(time, sourcePoints = HAND_R_VIDEO_POINTS) {
+function buildSourcePressureMatrix(time, sourcePoints) {
   const matrix = Array.from({ length: SOURCE_MATRIX_SIZE }, () => Array(SOURCE_MATRIX_SIZE).fill(0));
   const sourcePointSet = buildSourcePointSet(sourcePoints);
 
@@ -132,7 +177,7 @@ function buildSourcePressureMatrix(time, sourcePoints = HAND_R_VIDEO_POINTS) {
   return matrix;
 }
 
-export function buildRawHandPressureMatrix(time = 0, sourcePoints = HAND_R_VIDEO_POINTS) {
+export function buildRawHandPressureMatrix(time = 0, sourcePoints) {
   const matrix = Array.from({ length: SOURCE_MATRIX_SIZE }, () => Array(SOURCE_MATRIX_SIZE).fill(0));
   const sourcePointSet = buildSourcePointSet(sourcePoints);
 
@@ -245,9 +290,9 @@ function normalizeVideoPoints(videoPoints = HAND_R_VIDEO_POINTS) {
       Number.isInteger(point[0]) &&
       Number.isInteger(point[1]) &&
       point[0] >= 0 &&
-      point[0] < SOURCE_MATRIX_SIZE &&
+      point[0] < VIDEO_POINT_MATRIX_SIZE &&
       point[1] >= 0 &&
-      point[1] < SOURCE_MATRIX_SIZE
+      point[1] < VIDEO_POINT_MATRIX_SIZE
     ) {
       return [point[0], point[1]];
     }
@@ -283,12 +328,9 @@ function buildVideoPointPressureSourceMatrix(mappedPressureData, handSide = 'rig
       continue;
     }
 
-    const [row, col] = point;
-    if (row < 0 || row >= SOURCE_MATRIX_SIZE || col < 0 || col >= SOURCE_MATRIX_SIZE) {
-      continue;
-    }
-
-    sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], normalizedData[index]);
+    videoPointToSourceBlock(point).forEach(([row, col]) => {
+      sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], normalizedData[index]);
+    });
   }
 
   fillPalmInternalGaps(sourceMatrix);
@@ -323,12 +365,9 @@ function buildMappedPressureSourceMatrix(rawPressureData, handSide = 'right') {
       continue;
     }
 
-    const [row, col] = point;
-    if (row < 0 || row >= SOURCE_MATRIX_SIZE || col < 0 || col >= SOURCE_MATRIX_SIZE) {
-      continue;
-    }
-
-    sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], normalizedData[adcIndex]);
+    videoPointToSourceBlock(point).forEach(([row, col]) => {
+      sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], normalizedData[adcIndex]);
+    });
   }
 
   fillPalmInternalGaps(sourceMatrix);
@@ -363,6 +402,19 @@ function buildSerialPressureSourceMatrix(rawPressureData, mappedPressureData, ha
       sourceMatrix[row][col] = sampleSourceMatrix(serialMatrix, serialRow, serialCol);
     }
   }
+
+  return sourceMatrix;
+}
+
+function applyPrePressurePoints(sourceMatrix, sourcePoints, value = DEFAULT_PRE_PRESSURE_VALUE) {
+  const pressureValue = clamp01(value);
+  if (!pressureValue || !Array.isArray(sourceMatrix)) {
+    return sourceMatrix;
+  }
+
+  normalizeSourcePoints(sourcePoints).forEach(([row, col]) => {
+    sourceMatrix[row][col] = Math.max(sourceMatrix[row][col], pressureValue);
+  });
 
   return sourceMatrix;
 }
@@ -403,14 +455,36 @@ function gaussianSmoothMatrix(matrix, gaussianKernelSize) {
   );
 }
 
-export function isHandSensorPoint(row, col, matrixSize = SENSOR_MATRIX_SIZE, sourcePoints = HAND_R_VIDEO_POINTS) {
+function buildSourceContourMask(matrixSize, gaussianKernelSize, sourcePoints) {
+  const sourceMaskMatrix = Array.from({ length: SOURCE_MATRIX_SIZE }, () => Array(SOURCE_MATRIX_SIZE).fill(0));
+  normalizeSourcePoints(sourcePoints).forEach(([row, col]) => {
+    sourceMaskMatrix[row][col] = 1;
+  });
+  fillPalmInternalGaps(sourceMaskMatrix);
+
+  const matrixMask = Array.from({ length: matrixSize }, () => Array(matrixSize).fill(0));
+
+  for (let row = 0; row < matrixSize; row += 1) {
+    for (let col = 0; col < matrixSize; col += 1) {
+      const sourceRow = (row / Math.max(1, matrixSize - 1)) * (SOURCE_MATRIX_SIZE - 1);
+      const sourceCol = (col / Math.max(1, matrixSize - 1)) * (SOURCE_MATRIX_SIZE - 1);
+      matrixMask[row][col] = sampleSourceMatrix(sourceMaskMatrix, sourceRow, sourceCol);
+    }
+  }
+
+  return gaussianSmoothMatrix(matrixMask, gaussianKernelSize).map((rowValues) =>
+    rowValues.map((value) => value > SOURCE_CONTOUR_MASK_THRESHOLD),
+  );
+}
+
+export function isHandSensorPoint(row, col, matrixSize = SENSOR_MATRIX_SIZE, sourcePoints) {
   const normalizedMatrixSize = normalizeMatrixSize(matrixSize);
   const sourceRow = Math.round((row / Math.max(1, normalizedMatrixSize - 1)) * (SOURCE_MATRIX_SIZE - 1));
   const sourceCol = Math.round((col / Math.max(1, normalizedMatrixSize - 1)) * (SOURCE_MATRIX_SIZE - 1));
   return buildSourcePointSet(sourcePoints).has(`${sourceRow}:${sourceCol}`);
 }
 
-export function buildHandRegionFrame(matrixSize = SENSOR_MATRIX_SIZE, sourcePoints = HAND_R_VIDEO_POINTS) {
+export function buildHandRegionFrame(matrixSize = SENSOR_MATRIX_SIZE, sourcePoints) {
   const normalizedMatrixSize = normalizeMatrixSize(matrixSize);
   const matrix = Array.from({ length: normalizedMatrixSize }, () => Array(normalizedMatrixSize).fill(0));
   const points = [];
@@ -434,7 +508,7 @@ export function buildHandRegionFrame(matrixSize = SENSOR_MATRIX_SIZE, sourcePoin
 export function buildHandPressureFrame(time = 0, options = {}) {
   const matrixSize = normalizeMatrixSize(options.matrixSize ?? SENSOR_MATRIX_SIZE);
   const gaussianKernelSize = normalizeGaussianKernelSize(options.gaussianKernelSize ?? DEFAULT_GAUSSIAN_KERNEL_SIZE);
-  const sourcePoints = normalizeSourcePoints(options.sourcePoints ?? HAND_R_VIDEO_POINTS);
+  const sourcePoints = normalizeSourcePoints(options.sourcePoints);
   const serialSnapshot = options.useSerialData === false ? null : getSerialPressureSnapshot();
   const rawPressureData = options.rawPressureData ?? serialSnapshot?.pressureData;
   const mappedPressureData = options.mappedPressureData ?? serialSnapshot?.mappedPressureData;
@@ -442,7 +516,10 @@ export function buildHandPressureFrame(time = 0, options = {}) {
   const videoPoints = normalizeVideoPoints(options.videoPoints ?? HAND_R_VIDEO_POINTS);
   const points = [];
   const matrix = Array.from({ length: matrixSize }, () => Array(matrixSize).fill(0));
-  const sourceMatrix = buildSerialPressureSourceMatrix(rawPressureData, mappedPressureData, handSide, videoPoints) || buildSourcePressureMatrix(time, sourcePoints);
+  const serialSourceMatrix = buildSerialPressureSourceMatrix(rawPressureData, mappedPressureData, handSide, videoPoints);
+  const sourceMatrix = serialSourceMatrix
+    ? applyPrePressurePoints(serialSourceMatrix, sourcePoints, options.prePressureValue ?? DEFAULT_PRE_PRESSURE_VALUE)
+    : buildSourcePressureMatrix(time, sourcePoints);
 
   for (let row = 0; row < matrixSize; row += 1) {
     for (let col = 0; col < matrixSize; col += 1) {
@@ -454,10 +531,16 @@ export function buildHandPressureFrame(time = 0, options = {}) {
   }
 
   const smoothedMatrix = gaussianSmoothMatrix(matrix, gaussianKernelSize);
+  const sourceContourMask = options.limitToSourceContour === false
+    ? null
+    : buildSourceContourMask(matrixSize, gaussianKernelSize, sourcePoints);
 
   for (let row = 0; row < matrixSize; row += 1) {
     for (let col = 0; col < matrixSize; col += 1) {
-      const value = smoothedMatrix[row][col] > INTERPOLATED_POINT_THRESHOLD ? smoothedMatrix[row][col] : 0;
+      const insideSourceContour = sourceContourMask ? sourceContourMask[row][col] : true;
+      const value = insideSourceContour && smoothedMatrix[row][col] > INTERPOLATED_POINT_THRESHOLD
+        ? smoothedMatrix[row][col]
+        : 0;
       smoothedMatrix[row][col] = value;
 
       if (value > 0) {

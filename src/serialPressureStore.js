@@ -87,6 +87,17 @@ export function getSerialPressureSnapshot() {
   return preferredFrame || fallbackFrame || null;
 }
 
+export function getSerialPressureFramesSnapshot() {
+  return {
+    frames: {
+      left: serialState.frames.left,
+      right: serialState.frames.right,
+    },
+    manualFrame: serialState.manualFrame,
+    activeHandSide: serialState.activeHandSide,
+  };
+}
+
 function normalizeFrame(frame, source = 'live') {
   const pressureData = normalizePressureData(frame.pressureData);
   const mappedPressureData = normalizeMappedPressureData(frame.mappedPressureData);

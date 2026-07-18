@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { HAND_R_VIDEO_POINTS } from './handPressureData.js';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { HAND_R_VIDEO_POINTS, VIDEO_POINT_MATRIX_SIZE } from './handPressureData.js';
 
-const EDITOR_MATRIX_SIZE = 32;
+const EDITOR_MATRIX_SIZE = VIDEO_POINT_MATRIX_SIZE;
 const VIDEO_POINT_DRAFT_STORAGE_KEY = 'shroomLab.handVideoPointEditor.draft.v1';
 const VIDEO_POINT_CELL_SIZE_STORAGE_KEY = 'shroomLab.handVideoPointEditor.cellSize.v1';
 const DEFAULT_POINT_CELL_SIZE = 12;
@@ -72,6 +72,37 @@ function pointKey(row, col) {
   return `${row}:${col}`;
 }
 
+function clampCoordinate(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(EDITOR_MATRIX_SIZE - 1, Math.round(numericValue)));
+}
+
+function clampDeltaForPoints(points, deltaRow, deltaCol) {
+  const rows = points.map(([row]) => row);
+  const cols = points.map(([, col]) => col);
+  const minRow = Math.min(...rows);
+  const maxRow = Math.max(...rows);
+  const minCol = Math.min(...cols);
+  const maxCol = Math.max(...cols);
+
+  return {
+    row: Math.max(-minRow, Math.min(EDITOR_MATRIX_SIZE - 1 - maxRow, deltaRow)),
+    col: Math.max(-minCol, Math.min(EDITOR_MATRIX_SIZE - 1 - maxCol, deltaCol)),
+  };
+}
+
+function moveAllPoints(points, deltaRow, deltaCol) {
+  const safeDelta = clampDeltaForPoints(points, deltaRow, deltaCol);
+  return {
+    points: points.map(([row, col]) => [row + safeDelta.row, col + safeDelta.col]),
+    delta: safeDelta,
+  };
+}
+
 function formatVideoPointArray(points) {
   const lines = [];
 
@@ -131,6 +162,8 @@ export default function VideoPointGridEditor({
   const [pointCellSize, setPointCellSize] = useState(readStoredCellSize);
   const [clipboardStatus, setClipboardStatus] = useState('');
   const [arrayInput, setArrayInput] = useState('');
+  const [moveAllMode, setMoveAllMode] = useState(false);
+  const moveAllDragRef = useRef(null);
   const points = useMemo(
     () => sanitizeVideoPoints(isControlled ? controlledPoints : internalPoints),
     [controlledPoints, internalPoints, isControlled],
@@ -172,9 +205,112 @@ export default function VideoPointGridEditor({
   };
 
   const setCurrentPoint = (row, col) => {
-    const nextPoints = points.map((point, index) => (index === activeIndex ? [row, col] : point));
+    const nextPoints = points.map((point, index) => (
+      index === activeIndex ? [clampCoordinate(row), clampCoordinate(col)] : point
+    ));
     commitPoints(nextPoints);
   };
+
+  const moveAllBy = (deltaRow, deltaCol) => {
+    const moved = moveAllPoints(points, deltaRow, deltaCol);
+    commitPoints(moved.points);
+    setClipboardStatus(`Moved all [${moved.delta.row}, ${moved.delta.col}]`);
+  };
+
+  const updatePointAtIndex = (pointIndex, row, col) => {
+    const nextPoints = points.map((point, index) => (
+      index === pointIndex ? [clampCoordinate(row), clampCoordinate(col)] : point
+    ));
+    commitPoints(nextPoints);
+    setActiveIndex(pointIndex);
+  };
+
+  const handleGridCellClick = (row, col, indices) => {
+    if (moveAllMode) {
+      return;
+    }
+
+    const current = currentPoint[0] === row && currentPoint[1] === col;
+
+    if (indices.length && !current) {
+      setActiveIndex(indices[0]);
+      return;
+    }
+
+    setCurrentPoint(row, col);
+  };
+
+  const cellFromElement = (element, gridElement) => {
+    const cellElement = element?.closest?.('.point-cell');
+    if (!cellElement || !gridElement.contains(cellElement)) {
+      return null;
+    }
+
+    const row = Number(cellElement.dataset.row);
+    const col = Number(cellElement.dataset.col);
+    return Number.isInteger(row) && Number.isInteger(col) ? { row, col } : null;
+  };
+
+  const startMoveAllDrag = (event) => {
+    if (!moveAllMode || (event.button !== undefined && event.button !== 0)) {
+      return;
+    }
+
+    const targetElement = document.elementFromPoint(event.clientX, event.clientY);
+    const cell = cellFromElement(targetElement, event.currentTarget);
+    if (!cell) {
+      return;
+    }
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    moveAllDragRef.current = {
+      active: true,
+      startRow: cell.row,
+      startCol: cell.col,
+      startPoints: points.map(([row, col]) => [row, col]),
+    };
+    setClipboardStatus('Move all drag');
+  };
+
+  const updateMoveAllDrag = (event) => {
+    const dragState = moveAllDragRef.current;
+    if (!dragState?.active) {
+      return;
+    }
+
+    event.preventDefault();
+    const targetElement = document.elementFromPoint(event.clientX, event.clientY);
+    const cell = cellFromElement(targetElement, event.currentTarget);
+    if (!cell) {
+      return;
+    }
+
+    const moved = moveAllPoints(
+      dragState.startPoints,
+      cell.row - dragState.startRow,
+      cell.col - dragState.startCol,
+    );
+    commitPoints(moved.points);
+    setClipboardStatus(`Moving all [${moved.delta.row}, ${moved.delta.col}]`);
+  };
+
+  const endMoveAllDrag = () => {
+    if (!moveAllDragRef.current?.active) {
+      return;
+    }
+
+    moveAllDragRef.current = null;
+  };
+
+  useEffect(() => {
+    window.addEventListener('pointerup', endMoveAllDrag);
+    window.addEventListener('pointercancel', endMoveAllDrag);
+    return () => {
+      window.removeEventListener('pointerup', endMoveAllDrag);
+      window.removeEventListener('pointercancel', endMoveAllDrag);
+    };
+  }, []);
 
   const updateActiveIndex = (value) => {
     const nextIndex = Math.max(0, Math.min(points.length - 1, Number(value) - 1));
@@ -251,7 +387,7 @@ export default function VideoPointGridEditor({
           <header className="point-editor-header">
             <div>
               <h1>HAND_R_VIDEO_POINTS</h1>
-              <p>32x32 ordered coordinate grid for newArr147</p>
+              <p>{EDITOR_MATRIX_SIZE}x{EDITOR_MATRIX_SIZE} ordered coordinate grid for newArr147</p>
             </div>
             <label className="point-cell-size-control">
               <span>Cell size</span>
@@ -270,8 +406,13 @@ export default function VideoPointGridEditor({
           <div className="point-grid-scroll">
             <div
               className="point-grid video-point-grid"
-              aria-label="32x32 ordered HAND_R_VIDEO_POINTS editor"
-              style={{ '--point-cell-size': `${pointCellSize}px` }}
+              aria-label={`${EDITOR_MATRIX_SIZE}x${EDITOR_MATRIX_SIZE} ordered HAND_R_VIDEO_POINTS editor`}
+              style={{
+                '--point-cell-size': `${pointCellSize}px`,
+                '--point-grid-size': `${EDITOR_MATRIX_SIZE}`,
+              }}
+              onPointerDown={startMoveAllDrag}
+              onPointerMove={updateMoveAllDrag}
             >
               {Array.from({ length: EDITOR_MATRIX_SIZE }, (_, row) =>
                 Array.from({ length: EDITOR_MATRIX_SIZE }, (_, col) => {
@@ -286,9 +427,11 @@ export default function VideoPointGridEditor({
                       type="button"
                       title={`[${row}, ${col}]${indices.length ? ` - index ${indices.map((index) => index + 1).join(', ')}` : ''}`}
                       aria-pressed={current}
-                      onClick={() => setCurrentPoint(row, col)}
+                      data-row={row}
+                      data-col={col}
+                      onClick={() => handleGridCellClick(row, col, indices)}
                     >
-                      {current ? activeIndex + 1 : ''}
+                      {current ? activeIndex + 1 : indices.length > 1 ? `+${indices.length}` : indices.length === 1 ? indices[0] + 1 : ''}
                     </button>
                   );
                 }),
@@ -303,7 +446,7 @@ export default function VideoPointGridEditor({
             <dl className="point-editor-stats">
               <div>
                 <dt>Matrix</dt>
-                <dd>32x32</dd>
+                <dd>{EDITOR_MATRIX_SIZE}x{EDITOR_MATRIX_SIZE}</dd>
               </div>
               <div>
                 <dt>Length</dt>
@@ -339,7 +482,7 @@ export default function VideoPointGridEditor({
                 <input
                   type="number"
                   min="0"
-                  max="31"
+                  max={EDITOR_MATRIX_SIZE - 1}
                   value={currentPoint[0]}
                   onChange={(event) => setCurrentPoint(Number(event.target.value), currentPoint[1])}
                 />
@@ -349,11 +492,69 @@ export default function VideoPointGridEditor({
                 <input
                   type="number"
                   min="0"
-                  max="31"
+                  max={EDITOR_MATRIX_SIZE - 1}
                   value={currentPoint[1]}
                   onChange={(event) => setCurrentPoint(currentPoint[0], Number(event.target.value))}
                 />
               </label>
+            </div>
+
+            <div className="video-point-move-controls">
+              <button
+                className={moveAllMode ? 'active' : ''}
+                type="button"
+                onClick={() => {
+                  setMoveAllMode((currentMode) => !currentMode);
+                  setClipboardStatus(moveAllMode ? 'Single point mode' : 'Move all mode');
+                }}
+              >
+                Move All
+              </button>
+              <button type="button" onClick={() => moveAllBy(-1, 0)}>
+                Up
+              </button>
+              <button type="button" onClick={() => moveAllBy(1, 0)}>
+                Down
+              </button>
+              <button type="button" onClick={() => moveAllBy(0, -1)}>
+                Left
+              </button>
+              <button type="button" onClick={() => moveAllBy(0, 1)}>
+                Right
+              </button>
+            </div>
+
+            <div className="video-point-index-list" aria-label="newArr147 region coordinate controls">
+              {points.map(([row, col], index) => (
+                <div
+                  key={index}
+                  className={`video-point-index-row${index === activeIndex ? ' active' : ''}`}
+                >
+                  <button type="button" onClick={() => setActiveIndex(index)}>
+                    #{index + 1}
+                  </button>
+                  <label>
+                    <span>R</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={EDITOR_MATRIX_SIZE - 1}
+                      value={row}
+                      onChange={(event) => updatePointAtIndex(index, Number(event.target.value), col)}
+                    />
+                  </label>
+                  <label>
+                    <span>C</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={EDITOR_MATRIX_SIZE - 1}
+                      value={col}
+                      onChange={(event) => updatePointAtIndex(index, row, Number(event.target.value))}
+                    />
+                  </label>
+                </div>
+              ))}
             </div>
 
             <div className="point-editor-actions video-point-actions">

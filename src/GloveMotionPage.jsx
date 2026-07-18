@@ -22,6 +22,8 @@ const DEFAULT_CALIBRATION = Object.freeze([
 const FINGER_BEND_AXIS = new THREE.Vector3(0, 0, 1);
 const DEFAULT_LINE_COLOR = '#6dfaff';
 const LINE_COLOR_PRESETS = ['#6dfaff', '#00fff7', '#ff8157', '#ffe66d', '#a88cff'];
+const DEFAULT_SCENE_BACKGROUND_COLOR = '#061018';
+const GLOVE_MOTION_SETTINGS_KEY = 'shroomlab.gloveMotion.settings.v1';
 const DEFAULT_REGION_LABEL = 'regions';
 const REGION_COLORS = {
   palm: 0x00ff00,
@@ -42,6 +44,57 @@ const PRESSURE_BASE_COLOR = new THREE.Color(0x073c46);
 const PRESSURE_CYAN = new THREE.Color(0x00fff7);
 const PRESSURE_YELLOW = new THREE.Color(0xffe66d);
 const PRESSURE_RED = new THREE.Color(0xff2f2f);
+const WUJI_BRIDGE_URL = 'ws://127.0.0.1:8765/ws';
+const WUJI_MAX_RAD = 1.0;
+const WUJI_SPREAD_MAX_RAD = 0.2;
+const WUJI_SEND_INTERVAL_MS = 40;
+const WUJI_ZERO_FRAME_COUNT = 6;
+const DEFAULT_WUJI_WEIGHTS = Object.freeze({
+  maxRad: WUJI_MAX_RAD,
+  j1: 0.55,
+  j3: 0.90,
+  j4: 0.75,
+});
+const WUJI_WEIGHT_CONTROLS = Object.freeze([
+  { key: 'maxRad', label: 'Max', min: 0.2, max: 2.5, step: 0.01 },
+  { key: 'j1', label: 'J1', min: 0, max: 2.5, step: 0.01 },
+  { key: 'j3', label: 'J3', min: 0, max: 2.5, step: 0.01 },
+  { key: 'j4', label: 'J4', min: 0, max: 2.5, step: 0.01 },
+]);
+const WUJI_ZERO_TARGET = Object.freeze([
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+]);
+const DEFAULT_MODEL_TRANSFORM = Object.freeze({
+  x: 0,
+  y: 0,
+  z: 0,
+  rotX: 0,
+  rotY: 0,
+  rotZ: 0,
+  scale: 1,
+});
+const MODEL_TRANSFORM_CONTROLS = Object.freeze([
+  { key: 'x', label: 'X', min: -10, max: 10, step: 0.05 },
+  { key: 'y', label: 'Y', min: -10, max: 10, step: 0.05 },
+  { key: 'z', label: 'Z', min: -10, max: 10, step: 0.05 },
+  { key: 'rotX', label: 'Pitch', min: -360, max: 360, step: 1 },
+  { key: 'rotY', label: 'Yaw', min: -360, max: 360, step: 1 },
+  { key: 'rotZ', label: 'Roll', min: -360, max: 360, step: 1 },
+  { key: 'scale', label: 'Scale', min: 0.35, max: 2.4, step: 0.01 },
+]);
+const HAND_BACK_PIVOT_LOCAL_Y = 0.88;
+
+function defaultModelTransforms() {
+  return {
+    single: { ...DEFAULT_MODEL_TRANSFORM },
+    left: { ...DEFAULT_MODEL_TRANSFORM },
+    right: { ...DEFAULT_MODEL_TRANSFORM },
+  };
+}
 
 function readStoredCalibration(handSide) {
   if (typeof localStorage === 'undefined') {
@@ -81,6 +134,150 @@ function clamp01(value) {
   return Math.max(0, Math.min(1, value));
 }
 
+function clampNumber(value, fallback, min = -Infinity, max = Infinity) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return fallback;
+  }
+
+  return Math.max(min, Math.min(max, numericValue));
+}
+
+function normalizeHexColor(value, fallback) {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
+    ? value
+    : fallback;
+}
+
+function normalizeModelTransform(value) {
+  return MODEL_TRANSFORM_CONTROLS.reduce((transform, control) => {
+    transform[control.key] = clampNumber(
+      value?.[control.key],
+      DEFAULT_MODEL_TRANSFORM[control.key],
+      control.min,
+      control.max,
+    );
+    return transform;
+  }, {});
+}
+
+function normalizeModelTransforms(value) {
+  const next = defaultModelTransforms();
+  if (!value || typeof value !== 'object') {
+    return next;
+  }
+
+  Object.entries(value).forEach(([key, transform]) => {
+    if (transform && typeof transform === 'object') {
+      next[key] = normalizeModelTransform(transform);
+    }
+  });
+
+  return next;
+}
+
+function normalizeWujiWeights(value) {
+  return WUJI_WEIGHT_CONTROLS.reduce((weights, control) => {
+    weights[control.key] = clampNumber(
+      value?.[control.key],
+      DEFAULT_WUJI_WEIGHTS[control.key],
+      control.min,
+      control.max,
+    );
+    return weights;
+  }, {});
+}
+
+function readStoredGloveMotionSettings() {
+  const defaults = {
+    useLiveData: true,
+    bendGain: 1,
+    lineColor: DEFAULT_LINE_COLOR,
+    showSkeleton: false,
+    mirrorScaleX: false,
+    sceneBackgroundColor: DEFAULT_SCENE_BACKGROUND_COLOR,
+    wujiWeights: { ...DEFAULT_WUJI_WEIGHTS },
+    modelTransforms: defaultModelTransforms(),
+  };
+
+  if (typeof localStorage === 'undefined') {
+    return defaults;
+  }
+
+  try {
+    const parsed = JSON.parse(localStorage.getItem(GLOVE_MOTION_SETTINGS_KEY) || 'null');
+    if (!parsed || typeof parsed !== 'object') {
+      return defaults;
+    }
+
+    return {
+      useLiveData: typeof parsed.useLiveData === 'boolean' ? parsed.useLiveData : defaults.useLiveData,
+      bendGain: clampNumber(parsed.bendGain, defaults.bendGain, 0, 1.35),
+      lineColor: normalizeHexColor(parsed.lineColor, defaults.lineColor),
+      showSkeleton: typeof parsed.showSkeleton === 'boolean' ? parsed.showSkeleton : defaults.showSkeleton,
+      mirrorScaleX: typeof parsed.mirrorScaleX === 'boolean' ? parsed.mirrorScaleX : defaults.mirrorScaleX,
+      sceneBackgroundColor: normalizeHexColor(parsed.sceneBackgroundColor, defaults.sceneBackgroundColor),
+      wujiWeights: normalizeWujiWeights(parsed.wujiWeights),
+      modelTransforms: normalizeModelTransforms(parsed.modelTransforms),
+    };
+  } catch {
+    return defaults;
+  }
+}
+
+function writeStoredGloveMotionSettings(settings) {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+
+  localStorage.setItem(GLOVE_MOTION_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function roundRad(value) {
+  return Math.round(value * 10000) / 10000;
+}
+
+function bendValuesToWujiTarget(bends, weights = DEFAULT_WUJI_WEIGHTS) {
+  const maxRad = Number(weights.maxRad) || WUJI_MAX_RAD;
+  return bends.slice(0, 5).map((bend) => {
+    const b = clamp01(Number(bend) || 0);
+    return [
+      roundRad(b * maxRad * (Number(weights.j1) || 0)),
+      0,
+      roundRad(b * maxRad * (Number(weights.j3) || 0)),
+      roundRad(b * maxRad * (Number(weights.j4) || 0)),
+    ];
+  });
+}
+
+function wujiSnapshotPayload(target, weights = DEFAULT_WUJI_WEIGHTS) {
+  const maxRad = Number(weights.maxRad) || WUJI_MAX_RAD;
+  return JSON.stringify({
+    type: 'snapshot',
+    mode: 'five-bend-control',
+    target,
+    maxRad,
+    spreadMaxRad: WUJI_SPREAD_MAX_RAD,
+    timestamp: Date.now() / 1000,
+  });
+}
+
+function formatWujiStatus(enabled, status) {
+  if (!enabled) {
+    return 'OFF';
+  }
+
+  if (status.error) {
+    return status.error;
+  }
+
+  if (status.connected) {
+    return status.ack || `sent ${status.frames}`;
+  }
+
+  return 'connecting';
+}
+
 function clampIndex(value, maxExclusive) {
   return Math.max(0, Math.min(maxExclusive - 1, value));
 }
@@ -118,6 +315,27 @@ function setPressureColor(attribute, vertexIndex, value) {
   }
 
   attribute.setXYZ(vertexIndex, color.r, color.g, color.b);
+}
+
+function updateManualQuaternion(transform, target) {
+  target.setFromEuler(
+    new THREE.Euler(
+      THREE.MathUtils.degToRad(transform.rotX || 0),
+      THREE.MathUtils.degToRad(transform.rotY || 0),
+      THREE.MathUtils.degToRad(transform.rotZ || 0),
+      'XYZ',
+    ),
+  );
+
+  return target;
+}
+
+function formatTransformValue(key, value) {
+  if (key === 'scale') {
+    return value.toFixed(2);
+  }
+
+  return Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(2);
 }
 
 function isUsableRotate(rotate) {
@@ -225,15 +443,24 @@ function normalizeModel(model) {
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const scale = 7.4 / (Math.max(size.x, size.y, size.z) || 1);
+  const handBackPivot = new THREE.Vector3(
+    center.x,
+    box.min.y + size.y * HAND_BACK_PIVOT_LOCAL_Y,
+    center.z,
+  );
 
   model.scale.setScalar(scale);
-  model.position.copy(center).multiplyScalar(-scale);
   model.rotation.set(0.2, -0.42, 2.28);
+  model.position.set(0, 0, 0);
+  model.updateMatrixWorld(true);
+
+  const pivotAfterTransform = handBackPivot.clone().applyMatrix4(model.matrixWorld);
+  model.position.sub(pivotAfterTransform);
+  model.updateMatrixWorld(true);
 }
 
 function applyLineColor(model, skeletonHelper, lineColor) {
   const color = new THREE.Color(lineColor || DEFAULT_LINE_COLOR);
-  const emissive = color.clone().multiplyScalar(0.18);
 
   model.traverse((child) => {
     if (!child.isMesh) return;
@@ -248,7 +475,8 @@ function applyLineColor(model, skeletonHelper, lineColor) {
       }
 
       if (material.color) material.color.copy(color);
-      if ('emissive' in material) material.emissive.copy(emissive);
+      if ('emissive' in material) material.emissive.set(0x000000);
+      if ('emissiveIntensity' in material) material.emissiveIntensity = 0;
       material.needsUpdate = true;
     });
   });
@@ -258,17 +486,40 @@ function applyLineColor(model, skeletonHelper, lineColor) {
   }
 }
 
+function createFlatModelMaterial(sourceMaterial, hasVertexColors, isSkinnedMesh) {
+  const color = sourceMaterial?.color?.isColor
+    ? sourceMaterial.color.clone()
+    : new THREE.Color(DEFAULT_LINE_COLOR);
+  const material = new THREE.MeshBasicMaterial({
+    color,
+    map: sourceMaterial?.map || null,
+    alphaMap: sourceMaterial?.alphaMap || null,
+    transparent: Boolean(sourceMaterial?.transparent),
+    opacity: Number.isFinite(sourceMaterial?.opacity) ? sourceMaterial.opacity : 1,
+    side: THREE.DoubleSide,
+    vertexColors: hasVertexColors,
+  });
+
+  material.depthTest = sourceMaterial?.depthTest ?? true;
+  material.depthWrite = sourceMaterial?.depthWrite ?? true;
+  material.skinning = Boolean(isSkinnedMesh || sourceMaterial?.skinning);
+  material.morphTargets = Boolean(sourceMaterial?.morphTargets);
+  material.morphNormals = Boolean(sourceMaterial?.morphNormals);
+  material.toneMapped = false;
+  return material;
+}
+
 function applyModelLook(model, lineColor) {
   model.traverse((child) => {
     if (!child.isMesh) return;
 
     child.frustumCulled = false;
     const materials = Array.isArray(child.material) ? child.material : [child.material];
-    materials.filter(Boolean).forEach((material) => {
-      if ('roughness' in material) material.roughness = 0.52;
-      if ('metalness' in material) material.metalness = 0.08;
-      material.side = THREE.DoubleSide;
-    });
+    const hasVertexColors = Boolean(child.geometry?.attributes?.color);
+    const flatMaterials = materials.map((material) => (
+      createFlatModelMaterial(material, hasVertexColors, child.isSkinnedMesh)
+    ));
+    child.material = Array.isArray(child.material) ? flatMaterials : flatMaterials[0];
   });
 
   applyLineColor(model, null, lineColor);
@@ -590,9 +841,17 @@ export default function GloveMotionPage({
   regionLabel = DEFAULT_REGION_LABEL,
   modelUrl = MODEL_URL,
   modelLabel = MODEL_URL,
+  modelScaleX = 1,
+  initialHandSide = 'right',
+  handViews = null,
+  enableWujiBridgeByDefault = false,
+  wujiBridgeUrl = WUJI_BRIDGE_URL,
 }) {
+  const storedSettings = useMemo(() => readStoredGloveMotionSettings(), []);
+  const pageRef = useRef(null);
   const mountRef = useRef(null);
   const motionGroupRef = useRef(null);
+  const handRigsRef = useRef([]);
   const modelRef = useRef(null);
   const bonesRef = useRef(new Map());
   const originalQuaternionsRef = useRef(new Map());
@@ -605,17 +864,39 @@ export default function GloveMotionPage({
     right: readStoredCalibration('right'),
   });
   const snapshotRef = useRef(null);
+  const framesRef = useRef({ left: null, right: null, manualFrame: null });
   const useLiveRef = useRef(true);
   const bendGainRef = useRef(1);
   const lineColorRef = useRef(DEFAULT_LINE_COLOR);
   const activeHandSideRef = useRef('right');
   const skeletonHelperRef = useRef(null);
   const pressureRuntimeRef = useRef(null);
+  const modelTransformsRef = useRef(storedSettings.modelTransforms);
+  const responsiveTransformRef = useRef({ x: 0, y: 0, z: 0, scale: 1 });
+  const mirrorScaleXRef = useRef(storedSettings.mirrorScaleX ? -1 : 1);
+  const wujiSocketRef = useRef(null);
+  const wujiEnabledRef = useRef(enableWujiBridgeByDefault);
+  const wujiReconnectTimerRef = useRef(0);
+  const wujiCloseTimerRef = useRef(0);
+  const lastWujiSendAtRef = useRef(0);
+  const wujiWeightsRef = useRef({ ...DEFAULT_WUJI_WEIGHTS });
   const dataSource = useWebSocketPressureSource();
-  const [useLiveData, setUseLiveData] = useState(true);
-  const [bendGain, setBendGain] = useState(1);
-  const [lineColor, setLineColor] = useState(DEFAULT_LINE_COLOR);
-  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [useLiveData, setUseLiveData] = useState(storedSettings.useLiveData);
+  const [bendGain, setBendGain] = useState(storedSettings.bendGain);
+  const [lineColor, setLineColor] = useState(storedSettings.lineColor);
+  const [showSkeleton, setShowSkeleton] = useState(storedSettings.showSkeleton);
+  const [mirrorScaleX, setMirrorScaleX] = useState(storedSettings.mirrorScaleX);
+  const [sceneBackgroundColor, setSceneBackgroundColor] = useState(storedSettings.sceneBackgroundColor);
+  const [isSceneFullscreen, setIsSceneFullscreen] = useState(false);
+  const [wujiBridgeEnabled, setWujiBridgeEnabled] = useState(enableWujiBridgeByDefault);
+  const [wujiBridgeStatus, setWujiBridgeStatus] = useState({
+    connected: false,
+    frames: 0,
+    ack: '',
+    error: '',
+  });
+  const [wujiWeights, setWujiWeights] = useState(() => ({ ...storedSettings.wujiWeights }));
+  const [modelTransforms, setModelTransforms] = useState(() => ({ ...storedSettings.modelTransforms }));
   const [loadState, setLoadState] = useState('Loading');
   const [calibrationVersion, setCalibrationVersion] = useState(0);
   const [poseReadout, setPoseReadout] = useState({
@@ -625,6 +906,32 @@ export default function GloveMotionPage({
     rawFingerPoints: [0, 0, 0, 0, 0],
     frameAge: 'none',
   });
+
+  const handViewConfigs = useMemo(() => {
+    const views = Array.isArray(handViews) && handViews.length
+      ? handViews
+      : [{ key: 'single', side: null, x: 0, modelScaleX }];
+
+    return views.map((view, index) => ({
+      key: view.key || view.side || `hand-${index}`,
+      side: view.side === 'left' || view.side === 'right' ? view.side : null,
+      x: Number(view.x) || 0,
+      y: Number(view.y) || 0,
+      z: Number(view.z) || 0,
+      scale: Number.isFinite(Number(view.scale)) ? Number(view.scale) : 1,
+      modelScaleX: Number.isFinite(Number(view.modelScaleX)) ? Number(view.modelScaleX) : 1,
+      phase: Number(view.phase) || index * 0.58,
+    }));
+  }, [handViews, modelScaleX]);
+
+  const activeTransformKey = useMemo(() => {
+    const activeSideView = handViewConfigs.find((view) => view.side === dataSource.activeHandSide);
+    return activeSideView?.key || handViewConfigs[0]?.key || 'single';
+  }, [dataSource.activeHandSide, handViewConfigs]);
+
+  const activeModelTransform = modelTransforms[activeTransformKey] || DEFAULT_MODEL_TRANSFORM;
+  const activeTransformLabel = handViewConfigs.find((view) => view.key === activeTransformKey)?.side
+    || activeTransformKey;
 
   const activeCalibration = useMemo(
     () => calibrationRef.current[dataSource.activeHandSide] || DEFAULT_CALIBRATION,
@@ -636,8 +943,22 @@ export default function GloveMotionPage({
   }, [dataSource.snapshot]);
 
   useEffect(() => {
+    framesRef.current = {
+      left: dataSource.frames?.left || null,
+      right: dataSource.frames?.right || null,
+      manualFrame: dataSource.manualFrame || null,
+    };
+  }, [dataSource.frames, dataSource.manualFrame]);
+
+  useEffect(() => {
     activeHandSideRef.current = dataSource.activeHandSide;
   }, [dataSource.activeHandSide]);
+
+  useEffect(() => {
+    if (initialHandSide === 'left' || initialHandSide === 'right') {
+      dataSource.setActiveHandSide(initialHandSide);
+    }
+  }, [dataSource.setActiveHandSide, initialHandSide]);
 
   useEffect(() => {
     useLiveRef.current = useLiveData;
@@ -649,21 +970,341 @@ export default function GloveMotionPage({
 
   useEffect(() => {
     lineColorRef.current = lineColor;
-    if (modelRef.current) {
-      applyLineColor(modelRef.current, skeletonHelperRef.current, lineColor);
-    }
+    handRigsRef.current.forEach((rig) => {
+      if (rig.model) {
+        applyLineColor(rig.model, rig.skeletonHelper, lineColor);
+      }
+    });
   }, [lineColor]);
 
   useEffect(() => {
-    if (skeletonHelperRef.current) {
-      skeletonHelperRef.current.visible = showSkeleton;
-    }
+    handRigsRef.current.forEach((rig) => {
+      if (rig.skeletonHelper) {
+        rig.skeletonHelper.visible = showSkeleton;
+      }
+    });
   }, [showSkeleton]);
+
+  useEffect(() => {
+    mirrorScaleXRef.current = mirrorScaleX ? -1 : 1;
+    applyCurrentModelTransform();
+  }, [mirrorScaleX]);
+
+  const applyModelTransformToRig = (rig) => {
+    if (!rig?.group) {
+      return;
+    }
+
+    const transforms = modelTransformsRef.current || {};
+    const transform = transforms[rig.transformKey] || DEFAULT_MODEL_TRANSFORM;
+    const rigScale = Number.isFinite(Number(rig.scale)) ? Number(rig.scale) : 1;
+    const rigScaleX = Number.isFinite(Number(rig.modelScaleX)) ? Number(rig.modelScaleX) : 1;
+    const resolvedScale = rigScale * (Number(transform.scale) || 1);
+    const mirrorScaleXValue = mirrorScaleXRef.current;
+
+    rig.group.position.set(
+      (Number(rig.x) || 0) + (Number(transform.x) || 0),
+      (Number(rig.y) || 0) + (Number(transform.y) || 0),
+      (Number(rig.z) || 0) + (Number(transform.z) || 0),
+    );
+    rig.group.scale.set(
+      rigScaleX * resolvedScale * mirrorScaleXValue,
+      resolvedScale,
+      resolvedScale,
+    );
+    updateManualQuaternion(transform, rig.manualQuaternion);
+  };
+
+  const applyCurrentModelTransform = () => {
+    const motionGroup = motionGroupRef.current;
+    if (!motionGroup) {
+      return;
+    }
+
+    const base = responsiveTransformRef.current;
+    motionGroup.position.set(base.x, base.y, base.z);
+    motionGroup.scale.setScalar(base.scale);
+    handRigsRef.current.forEach(applyModelTransformToRig);
+  };
+
+  const updateModelTransform = (key, value) => {
+    setModelTransforms((current) => ({
+      ...current,
+      [activeTransformKey]: {
+        ...(current[activeTransformKey] || DEFAULT_MODEL_TRANSFORM),
+        [key]: Number(value),
+      },
+    }));
+  };
+
+  const resetModelTransform = () => {
+    setModelTransforms((current) => ({
+      ...current,
+      [activeTransformKey]: { ...DEFAULT_MODEL_TRANSFORM },
+    }));
+  };
+
+  const enterSceneFullscreen = () => {
+    setIsSceneFullscreen(true);
+    const element = pageRef.current;
+    if (element?.requestFullscreen) {
+      element.requestFullscreen().catch(() => {});
+    }
+  };
+
+  const exitSceneFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => setIsSceneFullscreen(false));
+      return;
+    }
+
+    setIsSceneFullscreen(false);
+  };
+
+  const updateWujiWeight = (key, value) => {
+    setWujiWeights((current) => ({
+      ...current,
+      [key]: Number(value),
+    }));
+  };
+
+  const resetWujiWeights = () => {
+    setWujiWeights({ ...DEFAULT_WUJI_WEIGHTS });
+  };
+
+  const sendWujiZeroFrames = () => {
+    const socket = wujiSocketRef.current;
+    if (socket?.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    for (let index = 0; index < WUJI_ZERO_FRAME_COUNT; index += 1) {
+      socket.send(wujiSnapshotPayload(WUJI_ZERO_TARGET, wujiWeightsRef.current));
+    }
+  };
+
+  const closeWujiBridge = ({ sendZero = true } = {}) => {
+    window.clearTimeout(wujiReconnectTimerRef.current);
+    window.clearTimeout(wujiCloseTimerRef.current);
+    wujiReconnectTimerRef.current = 0;
+    wujiCloseTimerRef.current = 0;
+
+    const socket = wujiSocketRef.current;
+    if (!socket) {
+      setWujiBridgeStatus((current) => ({ ...current, connected: false }));
+      return;
+    }
+
+    if (sendZero && socket.readyState === WebSocket.OPEN) {
+      sendWujiZeroFrames();
+      wujiCloseTimerRef.current = window.setTimeout(() => {
+        if (wujiSocketRef.current === socket) {
+          socket.close();
+        }
+      }, 180);
+      return;
+    }
+
+    socket.close();
+  };
+
+  const connectWujiBridge = () => {
+    if (typeof WebSocket === 'undefined') {
+      setWujiBridgeStatus((current) => ({
+        ...current,
+        connected: false,
+        error: 'WebSocket unavailable',
+      }));
+      return;
+    }
+
+    const currentSocket = wujiSocketRef.current;
+    if (currentSocket && currentSocket.readyState <= WebSocket.OPEN) {
+      return;
+    }
+
+    window.clearTimeout(wujiReconnectTimerRef.current);
+    const socket = new WebSocket(wujiBridgeUrl);
+    wujiSocketRef.current = socket;
+    setWujiBridgeStatus((current) => ({ ...current, error: '', ack: 'connecting' }));
+
+    socket.addEventListener('open', () => {
+      if (wujiSocketRef.current !== socket) return;
+      setWujiBridgeStatus((current) => ({
+        ...current,
+        connected: true,
+        error: '',
+        ack: 'connected',
+      }));
+    });
+
+    socket.addEventListener('message', (event) => {
+      if (wujiSocketRef.current !== socket) return;
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'error') {
+          setWujiBridgeStatus((current) => ({
+            ...current,
+            ack: '',
+            error: message.message || 'bridge error',
+          }));
+          return;
+        }
+
+        if (message.type === 'ack') {
+          setWujiBridgeStatus((current) => ({
+            ...current,
+            connected: true,
+            error: message.hardware_error || '',
+            ack: `ack ${message.frames ?? current.frames}`,
+          }));
+          return;
+        }
+
+        if (message.type === 'status') {
+          setWujiBridgeStatus((current) => ({
+            ...current,
+            connected: true,
+            error: message.hardware_error || '',
+            ack: message.live ? 'live' : 'status',
+          }));
+        }
+      } catch {
+        setWujiBridgeStatus((current) => ({ ...current, ack: 'message' }));
+      }
+    });
+
+    socket.addEventListener('error', () => {
+      if (wujiSocketRef.current !== socket) return;
+      setWujiBridgeStatus((current) => ({
+        ...current,
+        connected: false,
+        error: 'bridge unavailable',
+      }));
+    });
+
+    socket.addEventListener('close', () => {
+      if (wujiSocketRef.current === socket) {
+        wujiSocketRef.current = null;
+      }
+      setWujiBridgeStatus((current) => ({
+        ...current,
+        connected: false,
+        ack: wujiEnabledRef.current ? 'reconnecting' : 'closed',
+      }));
+
+      if (wujiEnabledRef.current) {
+        wujiReconnectTimerRef.current = window.setTimeout(connectWujiBridge, 1200);
+      }
+    });
+  };
+
+  const sendWujiBends = (bends) => {
+    if (!wujiEnabledRef.current || !Array.isArray(bends)) {
+      return;
+    }
+
+    const now = performance.now();
+    if (now - lastWujiSendAtRef.current < WUJI_SEND_INTERVAL_MS) {
+      return;
+    }
+
+    const socket = wujiSocketRef.current;
+    if (socket?.readyState !== WebSocket.OPEN) {
+      connectWujiBridge();
+      return;
+    }
+
+    lastWujiSendAtRef.current = now;
+    const target = bendValuesToWujiTarget(
+      bends.map((bend) => clamp01((Number(bend) || 0) * bendGainRef.current)),
+      wujiWeightsRef.current,
+    );
+    socket.send(wujiSnapshotPayload(target, wujiWeightsRef.current));
+    setWujiBridgeStatus((current) => ({
+      ...current,
+      connected: true,
+      frames: current.frames + 1,
+      ack: `sent ${current.frames + 1}`,
+      error: '',
+    }));
+  };
+
+  useEffect(() => {
+    modelTransformsRef.current = modelTransforms;
+    applyCurrentModelTransform();
+  }, [modelTransforms]);
+
+  useEffect(() => {
+    writeStoredGloveMotionSettings({
+      useLiveData,
+      bendGain,
+      lineColor,
+      showSkeleton,
+      mirrorScaleX,
+      sceneBackgroundColor,
+      wujiWeights,
+      modelTransforms,
+    });
+  }, [
+    useLiveData,
+    bendGain,
+    lineColor,
+    showSkeleton,
+    mirrorScaleX,
+    sceneBackgroundColor,
+    wujiWeights,
+    modelTransforms,
+  ]);
+
+  useEffect(() => {
+    setModelTransforms((current) => {
+      let changed = false;
+      const next = { ...current };
+      handViewConfigs.forEach((view) => {
+        if (!next[view.key]) {
+          next[view.key] = { ...DEFAULT_MODEL_TRANSFORM };
+          changed = true;
+        }
+      });
+
+      return changed ? next : current;
+    });
+  }, [handViewConfigs]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsSceneFullscreen(document.fullscreenElement === pageRef.current);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    wujiWeightsRef.current = wujiWeights;
+  }, [wujiWeights]);
+
+  useEffect(() => {
+    wujiEnabledRef.current = wujiBridgeEnabled;
+
+    if (wujiBridgeEnabled) {
+      connectWujiBridge();
+    } else {
+      closeWujiBridge({ sendZero: true });
+    }
+
+    return () => {
+      wujiEnabledRef.current = false;
+      closeWujiBridge({ sendZero: true });
+    };
+  }, [wujiBridgeEnabled, wujiBridgeUrl]);
 
   useEffect(() => {
     const mount = mountRef.current;
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x06121a, 10, 30);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -684,107 +1325,173 @@ export default function GloveMotionPage({
     scene.add(motionGroup);
     motionGroupRef.current = motionGroup;
 
-    scene.add(new THREE.HemisphereLight(0xc9ffff, 0x061018, 1.12));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.05);
-    keyLight.position.set(-4, 6.2, 8);
-    scene.add(keyLight);
-    const rimLight = new THREE.PointLight(0x00fff7, 1.6, 20);
-    rimLight.position.set(4.5, 1.8, -4);
-    scene.add(rimLight);
-
     const grid = new THREE.GridHelper(10, 26, 0x1edee6, 0x123b4b);
     grid.position.y = -3.9;
     grid.material.transparent = true;
     grid.material.opacity = 0.22;
     scene.add(grid);
 
-    let model = null;
     let frameId = 0;
     let disposed = false;
     let lastReadoutAt = 0;
-    let lastPressureFrameAt = -1;
     let elapsed = 0;
     const clock = new THREE.Clock();
-    const liveFingerPoints = [0, 0, 0, 0, 0];
-    const targetQuaternion = new THREE.Quaternion();
-    const displayedQuaternion = new THREE.Quaternion();
-    displayedQuaternionRef.current = displayedQuaternion;
     const curlQuaternion = new THREE.Quaternion();
-    const simulatedFrame = {
-      euler: new THREE.Euler(0, 0, 0, 'XYZ'),
-      quaternion: new THREE.Quaternion(),
-      rotate: [0, 0, 0, 1],
-      rawFingerPoints: [0, 0, 0, 0, 0],
+    const loader = new GLTFLoader();
+    const handRigs = handViewConfigs.map((view) => {
+      const group = new THREE.Group();
+      motionGroup.add(group);
+
+      return {
+        ...view,
+        transformKey: view.key,
+        group,
+        model: null,
+        skeletonHelper: null,
+        bones: new Map(),
+        originalQuaternions: new Map(),
+        pressureRuntime: null,
+        lastPressureFrameAt: -1,
+        liveFingerPoints: [0, 0, 0, 0, 0],
+        quaternionState: { base: null, baseInv: null },
+        targetQuaternion: new THREE.Quaternion(),
+        displayedQuaternion: new THREE.Quaternion(),
+        manualQuaternion: new THREE.Quaternion(),
+        bend: [...EMPTY_BEND],
+        latestRawFingerPoints: [0, 0, 0, 0, 0],
+        simulatedFrame: {
+          euler: new THREE.Euler(0, 0, 0, 'XYZ'),
+          quaternion: new THREE.Quaternion(),
+          rotate: [0, 0, 0, 1],
+          rawFingerPoints: [0, 0, 0, 0, 0],
+        },
+        zeroFrame: {
+          rotate: [0, 0, 0, 1],
+          rawFingerPoints: [0, 0, 0, 0, 0],
+        },
+        bonesText: '',
+        regionText: '',
+      };
+    });
+    handRigsRef.current = handRigs;
+    applyCurrentModelTransform();
+    displayedQuaternionRef.current = handRigs[0]?.displayedQuaternion || null;
+
+    const summarizeLoadState = () => {
+      if (!handRigs.length) {
+        setLoadState('No hands');
+        return;
+      }
+
+      const loadedCount = handRigs.filter((rig) => rig.model).length;
+      const regionCount = handRigs.filter((rig) => rig.regionText).length;
+      const firstLoaded = handRigs.find((rig) => rig.bonesText);
+      if (handRigs.length === 1) {
+        setLoadState([firstLoaded?.bonesText, firstLoaded?.regionText].filter(Boolean).join(' / ') || 'Loading');
+        return;
+      }
+
+      const regionText = regionCount === handRigs.length
+        ? handRigs.map((rig) => `${rig.side || rig.key}: ${rig.regionText}`).join(' / ')
+        : `${loadedCount}/${handRigs.length} hands`;
+      setLoadState(`${regionText}${firstLoaded?.bonesText ? ` / ${firstLoaded.bonesText}` : ''}`);
     };
 
-    new GLTFLoader().load(
-      modelUrl,
-      (gltf) => {
-        if (disposed) {
-          disposeObject(gltf.scene);
-          return;
-        }
+    const getRigSnapshot = (rig) => {
+      if (!rig.side) {
+        return snapshotRef.current;
+      }
 
-        model = gltf.scene;
-        modelRef.current = model;
-        normalizeModel(model);
-        applyModelLook(model, lineColorRef.current);
-        motionGroup.add(model);
+      const frames = framesRef.current;
+      if (frames.manualFrame?.handSide === rig.side) {
+        return frames.manualFrame;
+      }
 
-        const bones = [];
-        model.traverse((child) => {
-          if (child.isBone && !bones.some((bone) => bone.uuid === child.uuid)) {
-            bones.push(child);
+      return frames[rig.side] || null;
+    };
+
+    handRigs.forEach((rig, rigIndex) => {
+      loader.load(
+        modelUrl,
+        (gltf) => {
+          if (disposed) {
+            disposeObject(gltf.scene);
+            return;
           }
-        });
-        bonesRef.current = new Map(bones.map((bone) => [bone.name, bone]));
-        originalQuaternionsRef.current = new Map(
-          bones.map((bone) => [bone.name, bone.quaternion.clone()]),
-        );
 
-        const skeletonHelper = new THREE.SkeletonHelper(model);
-        skeletonHelper.material.color.set(lineColorRef.current);
-        skeletonHelper.material.transparent = true;
-        skeletonHelper.material.opacity = 0.72;
-        skeletonHelper.material.depthTest = false;
-        skeletonHelper.renderOrder = 8;
-        skeletonHelper.visible = showSkeleton;
-        scene.add(skeletonHelper);
-        skeletonHelperRef.current = skeletonHelper;
-        applyLineColor(model, skeletonHelper, lineColorRef.current);
+          const model = gltf.scene;
+          rig.model = model;
+          normalizeModel(model);
+          applyModelLook(model, lineColorRef.current);
+          rig.group.add(model);
 
-        const skinnedMeshCount = [];
-        model.traverse((child) => {
-          if (child.isSkinnedMesh) skinnedMeshCount.push(child);
-        });
-        setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin`);
-
-        resolveRegionData(regionDataSource)
-          .then((regionData) => {
-            if (disposed || !model) return;
-
-            const result = applyRegionColors(model, regionData, regionColorOptions);
-            pressureRuntimeRef.current = result.pressureRuntime;
-            applyLineColor(model, skeletonHelper, lineColorRef.current);
-            setLoadState(
-              `${bones.length} bones / ${skinnedMeshCount.length} skin / ${
-                result.colored ? `${result.lineCount} ${regionLabel}` : `no ${regionLabel}`
-              }`,
-            );
-          })
-          .catch((error) => {
-            console.error('Failed to apply hand region colors:', error);
-            if (!disposed) {
-              setLoadState(`${bones.length} bones / ${skinnedMeshCount.length} skin / region failed`);
+          const bones = [];
+          model.traverse((child) => {
+            if (child.isBone && !bones.some((bone) => bone.uuid === child.uuid)) {
+              bones.push(child);
             }
           });
-      },
-      undefined,
-      (error) => {
-        console.error('Failed to load glove motion GLB:', error);
-        if (!disposed) setLoadState('Load failed');
-      },
-    );
+          rig.bones = new Map(bones.map((bone) => [bone.name, bone]));
+          rig.originalQuaternions = new Map(
+            bones.map((bone) => [bone.name, bone.quaternion.clone()]),
+          );
+
+          const skeletonHelper = new THREE.SkeletonHelper(model);
+          skeletonHelper.material.color.set(lineColorRef.current);
+          skeletonHelper.material.transparent = true;
+          skeletonHelper.material.opacity = 0.72;
+          skeletonHelper.material.depthTest = false;
+          skeletonHelper.renderOrder = 8;
+          skeletonHelper.visible = showSkeleton;
+          scene.add(skeletonHelper);
+          rig.skeletonHelper = skeletonHelper;
+          applyLineColor(model, skeletonHelper, lineColorRef.current);
+
+          const skinnedMeshCount = [];
+          model.traverse((child) => {
+            if (child.isSkinnedMesh) skinnedMeshCount.push(child);
+          });
+          rig.bonesText = `${bones.length} bones / ${skinnedMeshCount.length} skin`;
+
+          if (rigIndex === 0) {
+            modelRef.current = model;
+            bonesRef.current = rig.bones;
+            originalQuaternionsRef.current = rig.originalQuaternions;
+            skeletonHelperRef.current = skeletonHelper;
+          }
+          summarizeLoadState();
+
+          resolveRegionData(regionDataSource)
+            .then((regionData) => {
+              if (disposed || !rig.model) return;
+
+              const result = applyRegionColors(rig.model, regionData, regionColorOptions);
+              rig.pressureRuntime = result.pressureRuntime;
+              if (rigIndex === 0) {
+                pressureRuntimeRef.current = result.pressureRuntime;
+              }
+              applyLineColor(rig.model, rig.skeletonHelper, lineColorRef.current);
+              rig.regionText = result.colored ? `${result.lineCount} ${regionLabel}` : `no ${regionLabel}`;
+              summarizeLoadState();
+            })
+            .catch((error) => {
+              console.error('Failed to apply hand region colors:', error);
+              if (!disposed) {
+                rig.regionText = 'region failed';
+                summarizeLoadState();
+              }
+            });
+        },
+        undefined,
+        (error) => {
+          console.error('Failed to load glove motion GLB:', error);
+          if (!disposed) {
+            rig.bonesText = 'Load failed';
+            summarizeLoadState();
+          }
+        },
+      );
+    });
 
     const resize = () => {
       const { clientWidth, clientHeight } = mount;
@@ -794,46 +1501,83 @@ export default function GloveMotionPage({
       camera.aspect = clientWidth / Math.max(clientHeight, 1);
       camera.position.set(0, compact ? 0.15 : 0.35, compact ? 16.8 : 14.2);
       camera.updateProjectionMatrix();
-      motionGroup.scale.setScalar(compact ? 0.74 : 1);
-      motionGroup.position.set(compact ? -0.2 : 0, compact ? 0.15 : 0, 0);
+      responsiveTransformRef.current = {
+        x: compact ? -0.2 : 0,
+        y: compact ? 0.15 : 0,
+        z: 0,
+        scale: compact ? 0.74 : 1,
+      };
+      applyCurrentModelTransform();
     };
 
     const animate = () => {
       const delta = Math.min(clock.getDelta(), 0.05);
       elapsed += delta;
-      const snapshot = snapshotRef.current;
-      const pressureFrameAt = snapshot?.timestamp || 0;
-      if (pressureFrameAt !== lastPressureFrameAt) {
-        lastPressureFrameAt = pressureFrameAt;
-        updateNew147PressureColors(pressureRuntimeRef.current, snapshot?.mappedPressureData);
+      let readoutRig = handRigs[0] || null;
+      let readoutSnapshot = null;
+      let readoutHasLive = false;
+      let readoutRawFingerPoints = EMPTY_BEND;
+
+      handRigs.forEach((rig) => {
+        const snapshot = getRigSnapshot(rig);
+        const pressureFrameAt = snapshot?.timestamp || 0;
+        if (pressureFrameAt !== rig.lastPressureFrameAt) {
+          rig.lastPressureFrameAt = pressureFrameAt;
+          updateNew147PressureColors(rig.pressureRuntime, snapshot?.mappedPressureData);
+        }
+
+        const liveRotate = snapshot?.rotate;
+        const hasMappedFingerPoints = extractFingerRootPoints(snapshot?.mappedPressureData, rig.liveFingerPoints);
+        const hasLivePose = useLiveRef.current && isUsableRotate(liveRotate);
+        const hasLiveBend = useLiveRef.current && hasMappedFingerPoints;
+        const useZeroFallback = handRigs.length > 1 && rig.side;
+        const fallbackFrame = hasLivePose && hasLiveBend
+          ? null
+          : useZeroFallback
+            ? rig.zeroFrame
+            : writeSimulatedFrame(elapsed + rig.phase, rig.simulatedFrame);
+        const rotate = hasLivePose ? liveRotate : fallbackFrame.rotate;
+        const rawFingerPoints = hasLiveBend ? rig.liveFingerPoints : fallbackFrame.rawFingerPoints;
+        transformQuaternionForRender(rotate, rig.quaternionState, rig.targetQuaternion);
+
+        const smoothing = 1 - Math.exp(-delta * (hasLivePose ? 18 : 10));
+        rig.displayedQuaternion.slerp(rig.targetQuaternion, smoothing);
+        rig.group.quaternion.copy(rig.manualQuaternion).multiply(rig.displayedQuaternion);
+        rig.latestRawFingerPoints = rawFingerPoints.slice(0, 5);
+        rig.bend = updateFingerBend(
+          rig.bend,
+          rawFingerPoints,
+          calibrationRef.current[rig.side || snapshot?.handSide || activeHandSideRef.current] || DEFAULT_CALIBRATION,
+        );
+        if (hasLiveBend && (!rig.side || rig.side === activeHandSideRef.current)) {
+          sendWujiBends(rig.bend);
+        }
+        applyFingerBend(
+          rig.bones,
+          rig.originalQuaternions,
+          rig.bend,
+          bendGainRef.current,
+          curlQuaternion,
+        );
+        rig.model?.updateMatrixWorld(true);
+
+        if (!readoutRig || rig.side === activeHandSideRef.current) {
+          readoutRig = rig;
+          readoutSnapshot = snapshot;
+          readoutHasLive = hasLivePose || hasLiveBend;
+          readoutRawFingerPoints = rawFingerPoints;
+        }
+      });
+
+      if (readoutRig) {
+        latestRawFingerPointsRef.current = readoutRig.latestRawFingerPoints.slice(0, 5);
+        bendRef.current = readoutRig.bend;
+        displayedQuaternionRef.current = readoutRig.displayedQuaternion;
+        quaternionStateRef.current = readoutRig.quaternionState;
+        bonesRef.current = readoutRig.bones;
+        originalQuaternionsRef.current = readoutRig.originalQuaternions;
+        pressureRuntimeRef.current = readoutRig.pressureRuntime;
       }
-
-      const liveRotate = snapshot?.rotate;
-      const hasMappedFingerPoints = extractFingerRootPoints(snapshot?.mappedPressureData, liveFingerPoints);
-      const hasLivePose = useLiveRef.current && isUsableRotate(liveRotate);
-      const hasLiveBend = useLiveRef.current && hasMappedFingerPoints;
-      const fallbackFrame = hasLivePose && hasLiveBend ? null : writeSimulatedFrame(elapsed, simulatedFrame);
-      const rotate = hasLivePose ? liveRotate : fallbackFrame.rotate;
-      const rawFingerPoints = hasLiveBend ? liveFingerPoints : fallbackFrame.rawFingerPoints;
-      transformQuaternionForRender(rotate, quaternionStateRef.current, targetQuaternion);
-
-      const smoothing = 1 - Math.exp(-delta * (hasLivePose ? 18 : 10));
-      displayedQuaternion.slerp(targetQuaternion, smoothing);
-      motionGroup.quaternion.copy(displayedQuaternion);
-      latestRawFingerPointsRef.current = rawFingerPoints;
-      bendRef.current = updateFingerBend(
-        bendRef.current,
-        rawFingerPoints,
-        calibrationRef.current[snapshot?.handSide || activeHandSideRef.current] || DEFAULT_CALIBRATION,
-      );
-      applyFingerBend(
-        bonesRef.current,
-        originalQuaternionsRef.current,
-        bendRef.current,
-        bendGainRef.current,
-        curlQuaternion,
-      );
-      model?.updateMatrixWorld(true);
 
       controls.update();
       renderer.render(scene, camera);
@@ -841,11 +1585,11 @@ export default function GloveMotionPage({
       if (performance.now() - lastReadoutAt > 250) {
         lastReadoutAt = performance.now();
         setPoseReadout({
-          source: hasLivePose || hasLiveBend ? 'LIVE' : 'SIM',
-          quaternion: formatQuaternion(displayedQuaternion),
-          bends: bendRef.current.map((value) => Math.round(value * 100)),
-          rawFingerPoints: rawFingerPoints.map((value) => Math.round(value)),
-          frameAge: snapshot?.timestamp ? `${Math.max(0, Date.now() - snapshot.timestamp)} ms` : 'none',
+          source: readoutHasLive ? 'LIVE' : 'SIM',
+          quaternion: formatQuaternion(readoutRig?.displayedQuaternion || new THREE.Quaternion()),
+          bends: (readoutRig?.bend || EMPTY_BEND).map((value) => Math.round(value * 100)),
+          rawFingerPoints: Array.from(readoutRawFingerPoints || EMPTY_BEND).map((value) => Math.round(value)),
+          frameAge: readoutSnapshot?.timestamp ? `${Math.max(0, Date.now() - readoutSnapshot.timestamp)} ms` : 'none',
         });
       }
 
@@ -861,14 +1605,18 @@ export default function GloveMotionPage({
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', resize);
       controls.dispose();
-      skeletonHelperRef.current?.geometry?.dispose();
-      skeletonHelperRef.current?.material?.dispose();
-      if (skeletonHelperRef.current?.parent) {
-        skeletonHelperRef.current.parent.remove(skeletonHelperRef.current);
-      }
+      handRigs.forEach((rig) => {
+        rig.skeletonHelper?.geometry?.dispose();
+        rig.skeletonHelper?.material?.dispose();
+        if (rig.skeletonHelper?.parent) {
+          rig.skeletonHelper.parent.remove(rig.skeletonHelper);
+        }
+        if (rig.model) {
+          disposeObject(rig.model);
+        }
+      });
       skeletonHelperRef.current = null;
       pressureRuntimeRef.current = null;
-      if (model) disposeObject(model);
       modelRef.current = null;
       grid.geometry.dispose();
       grid.material.dispose();
@@ -876,15 +1624,20 @@ export default function GloveMotionPage({
       renderer.domElement.remove();
       motionGroupRef.current = null;
       displayedQuaternionRef.current = null;
+      handRigsRef.current = [];
       bonesRef.current = new Map();
       originalQuaternionsRef.current = new Map();
     };
-  }, [modelUrl, regionColorOptions, regionDataSource, regionLabel]);
+  }, [handViewConfigs, modelUrl, regionColorOptions, regionDataSource, regionLabel]);
 
   const resetQuaternionBase = () => {
     quaternionStateRef.current = { base: null, baseInv: null };
     displayedQuaternionRef.current?.identity();
-    motionGroupRef.current?.quaternion.identity();
+    handRigsRef.current.forEach((rig) => {
+      rig.quaternionState = { base: null, baseInv: null };
+      rig.displayedQuaternion.identity();
+      rig.group.quaternion.copy(rig.manualQuaternion);
+    });
   };
 
   const captureCalibration = (index) => {
@@ -901,14 +1654,20 @@ export default function GloveMotionPage({
   };
 
   return (
-    <main className="glove-motion-page">
-      <nav className="app-nav" style={{ '--nav-count': 7 }} aria-label="Page view">
+    <main
+      ref={pageRef}
+      className={`glove-motion-page${isSceneFullscreen ? ' scene-fullscreen' : ''}`}
+      style={{ '--glove-background-color': sceneBackgroundColor }}
+    >
+      <nav className="app-nav" style={{ '--nav-count': 9 }} aria-label="Page view">
         <button type="button" onClick={() => onNavigate('terrain')}>Pressure</button>
         <button type="button" onClick={() => onNavigate('hand')}>Wireframe</button>
         <button type="button" onClick={() => onNavigate('obj')}>OBJ</button>
         <button type="button" onClick={() => onNavigate('bones')}>Bones</button>
         <button className={pageKey === 'gloveMotion' ? 'active' : ''} type="button" onClick={() => onNavigate('gloveMotion')}>Motion</button>
+        <button className={pageKey === 'motiondouble' ? 'active' : ''} type="button" onClick={() => onNavigate('motiondouble')}>MotionDouble</button>
         <button className={pageKey === 'motion2' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2')}>Motion2</button>
+        <button className={pageKey === 'motion2double' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2double')}>M2Double</button>
         <button type="button" onClick={() => onNavigate('points')}>Points</button>
       </nav>
 
@@ -923,6 +1682,10 @@ export default function GloveMotionPage({
           <strong className={poseReadout.source === 'LIVE' ? 'online' : ''}>{poseReadout.source}</strong>
           <span>{dataSource.status.connected ? 'WS connected' : dataSource.status.connecting ? 'Connecting' : 'Simulation'}</span>
         </div>
+
+        <button className="glove-fullscreen-button" type="button" onClick={enterSceneFullscreen}>
+          Fullscreen 3D
+        </button>
 
         <div className="glove-side-toggle" role="group" aria-label="Active hand side">
           {['left', 'right'].map((side) => (
@@ -959,6 +1722,49 @@ export default function GloveMotionPage({
           />
           <span>Skeleton</span>
         </label>
+        <button
+          className={`glove-toggle-button${mirrorScaleX ? ' active' : ''}`}
+          type="button"
+          aria-pressed={mirrorScaleX}
+          onClick={() => setMirrorScaleX((value) => !value)}
+        >
+          {mirrorScaleX ? 'scale.x = -1' : 'scale.x = 1'}
+        </button>
+        <label className="glove-toggle-control">
+          <input
+            type="checkbox"
+            checked={wujiBridgeEnabled}
+            onChange={(event) => setWujiBridgeEnabled(event.target.checked)}
+          />
+          <span>Wuji bridge</span>
+        </label>
+        <div className="glove-bridge-status" title={wujiBridgeUrl}>
+          <span>{wujiBridgeUrl}</span>
+          <strong className={wujiBridgeEnabled && wujiBridgeStatus.connected && !wujiBridgeStatus.error ? 'online' : ''}>
+            {formatWujiStatus(wujiBridgeEnabled, wujiBridgeStatus)}
+          </strong>
+        </div>
+        <div className="glove-wuji-weight-control" aria-label="Wuji bridge bend weights">
+          <div className="glove-wuji-weight-heading">
+            <span>Wuji weights</span>
+            <button type="button" onClick={resetWujiWeights}>Reset</button>
+          </div>
+          {WUJI_WEIGHT_CONTROLS.map((control) => (
+            <label key={control.key}>
+              <span>{control.label}</span>
+              <input
+                type="range"
+                min={control.min}
+                max={control.max}
+                step={control.step}
+                value={wujiWeights[control.key]}
+                onChange={(event) => updateWujiWeight(control.key, event.target.value)}
+                onInput={(event) => updateWujiWeight(control.key, event.target.value)}
+              />
+              <strong>{wujiWeights[control.key].toFixed(2)}</strong>
+            </label>
+          ))}
+        </div>
 
         <label className="glove-bend-gain-control">
           <span>Bend gain</span>
@@ -997,10 +1803,46 @@ export default function GloveMotionPage({
           </div>
         </div>
 
+        <div className="glove-background-color-control" aria-label="3D background color">
+          <label>
+            <span>Background</span>
+            <input
+              type="color"
+              value={sceneBackgroundColor}
+              onChange={(event) => setSceneBackgroundColor(event.target.value)}
+            />
+          </label>
+          <button type="button" onClick={() => setSceneBackgroundColor(DEFAULT_SCENE_BACKGROUND_COLOR)}>
+            Reset
+          </button>
+        </div>
+
+        <div className="glove-transform-control" aria-label="Model transform controls">
+          <div className="glove-transform-heading">
+            <span>Transform: {activeTransformLabel}</span>
+            <button type="button" onClick={resetModelTransform}>Reset</button>
+          </div>
+          {MODEL_TRANSFORM_CONTROLS.map((control) => (
+            <label key={control.key}>
+              <span>{control.label}</span>
+              <input
+                type="range"
+                min={control.min}
+                max={control.max}
+                step={control.step}
+                value={activeModelTransform[control.key]}
+                onChange={(event) => updateModelTransform(control.key, event.target.value)}
+                onInput={(event) => updateModelTransform(control.key, event.target.value)}
+              />
+              <strong>{formatTransformValue(control.key, activeModelTransform[control.key])}</strong>
+            </label>
+          ))}
+        </div>
+
         <div className="glove-motion-actions">
           <button type="button" onClick={resetQuaternionBase}>Zero Q</button>
-          <button type="button" onClick={() => captureCalibration(0)}>Open Cal</button>
-          <button type="button" onClick={() => captureCalibration(1)}>Bend Cal</button>
+          <button type="button" onClick={() => captureCalibration(0)}>Open Cal {dataSource.activeHandSide}</button>
+          <button type="button" onClick={() => captureCalibration(1)}>Bend Cal {dataSource.activeHandSide}</button>
         </div>
 
         <dl className="glove-motion-readout">
@@ -1028,6 +1870,11 @@ export default function GloveMotionPage({
       </section>
 
       <div className="glove-motion-canvas" ref={mountRef} aria-label="Glove motion hand model" />
+      {isSceneFullscreen && (
+        <button className="glove-scene-fullscreen-exit" type="button" onClick={exitSceneFullscreen}>
+          Exit
+        </button>
+      )}
     </main>
   );
 }

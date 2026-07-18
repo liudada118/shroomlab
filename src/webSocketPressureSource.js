@@ -7,6 +7,7 @@ import {
 import {
   commitSerialPressureFrame,
   getActiveSerialHandSide,
+  getSerialPressureFramesSnapshot,
   getSerialPressureSnapshot,
   setActiveSerialHandSide,
   subscribeSerialPressureSource,
@@ -32,6 +33,38 @@ function normalizeHandSide(value, fallback = 'right') {
   }
 
   return fallback;
+}
+
+function handSideFromPayload(payload, fallbackHandSide) {
+  const explicitSide = normalizeHandSide(
+    payload.handSide ?? payload.side ?? payload.hand ?? payload.packetType ?? payload.type,
+    null,
+  );
+  if (explicitSide) {
+    return explicitSide;
+  }
+
+  if (payload.sitData != null || payload.sitFlag === true) {
+    return 'left';
+  }
+
+  if (payload.backData != null || payload.backFlag === true) {
+    return 'right';
+  }
+
+  return fallbackHandSide;
+}
+
+function handSideFromTopLevelMappedPayload(payload, fallbackHandSide) {
+  if (payload.backData != null) {
+    return 'right';
+  }
+
+  if (payload.sitData != null) {
+    return 'left';
+  }
+
+  return fallbackHandSide;
 }
 
 function toPressureArray(value) {
@@ -67,8 +100,11 @@ function pickPressureArray(payload) {
 
 function pickFrameData(payload) {
   if (Array.isArray(payload) || ArrayBuffer.isView(payload)) {
-    const pressureArray = toPressureArray(payload);
-    return pressureArray?.length === 256 ? { pressureData: pressureArray } : null;
+    const array = toPressureArray(payload);
+    if (array?.length === 256) {
+      return { pressureData: array };
+    }
+    return array?.length ? { mappedPressureData: array } : null;
   }
 
   if (!payload || typeof payload !== 'object') {
@@ -82,6 +118,15 @@ function pickFrameData(payload) {
 
   const pressureData = pickPressureArray(payload);
   return pressureData?.length === 256 ? { pressureData } : null;
+}
+
+function pickTopLevelMappedFrameData(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return null;
+  }
+
+  const mappedPressureData = toPressureArray(payload.newArr147 ?? payload.mappedPressureData);
+  return mappedPressureData?.length ? { mappedPressureData } : null;
 }
 
 function parseJsonMessage(data) {
@@ -133,13 +178,22 @@ function framesFromPayload(payload, fallbackHandSide = 'right') {
   }
 
   const frames = [];
-  const fallbackSide = normalizeHandSide(
-    payload.handSide ?? payload.side ?? payload.hand ?? payload.packetType ?? payload.type,
-    fallbackHandSide,
-  );
-  const directFrameData = pickFrameData(payload);
+  const topLevelMappedFrameData = pickTopLevelMappedFrameData(payload);
+  if (topLevelMappedFrameData) {
+    return [{
+      handSide: handSideFromTopLevelMappedPayload(payload, fallbackHandSide),
+      ...topLevelMappedFrameData,
+      rotate: payload.rotate,
+      timestamp: payload.timestamp || Date.now(),
+    }];
+  }
 
-  if (directFrameData) {
+  const fallbackSide = handSideFromPayload(payload, fallbackHandSide);
+  const directFrameData = pickFrameData(payload);
+  const hasSideSpecificData = ['sitData', 'leftData', 'left', 'backData', 'rightData', 'right']
+    .some((key) => pickFrameData(payload[key]));
+
+  if (directFrameData && !hasSideSpecificData) {
     frames.push({
       handSide: fallbackSide,
       ...directFrameData,
@@ -187,6 +241,7 @@ function createInitialStatus(url) {
 export function useWebSocketPressureSource(url = DEFAULT_PRESSURE_WS_URL) {
   const [status, setStatus] = useState(() => createInitialStatus(url));
   const [snapshot, setSnapshot] = useState(() => getSerialPressureSnapshot());
+  const [framesSnapshot, setFramesSnapshot] = useState(() => getSerialPressureFramesSnapshot());
   const [activeHandSide, setActiveHandSideState] = useState(getActiveSerialHandSide);
   const socketRef = useRef(null);
   const reconnectTimerRef = useRef(0);
@@ -196,6 +251,7 @@ export function useWebSocketPressureSource(url = DEFAULT_PRESSURE_WS_URL) {
 
   useEffect(() => subscribeSerialPressureSource(() => {
     setSnapshot(getSerialPressureSnapshot());
+    setFramesSnapshot(getSerialPressureFramesSnapshot());
     setActiveHandSideState(getActiveSerialHandSide());
   }), []);
 
@@ -379,6 +435,8 @@ export function useWebSocketPressureSource(url = DEFAULT_PRESSURE_WS_URL) {
   return {
     status,
     snapshot,
+    frames: framesSnapshot.frames,
+    manualFrame: framesSnapshot.manualFrame,
     activeHandSide,
     setActiveHandSide: setActiveSerialHandSide,
     connect,

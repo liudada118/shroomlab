@@ -3,9 +3,11 @@ import BoneControlPage from './BoneControlPage.jsx';
 import GloveMotionPage from './GloveMotionPage.jsx';
 import HandWireframePage from './HandWireframePage.jsx';
 import LightStudyPage from './LightStudyPage.jsx';
+import Motion2DoublePage from './Motion2DoublePage.jsx';
 import Motion2Page from './Motion2Page.jsx';
+import MotionDoublePage from './MotionDoublePage.jsx';
 import ObjModelPage from './ObjModelPage.jsx';
-import PointEditorPage, { getInitialEditorPoints, sanitizeEditorPoints } from './PointEditorPage.jsx';
+import PointEditorPage, { getInitialEditorPoints, scaleVideoPointsToEditorPoints } from './PointEditorPage.jsx';
 import PressureTerrain from './PressureTerrain.jsx';
 import RegionObjPage from './RegionObjPage.jsx';
 import SpatialChartsPage from './SpatialChartsPage.jsx';
@@ -13,6 +15,7 @@ import TextureMapPage from './TextureMapPage.jsx';
 import VideoPointGridEditor, { readStoredVideoPoints } from './VideoPointGridEditor.jsx';
 import {
   DEFAULT_GAUSSIAN_KERNEL_SIZE,
+  DEFAULT_PRE_PRESSURE_VALUE,
   HAND_R_VIDEO_POINTS,
   MATRIX_SIZE_OPTIONS,
   SENSOR_MATRIX_SIZE,
@@ -44,8 +47,14 @@ function pageFromHash() {
   if (window.location.hash === '#/glove-motion') {
     return 'gloveMotion';
   }
+  if (window.location.hash === '#/motiondouble') {
+    return 'motiondouble';
+  }
   if (window.location.hash === '#/motion2') {
     return 'motion2';
+  }
+  if (window.location.hash === '#/motion2double') {
+    return 'motion2double';
   }
   if (window.location.hash === '#/point-editor') {
     return 'points';
@@ -149,10 +158,25 @@ function parsePressureArrayText(text) {
   return null;
 }
 
-function MatrixPanel({ colorDepth, matrixSize, gaussianKernelSize, pressurePalette, sourcePoints, videoPoints, dataVersion }) {
+function MatrixPanel({
+  colorDepth,
+  matrixSize,
+  gaussianKernelSize,
+  pressurePalette,
+  sourcePoints,
+  videoPoints,
+  prePressureValue,
+  dataVersion,
+}) {
   const matrix = useMemo(
-    () => buildHandPressureFrame(0.8, { matrixSize, gaussianKernelSize, sourcePoints, videoPoints }).matrix,
-    [dataVersion, gaussianKernelSize, matrixSize, sourcePoints, videoPoints],
+    () => buildHandPressureFrame(0.8, {
+      matrixSize,
+      gaussianKernelSize,
+      sourcePoints,
+      videoPoints,
+      prePressureValue,
+    }).matrix,
+    [dataVersion, gaussianKernelSize, matrixSize, prePressureValue, sourcePoints, videoPoints],
   );
 
   return (
@@ -279,7 +303,16 @@ function DataSourceControl({ dataSource }) {
   );
 }
 
-function StatsPanel({ colorDepth, matrixSize, gaussianKernelSize, pressurePalette, sourcePoints, videoPoints, dataVersion }) {
+function StatsPanel({
+  colorDepth,
+  matrixSize,
+  gaussianKernelSize,
+  pressurePalette,
+  sourcePoints,
+  videoPoints,
+  prePressureValue,
+  dataVersion,
+}) {
   return (
     <aside className="stats-column">
       <section className="side-card force-card">
@@ -307,6 +340,7 @@ function StatsPanel({ colorDepth, matrixSize, gaussianKernelSize, pressurePalett
         pressurePalette={pressurePalette}
         sourcePoints={sourcePoints}
         videoPoints={videoPoints}
+        prePressureValue={prePressureValue}
         dataVersion={dataVersion}
       />
     </aside>
@@ -316,13 +350,17 @@ function StatsPanel({ colorDepth, matrixSize, gaussianKernelSize, pressurePalett
 function TerrainControls({
   heightScale,
   colorDepth,
+  backgroundColor,
   matrixSize,
   gaussianKernelSize,
+  prePressureValue,
   pressurePalette,
   onHeightScaleChange,
   onColorDepthChange,
+  onBackgroundColorChange,
   onMatrixSizeChange,
   onGaussianKernelSizeChange,
+  onPrePressureValueChange,
   onPressurePaletteChange,
   onPressurePaletteReset,
   onFullscreen,
@@ -367,6 +405,16 @@ function TerrainControls({
         />
         <strong>{colorDepth.toFixed(2)}</strong>
       </label>
+      <label className="terrain-background-control">
+        <span>BG</span>
+        <input
+          type="color"
+          value={backgroundColor}
+          aria-label="3D background color"
+          onChange={(event) => onBackgroundColorChange(event.target.value)}
+        />
+        <strong>{backgroundColor}</strong>
+      </label>
       <label>
         <span>Gaussian</span>
         <input
@@ -378,6 +426,18 @@ function TerrainControls({
           onChange={(event) => onGaussianKernelSizeChange(Number(event.target.value))}
         />
         <strong>{gaussianKernelSize}x{gaussianKernelSize}</strong>
+      </label>
+      <label>
+        <span>Preload</span>
+        <input
+          type="range"
+          min="0"
+          max="0.12"
+          step="0.005"
+          value={prePressureValue}
+          onChange={(event) => onPrePressureValueChange(Number(event.target.value))}
+        />
+        <strong>{prePressureValue.toFixed(3)}</strong>
       </label>
       <div className="heat-palette-control">
         <div className="heat-palette-heading">
@@ -409,23 +469,25 @@ function App() {
   const [page, setPage] = useState(pageFromHash);
   const [heightScale, setHeightScale] = useState(1.85);
   const [colorDepth, setColorDepth] = useState(1.25);
+  const [backgroundColor, setBackgroundColor] = useState('#071018');
   const [matrixSize, setMatrixSize] = useState(SENSOR_MATRIX_SIZE);
   const [gaussianKernelSize, setGaussianKernelSize] = useState(DEFAULT_GAUSSIAN_KERNEL_SIZE);
+  const [prePressureValue, setPrePressureValue] = useState(DEFAULT_PRE_PRESSURE_VALUE);
   const [pressurePalette, setPressurePalette] = useState(() => [...DEFAULT_PRESSURE_PALETTE]);
-  const [sourcePoints, setSourcePoints] = useState(getInitialEditorPoints);
   const [videoPoints, setVideoPoints] = useState(readStoredVideoPoints);
+  const [sourcePoints, setSourcePoints] = useState(() => getInitialEditorPoints(readStoredVideoPoints()));
   const terrainPanelRef = useRef(null);
   const dataSource = useWebSocketPressureSource();
   const dataVersion = dataSource.snapshot?.timestamp || dataSource.status.frameCount;
-
-  useEffect(() => {
-    setSourcePoints(sanitizeEditorPoints(videoPoints));
-  }, [videoPoints]);
 
   const updatePressurePalette = (index, color) => {
     setPressurePalette((currentPalette) =>
       currentPalette.map((currentColor, colorIndex) => (colorIndex === index ? color : currentColor)),
     );
+  };
+
+  const projectVideoPointsToHandCoordinates = () => {
+    setSourcePoints(scaleVideoPointsToEditorPoints(videoPoints));
   };
 
   useEffect(() => {
@@ -440,7 +502,9 @@ function App() {
       lightStudy: '/light-study',
       bones: '/glb-bones',
       gloveMotion: '/glove-motion',
+      motiondouble: '/motiondouble',
       motion2: '/motion2',
+      motion2double: '/motion2double',
       obj: '/obj-model',
       points: '/point-editor',
       pressure2: '/texture-map',
@@ -473,8 +537,16 @@ function App() {
     return <GloveMotionPage onNavigate={navigate} />;
   }
 
+  if (page === 'motiondouble') {
+    return <MotionDoublePage onNavigate={navigate} />;
+  }
+
   if (page === 'motion2') {
     return <Motion2Page onNavigate={navigate} />;
+  }
+
+  if (page === 'motion2double') {
+    return <Motion2DoublePage onNavigate={navigate} />;
   }
 
   if (page === 'points') {
@@ -511,7 +583,7 @@ function App() {
 
   return (
     <main className="dashboard-shell dashboard-shell-with-editor">
-      <nav className="app-nav" style={{ '--nav-count': 10 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 12 }} aria-label="Page view">
         <button className="active" type="button" onClick={() => navigate('terrain')}>
           Pressure
         </button>
@@ -530,8 +602,14 @@ function App() {
         <button type="button" onClick={() => navigate('gloveMotion')}>
           Motion
         </button>
+        <button type="button" onClick={() => navigate('motiondouble')}>
+          MotionDouble
+        </button>
         <button type="button" onClick={() => navigate('motion2')}>
           Motion2
+        </button>
+        <button type="button" onClick={() => navigate('motion2double')}>
+          M2Double
         </button>
         <button type="button" onClick={() => navigate('points')}>
           Points
@@ -554,8 +632,10 @@ function App() {
         <PointEditorPage
           embedded
           onNavigate={navigate}
+          baseVideoPoints={videoPoints}
           points={sourcePoints}
           onPointsChange={setSourcePoints}
+          onProjectVideoPoints={projectVideoPointsToHandCoordinates}
         />
       </section>
 
@@ -568,13 +648,17 @@ function App() {
         <TerrainControls
           heightScale={heightScale}
           colorDepth={colorDepth}
+          backgroundColor={backgroundColor}
           matrixSize={matrixSize}
           gaussianKernelSize={gaussianKernelSize}
+          prePressureValue={prePressureValue}
           pressurePalette={pressurePalette}
           onHeightScaleChange={setHeightScale}
           onColorDepthChange={setColorDepth}
+          onBackgroundColorChange={setBackgroundColor}
           onMatrixSizeChange={setMatrixSize}
           onGaussianKernelSizeChange={setGaussianKernelSize}
+          onPrePressureValueChange={setPrePressureValue}
           onPressurePaletteChange={updatePressurePalette}
           onPressurePaletteReset={() => setPressurePalette([...DEFAULT_PRESSURE_PALETTE])}
           onFullscreen={toggleTerrainFullscreen}
@@ -584,8 +668,10 @@ function App() {
         <PressureTerrain
           heightScale={heightScale}
           colorDepth={colorDepth}
+          backgroundColor={backgroundColor}
           matrixSize={matrixSize}
           gaussianKernelSize={gaussianKernelSize}
+          prePressureValue={prePressureValue}
           pressurePalette={pressurePalette}
           sourcePoints={sourcePoints}
           videoPoints={videoPoints}
@@ -602,6 +688,7 @@ function App() {
         colorDepth={colorDepth}
         matrixSize={matrixSize}
         gaussianKernelSize={gaussianKernelSize}
+        prePressureValue={prePressureValue}
         pressurePalette={pressurePalette}
         sourcePoints={sourcePoints}
         videoPoints={videoPoints}
