@@ -11,13 +11,17 @@ This project uses GitHub Actions for CI/CD.
 
 Configure these in GitHub repository settings:
 
-| Secret | Example | Description |
+| Secret | Default | Description |
 | --- | --- | --- |
-| `SERVER_HOST` | `39.105.83.246` | Server IP or domain. |
-| `SERVER_PORT` | `20202` | SSH port. Optional; defaults to `22`. |
-| `SERVER_USER` | `root` | SSH username. |
-| `SERVER_SSH_KEY` | private key text | Private key that can SSH into the server. |
-| `SERVER_PATH` | `/root/shroomlab` | Directory where `dist/` files should be published. |
+| `SERVER_SSH_KEY` | none | Required private key that can SSH into the server. |
+| `SERVER_HOST` | `39.105.83.246` | Optional server IP or domain override. |
+| `SERVER_PORT` | `20202` | Optional SSH port override. |
+| `SERVER_USER` | `root` | Optional SSH username override. |
+| `SERVER_PATH` | `/root/shroomlab` | Optional publish directory override. |
+
+`SERVER_SSH_KEY` may be stored either as a repository Actions secret or in the
+`production` environment used by the deploy job. Keep private key files out of
+the repository.
 
 ## Server Setup
 
