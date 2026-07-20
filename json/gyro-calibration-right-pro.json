@@ -1,0 +1,1698 @@
+{
+  "version": 1,
+  "pageKey": "motion2double",
+  "handSide": "right",
+  "exportedAt": "2026-07-18T10:03:31.136Z",
+  "poses": [
+    {
+      "key": "neutral",
+      "label": "Neutral"
+    },
+    {
+      "key": "pitch_up",
+      "label": "Pitch +"
+    },
+    {
+      "key": "pitch_down",
+      "label": "Pitch -"
+    },
+    {
+      "key": "yaw_left",
+      "label": "Yaw L"
+    },
+    {
+      "key": "yaw_right",
+      "label": "Yaw R"
+    },
+    {
+      "key": "roll_left",
+      "label": "Roll L"
+    },
+    {
+      "key": "roll_right",
+      "label": "Roll R"
+    }
+  ],
+  "captures": [
+    {
+      "id": "neutral-1784368731053",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368731053,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6635875105857849,
+          0.03290596604347229,
+          0.01494494080543518,
+          0.7472251653671265
+        ],
+        "sourceTimestamp": 1784368730981,
+        "sourceAgeMs": 72,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368731203",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368731203,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6636168360710144,
+          0.033176690340042114,
+          0.01479482650756836,
+          0.7471902370452881
+        ],
+        "sourceTimestamp": 1784368731164,
+        "sourceAgeMs": 39,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368731349",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368731349,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6625814437866211,
+          0.03313574194908142,
+          0.014729112386703491,
+          0.7481116056442261
+        ],
+        "sourceTimestamp": 1784368731189,
+        "sourceAgeMs": 160,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368731502",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368731502,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6627118587493896,
+          0.03339505195617676,
+          0.01423671841621399,
+          0.7479941248893738
+        ],
+        "sourceTimestamp": 1784368731428,
+        "sourceAgeMs": 74,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368731664",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368731664,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6628092527389526,
+          0.03321707248687744,
+          0.014270424842834473,
+          0.7479150295257568
+        ],
+        "sourceTimestamp": 1784368731591,
+        "sourceAgeMs": 73,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368731831",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368731831,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6629020571708679,
+          0.03341549634933472,
+          0.014272093772888184,
+          0.7478238940238953
+        ],
+        "sourceTimestamp": 1784368731713,
+        "sourceAgeMs": 118,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368732007",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368732007,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6630155444145203,
+          0.03306970000267029,
+          0.014397770166397095,
+          0.7477363348007202
+        ],
+        "sourceTimestamp": 1784368731895,
+        "sourceAgeMs": 112,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368732167",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368732167,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6619979739189148,
+          0.03298178315162659,
+          0.014139950275421143,
+          0.7486461997032166
+        ],
+        "sourceTimestamp": 1784368732058,
+        "sourceAgeMs": 109,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368732329",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368732329,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6621637344360352,
+          0.03324103355407715,
+          0.014231711626052856,
+          0.7484862804412842
+        ],
+        "sourceTimestamp": 1784368732262,
+        "sourceAgeMs": 67,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368732482",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368732482,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6622965931892395,
+          0.03322255611419678,
+          0.014140218496322632,
+          0.7483713626861572
+        ],
+        "sourceTimestamp": 1784368732424,
+        "sourceAgeMs": 58,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368732635",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368732635,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6624033451080322,
+          0.033353328704833984,
+          0.01384231448173523,
+          0.7482765913009644
+        ],
+        "sourceTimestamp": 1784368732530,
+        "sourceAgeMs": 105,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368732817",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368732817,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6625548601150513,
+          0.03359915316104889,
+          0.013645380735397339,
+          0.7481350302696228
+        ],
+        "sourceTimestamp": 1784368732749,
+        "sourceAgeMs": 68,
+        "source": "live"
+      }
+    },
+    {
+      "id": "neutral-1784368733038",
+      "pose": "neutral",
+      "label": "Neutral",
+      "handSide": "right",
+      "capturedAt": 1784368733038,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.6627563238143921,
+          0.033383339643478394,
+          0.013621389865875244,
+          0.7479668259620667
+        ],
+        "sourceTimestamp": 1784368732991,
+        "sourceAgeMs": 47,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368737739",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368737739,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49809423089027405,
+          -0.46857592463493347,
+          -0.5203673839569092,
+          0.5114260911941528
+        ],
+        "sourceTimestamp": 1784368737698,
+        "sourceAgeMs": 41,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368737895",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368737895,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49326831102371216,
+          -0.4691897928714752,
+          -0.5224912166595459,
+          0.5133715867996216
+        ],
+        "sourceTimestamp": 1784368737861,
+        "sourceAgeMs": 34,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738050",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738050,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49176621437072754,
+          -0.47163456678390503,
+          -0.5216830372810364,
+          0.5133943557739258
+        ],
+        "sourceTimestamp": 1784368737942,
+        "sourceAgeMs": 108,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738201",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738201,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4890410304069519,
+          -0.4747084379196167,
+          -0.5218470096588135,
+          0.512997567653656
+        ],
+        "sourceTimestamp": 1784368738166,
+        "sourceAgeMs": 35,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738347",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738347,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49189531803131104,
+          -0.47665607929229736,
+          -0.5189142823219299,
+          0.5114353895187378
+        ],
+        "sourceTimestamp": 1784368738311,
+        "sourceAgeMs": 36,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738515",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738515,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49177873134613037,
+          -0.4745153784751892,
+          -0.5190472602844238,
+          0.5133992433547974
+        ],
+        "sourceTimestamp": 1784368738450,
+        "sourceAgeMs": 65,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738669",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738669,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49207109212875366,
+          -0.4762238562107086,
+          -0.5190463066101074,
+          0.5115346908569336
+        ],
+        "sourceTimestamp": 1784368738620,
+        "sourceAgeMs": 49,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738830",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738830,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4942309260368347,
+          -0.4762115478515625,
+          -0.5169088840484619,
+          0.5116283893585205
+        ],
+        "sourceTimestamp": 1784368738754,
+        "sourceAgeMs": 76,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368738977",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368738977,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.49264171719551086,
+          -0.47948911786079407,
+          -0.5187893509864807,
+          0.508185088634491
+        ],
+        "sourceTimestamp": 1784368738937,
+        "sourceAgeMs": 40,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368739138",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368739138,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4932682514190674,
+          -0.4751843214035034,
+          -0.5190563797950745,
+          0.5113382339477539
+        ],
+        "sourceTimestamp": 1784368739104,
+        "sourceAgeMs": 34,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_up-1784368739354",
+      "pose": "pitch_up",
+      "label": "Pitch +",
+      "handSide": "right",
+      "capturedAt": 1784368739354,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.5565488338470459,
+          -0.39707133173942566,
+          -0.42370539903640747,
+          0.5941898822784424
+        ],
+        "sourceTimestamp": 1784368739323,
+        "sourceAgeMs": 31,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368743493",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368743493,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.43982353806495667,
+          0.5378465056419373,
+          0.47842711210250854,
+          0.5370139479637146
+        ],
+        "sourceTimestamp": 1784368743435,
+        "sourceAgeMs": 58,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368743661",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368743661,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.44139549136161804,
+          0.536943793296814,
+          0.48230844736099243,
+          0.5331416726112366
+        ],
+        "sourceTimestamp": 1784368743618,
+        "sourceAgeMs": 43,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368743810",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368743810,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.44160565733909607,
+          0.5377913117408752,
+          0.4820558726787567,
+          0.5323413014411926
+        ],
+        "sourceTimestamp": 1784368743641,
+        "sourceAgeMs": 169,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368743970",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368743970,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.44372767210006714,
+          0.5356982350349426,
+          0.48223966360092163,
+          0.5325207114219666
+        ],
+        "sourceTimestamp": 1784368743902,
+        "sourceAgeMs": 68,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368744132",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368744132,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4466899633407593,
+          0.5338138341903687,
+          0.48455557227134705,
+          0.5298270583152771
+        ],
+        "sourceTimestamp": 1784368744066,
+        "sourceAgeMs": 66,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368744285",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368744285,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4489949345588684,
+          0.5296007394790649,
+          0.48564472794532776,
+          0.5311082601547241
+        ],
+        "sourceTimestamp": 1784368744227,
+        "sourceAgeMs": 58,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368744438",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368744438,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.45121896266937256,
+          0.5262801051139832,
+          0.4854204058647156,
+          0.5327268242835999
+        ],
+        "sourceTimestamp": 1784368744369,
+        "sourceAgeMs": 69,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368744605",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368744605,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4553348422050476,
+          0.5263257026672363,
+          0.48573172092437744,
+          0.5288820862770081
+        ],
+        "sourceTimestamp": 1784368744593,
+        "sourceAgeMs": 12,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368744759",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368744759,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.45424211025238037,
+          0.5267114043235779,
+          0.48636505007743835,
+          0.5288558006286621
+        ],
+        "sourceTimestamp": 1784368744654,
+        "sourceAgeMs": 105,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368744920",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368744920,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.45694518089294434,
+          0.5240617990493774,
+          0.48469966650009155,
+          0.5306851267814636
+        ],
+        "sourceTimestamp": 1784368744836,
+        "sourceAgeMs": 84,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368745088",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368745088,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4555078148841858,
+          0.5237722396850586,
+          0.48636865615844727,
+          0.5306797623634338
+        ],
+        "sourceTimestamp": 1784368744998,
+        "sourceAgeMs": 90,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368745235",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368745235,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4563538432121277,
+          0.5223132371902466,
+          0.48562896251678467,
+          0.5320664048194885
+        ],
+        "sourceTimestamp": 1784368745140,
+        "sourceAgeMs": 95,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368745395",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368745395,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.4578721523284912,
+          0.514363706111908,
+          0.4848174452781677,
+          0.5391987562179565
+        ],
+        "sourceTimestamp": 1784368745323,
+        "sourceAgeMs": 72,
+        "source": "live"
+      }
+    },
+    {
+      "id": "pitch_down-1784368745615",
+      "pose": "pitch_down",
+      "label": "Pitch -",
+      "handSide": "right",
+      "capturedAt": 1784368745615,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.5040389895439148,
+          0.2834557294845581,
+          0.24445153772830963,
+          0.778357982635498
+        ],
+        "sourceTimestamp": 1784368745568,
+        "sourceAgeMs": 47,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368748585",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368748585,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9829180240631104,
+          0.16939488053321838,
+          0.04845329001545906,
+          0.05319817364215851
+        ],
+        "sourceTimestamp": 1784368748565,
+        "sourceAgeMs": 20,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368748738",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368748738,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9813999533653259,
+          0.1767553687095642,
+          0.05475449189543724,
+          0.05112449824810028
+        ],
+        "sourceTimestamp": 1784368748704,
+        "sourceAgeMs": 34,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368748899",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368748899,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9820843935012817,
+          0.17283949255943298,
+          0.0560990646481514,
+          0.04989732801914215
+        ],
+        "sourceTimestamp": 1784368748784,
+        "sourceAgeMs": 115,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368749052",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368749052,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9830082654953003,
+          0.17009380459785461,
+          0.05193110555410385,
+          0.04545694589614868
+        ],
+        "sourceTimestamp": 1784368749010,
+        "sourceAgeMs": 42,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368749213",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368749213,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9828308820724487,
+          0.17045733332633972,
+          0.05405993014574051,
+          0.045445069670677185
+        ],
+        "sourceTimestamp": 1784368749109,
+        "sourceAgeMs": 104,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368749368",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368749368,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9826322793960571,
+          0.17117571830749512,
+          0.05700238049030304,
+          0.043397217988967896
+        ],
+        "sourceTimestamp": 1784368749312,
+        "sourceAgeMs": 56,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368749537",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368749537,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9831270575523376,
+          0.1684444546699524,
+          0.05572928860783577,
+          0.04451845586299896
+        ],
+        "sourceTimestamp": 1784368749495,
+        "sourceAgeMs": 42,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368749675",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368749675,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9827825427055359,
+          0.1697925329208374,
+          0.056394439190626144,
+          0.04613809287548065
+        ],
+        "sourceTimestamp": 1784368749638,
+        "sourceAgeMs": 37,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368749844",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368749844,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9829559922218323,
+          0.16823700070381165,
+          0.05676713585853577,
+          0.047659486532211304
+        ],
+        "sourceTimestamp": 1784368749780,
+        "sourceAgeMs": 64,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368750004",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368750004,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9833517074584961,
+          0.1653570830821991,
+          0.05682137981057167,
+          0.04947739839553833
+        ],
+        "sourceTimestamp": 1784368749841,
+        "sourceAgeMs": 163,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_left-1784368750230",
+      "pose": "yaw_left",
+      "label": "Yaw L",
+      "handSide": "right",
+      "capturedAt": 1784368750230,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.9826363921165466,
+          0.1685207188129425,
+          0.060458146035671234,
+          0.04869578778743744
+        ],
+        "sourceTimestamp": 1784368750186,
+        "sourceAgeMs": 44,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368753879",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368753879,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.2166949212551117,
+          -0.020711705088615417,
+          -0.15005585551261902,
+          0.9644156694412231
+        ],
+        "sourceTimestamp": 1784368753820,
+        "sourceAgeMs": 59,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754033",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754033,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21646301448345184,
+          -0.01641470193862915,
+          -0.15099689364433289,
+          0.9644036889076233
+        ],
+        "sourceTimestamp": 1784368753942,
+        "sourceAgeMs": 91,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754194",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754194,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21633261442184448,
+          -0.015139982104301453,
+          -0.15356579422950745,
+          0.964047908782959
+        ],
+        "sourceTimestamp": 1784368754166,
+        "sourceAgeMs": 28,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754356",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754356,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21530139446258545,
+          -0.014627784490585327,
+          -0.15119335055351257,
+          0.9646615982055664
+        ],
+        "sourceTimestamp": 1784368754318,
+        "sourceAgeMs": 38,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754508",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754508,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21315330266952515,
+          -0.01374739408493042,
+          -0.15063804388046265,
+          0.9652383327484131
+        ],
+        "sourceTimestamp": 1784368754481,
+        "sourceAgeMs": 27,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754654",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754654,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21156761050224304,
+          -0.01275239884853363,
+          -0.15022921562194824,
+          0.9656643271446228
+        ],
+        "sourceTimestamp": 1784368754622,
+        "sourceAgeMs": 32,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754816",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754816,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21158058941364288,
+          -0.013486161828041077,
+          -0.1464053988456726,
+          0.9662387371063232
+        ],
+        "sourceTimestamp": 1784368754764,
+        "sourceAgeMs": 52,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368754976",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368754976,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21238867938518524,
+          -0.014293700456619263,
+          -0.14825940132141113,
+          0.9657670259475708
+        ],
+        "sourceTimestamp": 1784368754918,
+        "sourceAgeMs": 58,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368755130",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368755130,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21276113390922546,
+          -0.009793773293495178,
+          -0.15034881234169006,
+          0.9654180407524109
+        ],
+        "sourceTimestamp": 1784368755049,
+        "sourceAgeMs": 81,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368755298",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368755298,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21138936281204224,
+          -0.012996524572372437,
+          -0.15142002701759338,
+          0.9655141830444336
+        ],
+        "sourceTimestamp": 1784368755252,
+        "sourceAgeMs": 46,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368755466",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368755466,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.21098372340202332,
+          -0.017728716135025024,
+          -0.15430495142936707,
+          0.9650708436965942
+        ],
+        "sourceTimestamp": 1784368755395,
+        "sourceAgeMs": 71,
+        "source": "live"
+      }
+    },
+    {
+      "id": "yaw_right-1784368755695",
+      "pose": "yaw_right",
+      "label": "Yaw R",
+      "handSide": "right",
+      "capturedAt": 1784368755695,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          0.2105794996023178,
+          -0.017416566610336304,
+          -0.1552739441394806,
+          0.965009331703186
+        ],
+        "sourceTimestamp": 1784368755638,
+        "sourceAgeMs": 57,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368761033",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368761033,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3392050862312317,
+          0.576401948928833,
+          -0.6532920598983765,
+          0.35483816266059875
+        ],
+        "sourceTimestamp": 1784368760972,
+        "sourceAgeMs": 61,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368761191",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368761191,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.339310884475708,
+          0.5765394568443298,
+          -0.6527391076087952,
+          0.3555310368537903
+        ],
+        "sourceTimestamp": 1784368761151,
+        "sourceAgeMs": 40,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368761354",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368761354,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.34028053283691406,
+          0.5757666826248169,
+          -0.652334451675415,
+          0.35659727454185486
+        ],
+        "sourceTimestamp": 1784368761235,
+        "sourceAgeMs": 119,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368761509",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368761509,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.339712530374527,
+          0.576534628868103,
+          -0.6534007787704468,
+          0.35393601655960083
+        ],
+        "sourceTimestamp": 1784368761435,
+        "sourceAgeMs": 74,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368761669",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368761669,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3392340838909149,
+          0.5764917135238647,
+          -0.6534450650215149,
+          0.35438287258148193
+        ],
+        "sourceTimestamp": 1784368761596,
+        "sourceAgeMs": 73,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368761837",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368761837,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3386476933956146,
+          0.5772196054458618,
+          -0.6530574560165405,
+          0.35447344183921814
+        ],
+        "sourceTimestamp": 1784368761759,
+        "sourceAgeMs": 78,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368762005",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368762005,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3409006595611572,
+          0.5754457116127014,
+          -0.6521496772766113,
+          0.356860876083374
+        ],
+        "sourceTimestamp": 1784368761921,
+        "sourceAgeMs": 84,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368762172",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368762172,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3390893340110779,
+          0.5758258104324341,
+          -0.6534179449081421,
+          0.35565170645713806
+        ],
+        "sourceTimestamp": 1784368762124,
+        "sourceAgeMs": 48,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368762341",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368762341,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.33998754620552063,
+          0.5748023986816406,
+          -0.6531432867050171,
+          0.3569517731666565
+        ],
+        "sourceTimestamp": 1784368762286,
+        "sourceAgeMs": 55,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368762509",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368762509,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.34068307280540466,
+          0.5737779140472412,
+          -0.6531764268875122,
+          0.3578747808933258
+        ],
+        "sourceTimestamp": 1784368762449,
+        "sourceAgeMs": 60,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_left-1784368762728",
+      "pose": "roll_left",
+      "label": "Roll L",
+      "handSide": "right",
+      "capturedAt": 1784368762728,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.33930259943008423,
+          0.5731014609336853,
+          -0.6545559167861938,
+          0.35775026679039
+        ],
+        "sourceTimestamp": 1784368762692,
+        "sourceAgeMs": 36,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368766267",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368766267,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3663340210914612,
+          -0.5337502360343933,
+          0.4509178102016449,
+          0.6144780516624451
+        ],
+        "sourceTimestamp": 1784368766204,
+        "sourceAgeMs": 63,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368766440",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368766440,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3664807379245758,
+          -0.5300824046134949,
+          0.4512626528739929,
+          0.617306113243103
+        ],
+        "sourceTimestamp": 1784368766346,
+        "sourceAgeMs": 94,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368766594",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368766594,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.37039005756378174,
+          -0.5249645709991455,
+          0.4509417414665222,
+          0.6195765137672424
+        ],
+        "sourceTimestamp": 1784368766550,
+        "sourceAgeMs": 44,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368766768",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368766768,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.37205415964126587,
+          -0.5229207277297974,
+          0.4529463052749634,
+          0.6188451647758484
+        ],
+        "sourceTimestamp": 1784368766692,
+        "sourceAgeMs": 76,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368766940",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368766940,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3723156452178955,
+          -0.5208328366279602,
+          0.45318228006362915,
+          0.6202742457389832
+        ],
+        "sourceTimestamp": 1784368766874,
+        "sourceAgeMs": 66,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368767105",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368767105,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3729914724826813,
+          -0.5196293592453003,
+          0.45220044255256653,
+          0.6215928792953491
+        ],
+        "sourceTimestamp": 1784368767057,
+        "sourceAgeMs": 48,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368767272",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368767272,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.37429556250572205,
+          -0.5193784236907959,
+          0.45216795802116394,
+          0.621042013168335
+        ],
+        "sourceTimestamp": 1784368767213,
+        "sourceAgeMs": 59,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368767440",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368767440,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.3754163980484009,
+          -0.5191939473152161,
+          0.45158419013023376,
+          0.6209444999694824
+        ],
+        "sourceTimestamp": 1784368767382,
+        "sourceAgeMs": 58,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368767608",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368767608,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.37404465675354004,
+          -0.5183993577957153,
+          0.45499125123023987,
+          0.6199483871459961
+        ],
+        "sourceTimestamp": 1784368767527,
+        "sourceAgeMs": 81,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368767798",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368767798,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.37265393137931824,
+          -0.5160094499588013,
+          0.45378217101097107,
+          0.6236547827720642
+        ],
+        "sourceTimestamp": 1784368767710,
+        "sourceAgeMs": 88,
+        "source": "live"
+      }
+    },
+    {
+      "id": "roll_right-1784368768016",
+      "pose": "roll_right",
+      "label": "Roll R",
+      "handSide": "right",
+      "capturedAt": 1784368768016,
+      "left": null,
+      "right": {
+        "handSide": "right",
+        "rotate": [
+          -0.37478768825531006,
+          -0.5144420862197876,
+          0.4499960243701935,
+          0.6264081001281738
+        ],
+        "sourceTimestamp": 1784368767981,
+        "sourceAgeMs": 35,
+        "source": "live"
+      }
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import BoneControlPage from './BoneControlPage.jsx';
 import GloveMotionPage from './GloveMotionPage.jsx';
 import HandWireframePage from './HandWireframePage.jsx';
 import LightStudyPage from './LightStudyPage.jsx';
+import M2DoubleProPage from './M2DoubleProPage.jsx';
 import Motion2DoublePage from './Motion2DoublePage.jsx';
 import Motion2Page from './Motion2Page.jsx';
 import MotionDoublePage from './MotionDoublePage.jsx';
@@ -55,6 +56,9 @@ function pageFromHash() {
   }
   if (window.location.hash === '#/motion2double') {
     return 'motion2double';
+  }
+  if (window.location.hash === '#/m2doublePro' || window.location.hash === '#/m2doublepro') {
+    return 'm2doublePro';
   }
   if (window.location.hash === '#/point-editor') {
     return 'points';
@@ -505,6 +509,7 @@ function App() {
       motiondouble: '/motiondouble',
       motion2: '/motion2',
       motion2double: '/motion2double',
+      m2doublePro: '/m2doublePro',
       obj: '/obj-model',
       points: '/point-editor',
       pressure2: '/texture-map',
@@ -549,6 +554,10 @@ function App() {
     return <Motion2DoublePage onNavigate={navigate} />;
   }
 
+  if (page === 'm2doublePro') {
+    return <M2DoubleProPage onNavigate={navigate} />;
+  }
+
   if (page === 'points') {
     return <VideoPointGridEditor onNavigate={navigate} points={videoPoints} onPointsChange={setVideoPoints} />;
   }
@@ -583,7 +592,7 @@ function App() {
 
   return (
     <main className="dashboard-shell dashboard-shell-with-editor">
-      <nav className="app-nav" style={{ '--nav-count': 12 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 13 }} aria-label="Page view">
         <button className="active" type="button" onClick={() => navigate('terrain')}>
           Pressure
         </button>
@@ -610,6 +619,9 @@ function App() {
         </button>
         <button type="button" onClick={() => navigate('motion2double')}>
           M2Double
+        </button>
+        <button type="button" onClick={() => navigate('m2doublePro')}>
+          M2 Pro
         </button>
         <button type="button" onClick={() => navigate('points')}>
           Points

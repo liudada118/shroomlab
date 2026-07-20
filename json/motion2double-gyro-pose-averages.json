@@ -1,0 +1,86 @@
+{
+  "left": {
+    "sampleCount": 89,
+    "poseTargets": {
+      "neutral": { "euler": [-360, -180, -90] },
+      "pitch_up": { "euler": [-270, -180, -90], "label": "Pitch -270" },
+      "pitch_down": { "euler": [-90, -180, -90], "label": "Pitch -90" },
+      "yaw_left": { "euler": [-360, -90, -90], "label": "Yaw -90" },
+      "yaw_right": { "euler": [-360, -270, -90], "label": "Yaw -270" },
+      "roll_left": { "euler": [-360, -180, -180], "label": "Roll -180" },
+      "roll_right": { "euler": [-360, -180, 0], "label": "Roll 0" }
+    },
+    "captures": [
+      {
+        "pose": "neutral",
+        "left": { "rotate": [0.499321736, -0.070393007, -0.056281739, -0.861716307] }
+      },
+      {
+        "pose": "pitch_up",
+        "left": { "rotate": [0.368668548, 0.589183761, 0.344953577, -0.630835182] }
+      },
+      {
+        "pose": "pitch_down",
+        "left": { "rotate": [0.246785519, -0.657397357, -0.341879332, -0.624535143] }
+      },
+      {
+        "pose": "yaw_left",
+        "left": { "rotate": [0.856030071, 0.012552613, 0.037211673, -0.515432092] }
+      },
+      {
+        "pose": "yaw_right",
+        "left": { "rotate": [-0.308223295, -0.034707164, 0.040017455, -0.9498381] }
+      },
+      {
+        "pose": "roll_left",
+        "left": { "rotate": [0.275716259, -0.499132425, 0.559300597, -0.601689463] }
+      },
+      {
+        "pose": "roll_right",
+        "left": { "rotate": [0.182172511, 0.306436185, -0.577893705, -0.734131396] }
+      }
+    ]
+  },
+  "right": {
+    "sampleCount": 83,
+    "poseTargets": {
+      "neutral": { "euler": [-180, -360, -270] },
+      "pitch_up": { "euler": [-90, -360, -270], "label": "Pitch -90" },
+      "pitch_down": { "euler": [-270, -360, -270], "label": "Pitch -270" },
+      "yaw_left": { "euler": [-180, -270, -270], "label": "Yaw -270" },
+      "yaw_right": { "euler": [-180, -90, -270], "label": "Yaw -90" },
+      "roll_left": { "euler": [-180, -360, -360], "label": "Roll -360" },
+      "roll_right": { "euler": [-180, -360, -180], "label": "Roll -180" }
+    },
+    "captures": [
+      {
+        "pose": "neutral",
+        "right": { "rotate": [-0.66272303, 0.033238232, 0.0142513, 0.747990846] }
+      },
+      {
+        "pose": "pitch_up",
+        "right": { "rotate": [-0.499142258, -0.467731406, -0.511633259, 0.519918981] }
+      },
+      {
+        "pose": "pitch_down",
+        "right": { "rotate": [-0.456613132, 0.514480886, 0.469905571, 0.553175036] }
+      },
+      {
+        "pose": "yaw_left",
+        "right": { "rotate": [-0.98271478, 0.170099252, 0.055316205, 0.047728638] }
+      },
+      {
+        "pose": "yaw_right",
+        "right": { "rotate": [0.213268252, -0.014925919, -0.151059009, 0.965129549] }
+      },
+      {
+        "pose": "roll_left",
+        "right": { "rotate": [-0.339669225, 0.575629087, -0.653156955, 0.355896002] }
+      },
+      {
+        "pose": "roll_right",
+        "right": { "rotate": [-0.371987906, -0.521795216, 0.452190691, 0.62038563] }
+      }
+    ]
+  }
+}

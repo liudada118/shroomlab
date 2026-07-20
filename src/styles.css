@@ -676,6 +676,162 @@ button {
   box-shadow: 0 0 14px rgba(40, 223, 229, 0.28);
 }
 
+.glove-pose-playback-control {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(122, 179, 224, 0.16);
+  border-bottom: 1px solid rgba(122, 179, 224, 0.16);
+}
+
+.glove-pose-playback-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #d7edf4;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.glove-pose-playback-heading strong {
+  color: #ffd0bd;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.glove-pose-source-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.glove-pose-source-toggle button {
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid rgba(122, 179, 224, 0.24);
+  border-radius: 7px;
+  color: #b9cbd2;
+  background: rgba(13, 33, 45, 0.68);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.glove-pose-source-toggle button:hover,
+.glove-pose-source-toggle button.active {
+  color: #04191d;
+  border-color: rgba(45, 231, 238, 0.72);
+  background: #28dfe5;
+}
+
+.glove-pose-set-neutral {
+  min-height: 34px;
+  border: 1px solid rgba(255, 129, 87, 0.52);
+  border-radius: 7px;
+  color: #ffd0bd;
+  background: rgba(62, 30, 28, 0.7);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.glove-pose-set-neutral:hover {
+  color: #1d0d08;
+  border-color: #ff8157;
+  background: #ff8157;
+}
+
+.glove-pose-playback-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.glove-pose-playback-grid button,
+.glove-pose-playback-actions button,
+.glove-pose-playback-actions label {
+  min-width: 0;
+  min-height: 32px;
+  border: 1px solid rgba(122, 179, 224, 0.24);
+  border-radius: 7px;
+  color: #b9cbd2;
+  background: rgba(13, 33, 45, 0.68);
+  font-size: 0.7rem;
+}
+
+.glove-pose-playback-grid button,
+.glove-pose-playback-actions button {
+  overflow: hidden;
+  padding: 0 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.glove-pose-playback-grid button {
+  display: grid;
+  place-content: center;
+  min-height: 54px;
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.glove-pose-playback-grid button small {
+  color: #ffd0bd;
+  font-size: 0.58rem;
+}
+
+.glove-pose-playback-grid button.active small,
+.glove-pose-playback-grid button:hover small {
+  color: #12383c;
+}
+
+.glove-pose-playback-grid button:hover,
+.glove-pose-playback-grid button.active,
+.glove-pose-playback-actions button:hover,
+.glove-pose-playback-actions button.active {
+  color: #04191d;
+  border-color: rgba(45, 231, 238, 0.72);
+  background: #28dfe5;
+}
+
+.glove-pose-playback-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.glove-pose-playback-actions label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.glove-pose-playback-actions input {
+  accent-color: #00fff7;
+}
+
+.glove-pose-finger-curl {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+  color: #aeb9c6;
+  font-size: 0.72rem;
+}
+
+.glove-pose-finger-curl input {
+  width: 100%;
+  accent-color: #ff8157;
+}
+
+.glove-pose-finger-curl strong {
+  color: #ffd0bd;
+  text-align: right;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .glove-fullscreen-button,
 .glove-scene-fullscreen-exit {
   min-height: 34px;
@@ -713,6 +869,10 @@ button {
 
 .glove-motion-actions {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.glove-motion-actions.paired {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .glove-side-toggle button,
@@ -825,7 +985,7 @@ button {
 
 .glove-wuji-weight-control label {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 44px;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
   align-items: center;
   gap: 8px;
   color: #aeb9c6;
@@ -971,6 +1131,13 @@ button {
   border-top: 1px solid rgba(122, 179, 224, 0.16);
 }
 
+.glove-gyro-control {
+  display: grid;
+  gap: 7px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(122, 179, 224, 0.16);
+}
+
 .glove-transform-heading {
   display: flex;
   align-items: center;
@@ -979,6 +1146,12 @@ button {
   color: #d7edf4;
   font-size: 0.76rem;
   font-weight: 700;
+}
+
+.glove-transform-heading div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .glove-transform-heading button {
@@ -998,9 +1171,156 @@ button {
   background: #28dfe5;
 }
 
+.glove-transform-side-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.glove-transform-side-toggle button {
+  min-height: 30px;
+  border: 1px solid rgba(122, 179, 224, 0.24);
+  border-radius: 7px;
+  color: #b9cbd2;
+  background: rgba(13, 33, 45, 0.68);
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+.glove-transform-side-toggle button:hover,
+.glove-transform-side-toggle .active {
+  color: #04191d;
+  border-color: rgba(45, 231, 238, 0.72);
+  background: #28dfe5;
+}
+
+.glove-gyro-axis-toggle {
+  display: grid;
+  gap: 6px;
+}
+
+.glove-gyro-axis-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 6px;
+}
+
+.glove-gyro-axis-toggle button,
+.glove-gyro-axis-toggle select {
+  min-height: 30px;
+  border: 1px solid rgba(122, 179, 224, 0.24);
+  border-radius: 7px;
+  color: #b9cbd2;
+  background: rgba(13, 33, 45, 0.68);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.glove-gyro-axis-toggle button,
+.glove-gyro-axis-toggle select {
+  cursor: pointer;
+}
+
+.glove-gyro-axis-toggle select {
+  padding: 0 8px;
+}
+
+.glove-gyro-axis-toggle button:hover,
+.glove-gyro-axis-toggle .active {
+  color: #04191d;
+  border-color: rgba(255, 129, 87, 0.72);
+  background: #ff8157;
+}
+
+.glove-gyro-capture-control {
+  display: grid;
+  gap: 7px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(122, 179, 224, 0.12);
+}
+
+.glove-gyro-capture-control button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.glove-gyro-pose-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.glove-gyro-pose-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px;
+  gap: 5px;
+  min-width: 0;
+}
+
+.glove-gyro-pose-capture,
+.glove-gyro-pose-clear {
+  min-width: 0;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(122, 179, 224, 0.24);
+  border-radius: 7px;
+  padding: 0 8px;
+  color: #b9cbd2;
+  background: rgba(13, 33, 45, 0.68);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.glove-gyro-pose-capture {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.glove-gyro-pose-clear {
+  display: grid;
+  justify-content: center;
+  padding: 0;
+  color: #ffd0bd;
+}
+
+.glove-gyro-pose-capture:hover,
+.glove-gyro-pose-clear:hover {
+  color: #04191d;
+  border-color: rgba(45, 231, 238, 0.72);
+  background: #28dfe5;
+}
+
+.glove-gyro-pose-grid span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glove-gyro-pose-grid strong {
+  color: #ffd0bd;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.glove-gyro-pose-capture:hover strong {
+  color: #04191d;
+}
+
+.glove-gyro-capture-status {
+  min-width: 0;
+  overflow: hidden;
+  color: #8fa5b2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .glove-transform-control label {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  grid-template-columns: 62px minmax(0, 1fr) 48px;
   align-items: center;
   gap: 8px;
   color: #aeb9c6;
@@ -2987,16 +3307,18 @@ button {
   }
 
   .glove-motion-panel {
-    top: 72px;
+    top: auto;
+    bottom: 14px;
     left: 14px;
     right: 14px;
     width: auto;
-    max-height: calc(100vh - 174px);
+    max-height: 52svh;
   }
 
   .glove-motion-title {
     left: 14px;
-    bottom: 14px;
+    top: 76px;
+    bottom: auto;
     max-width: calc(100vw - 28px);
   }
 

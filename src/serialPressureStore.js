@@ -57,6 +57,20 @@ function normalizeMappedPressureData(values) {
   });
 }
 
+function normalizeRotate(values) {
+  if (!Array.isArray(values) || values.length < 4) {
+    return null;
+  }
+
+  const rotate = values.slice(0, 4).map((value) => Number(value));
+  const length = Math.hypot(...rotate);
+  if (rotate.some((value) => !Number.isFinite(value)) || length < 0.000001) {
+    return null;
+  }
+
+  return rotate;
+}
+
 export function subscribeSerialPressureSource(listener) {
   listeners.add(listener);
   listener(serialState);
@@ -101,7 +115,8 @@ export function getSerialPressureFramesSnapshot() {
 function normalizeFrame(frame, source = 'live') {
   const pressureData = normalizePressureData(frame.pressureData);
   const mappedPressureData = normalizeMappedPressureData(frame.mappedPressureData);
-  if ((!pressureData && !mappedPressureData) || (frame.handSide !== 'left' && frame.handSide !== 'right')) {
+  const rotate = normalizeRotate(frame.rotate);
+  if ((!pressureData && !mappedPressureData && !rotate) || (frame.handSide !== 'left' && frame.handSide !== 'right')) {
     return null;
   }
 
@@ -109,7 +124,7 @@ function normalizeFrame(frame, source = 'live') {
     handSide: frame.handSide,
     pressureData,
     mappedPressureData,
-    rotate: Array.isArray(frame.rotate) ? frame.rotate : [],
+    rotate: rotate || [],
     timestamp: frame.timestamp || Date.now(),
     source,
   };

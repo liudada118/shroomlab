@@ -79,6 +79,35 @@ function toPressureArray(value) {
   return null;
 }
 
+function toQuaternionArray(value) {
+  let values = null;
+  if (ArrayBuffer.isView(value) || Array.isArray(value)) {
+    values = Array.from(value).slice(0, 4);
+  } else if (value && typeof value === 'object') {
+    values = [value.x, value.y, value.z, value.w];
+  }
+
+  if (!values || values.length < 4) {
+    return null;
+  }
+
+  const quaternion = values.map((item) => Number(item));
+  const length = Math.hypot(...quaternion);
+  if (quaternion.some((item) => !Number.isFinite(item)) || length < 0.000001) {
+    return null;
+  }
+
+  return quaternion;
+}
+
+function pickQuaternion(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return null;
+  }
+
+  return toQuaternionArray(payload.rotate ?? payload.quaternion ?? payload.quat);
+}
+
 function pickPressureArray(payload) {
   if (Array.isArray(payload) || ArrayBuffer.isView(payload)) {
     return toPressureArray(payload);
@@ -118,6 +147,19 @@ function pickFrameData(payload) {
 
   const pressureData = pickPressureArray(payload);
   return pressureData?.length === 256 ? { pressureData } : null;
+}
+
+function pickCompleteFrameData(payload) {
+  const pressureFrameData = pickFrameData(payload);
+  const rotate = pickQuaternion(payload);
+  if (!pressureFrameData && !rotate) {
+    return null;
+  }
+
+  return {
+    ...(pressureFrameData || {}),
+    ...(rotate ? { rotate } : {}),
+  };
 }
 
 function pickTopLevelMappedFrameData(payload) {
@@ -183,21 +225,20 @@ function framesFromPayload(payload, fallbackHandSide = 'right') {
     return [{
       handSide: handSideFromTopLevelMappedPayload(payload, fallbackHandSide),
       ...topLevelMappedFrameData,
-      rotate: payload.rotate,
+      rotate: pickQuaternion(payload),
       timestamp: payload.timestamp || Date.now(),
     }];
   }
 
   const fallbackSide = handSideFromPayload(payload, fallbackHandSide);
-  const directFrameData = pickFrameData(payload);
+  const directFrameData = pickCompleteFrameData(payload);
   const hasSideSpecificData = ['sitData', 'leftData', 'left', 'backData', 'rightData', 'right']
-    .some((key) => pickFrameData(payload[key]));
+    .some((key) => pickCompleteFrameData(payload[key]));
 
   if (directFrameData && !hasSideSpecificData) {
     frames.push({
       handSide: fallbackSide,
       ...directFrameData,
-      rotate: payload.rotate,
       timestamp: payload.timestamp || Date.now(),
     });
   }
@@ -211,12 +252,11 @@ function framesFromPayload(payload, fallbackHandSide = 'right') {
     ['right', 'right'],
   ].forEach(([key, side]) => {
     const nested = payload[key];
-    const frameData = pickFrameData(nested);
+    const frameData = pickCompleteFrameData(nested);
     if (frameData) {
       frames.push({
         handSide: side,
         ...frameData,
-        rotate: nested?.rotate,
         timestamp: nested?.timestamp || payload.timestamp || Date.now(),
       });
     }

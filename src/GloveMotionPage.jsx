@@ -24,6 +24,9 @@ const DEFAULT_LINE_COLOR = '#6dfaff';
 const LINE_COLOR_PRESETS = ['#6dfaff', '#00fff7', '#ff8157', '#ffe66d', '#a88cff'];
 const DEFAULT_SCENE_BACKGROUND_COLOR = '#061018';
 const GLOVE_MOTION_SETTINGS_KEY = 'shroomlab.gloveMotion.settings.v1';
+const GYRO_CALIBRATION_CAPTURE_KEY = 'shroomlab.gloveMotion.gyroCalibrationCaptures.v1';
+const MODEL_TRANSFORM_SETTINGS_VERSION = 2;
+const GYRO_ADJUSTMENT_SETTINGS_VERSION = 10;
 const DEFAULT_REGION_LABEL = 'regions';
 const REGION_COLORS = {
   palm: 0x00ff00,
@@ -47,7 +50,10 @@ const PRESSURE_RED = new THREE.Color(0xff2f2f);
 const WUJI_BRIDGE_URL = 'ws://127.0.0.1:8765/ws';
 const WUJI_MAX_RAD = 1.0;
 const WUJI_SPREAD_MAX_RAD = 0.2;
-const WUJI_SEND_INTERVAL_MS = 40;
+const DEFAULT_WUJI_SEND_INTERVAL_MS = 40;
+const WUJI_SEND_INTERVAL_MIN_MS = 10;
+const WUJI_SEND_INTERVAL_MAX_MS = 200;
+const WUJI_SEND_INTERVAL_STEP_MS = 5;
 const WUJI_ZERO_FRAME_COUNT = 6;
 const DEFAULT_WUJI_WEIGHTS = Object.freeze({
   maxRad: WUJI_MAX_RAD,
@@ -75,6 +81,9 @@ const DEFAULT_MODEL_TRANSFORM = Object.freeze({
   rotX: 0,
   rotY: 0,
   rotZ: 0,
+  pivotX: 0,
+  pivotY: 0,
+  pivotZ: 0,
   scale: 1,
 });
 const MODEL_TRANSFORM_CONTROLS = Object.freeze([
@@ -84,8 +93,99 @@ const MODEL_TRANSFORM_CONTROLS = Object.freeze([
   { key: 'rotX', label: 'Pitch', min: -360, max: 360, step: 1 },
   { key: 'rotY', label: 'Yaw', min: -360, max: 360, step: 1 },
   { key: 'rotZ', label: 'Roll', min: -360, max: 360, step: 1 },
+  { key: 'pivotX', label: 'Pivot X', min: -3, max: 3, step: 0.01 },
+  { key: 'pivotY', label: 'Pivot Y', min: -3, max: 3, step: 0.01 },
+  { key: 'pivotZ', label: 'Pivot Z', min: -3, max: 3, step: 0.01 },
   { key: 'scale', label: 'Scale', min: 0.35, max: 2.4, step: 0.01 },
 ]);
+const GYRO_SOURCE_AXES = Object.freeze(['x', 'y', 'z']);
+const DEFAULT_GYRO_ADJUSTMENT = Object.freeze({
+  x: 1,
+  y: 1,
+  z: 1,
+  sourceX: 'x',
+  sourceY: 'y',
+  sourceZ: 'z',
+  invertRelative: false,
+  alignment: Object.freeze([0, 0, 0, 1]),
+  neutralRotate: null,
+});
+const CAPTURED_GYRO_ALIGNMENTS = Object.freeze({
+  left: Object.freeze([-0.705462, 0.704345, -0.067434, 0.040903]),
+  right: Object.freeze([0.012854, 0.051684, 0.66249, 0.747175]),
+});
+const CAPTURED_GYRO_NEUTRALS = Object.freeze({
+  left: Object.freeze([0.499321736, -0.070393007, -0.056281739, -0.861716307]),
+  right: Object.freeze([-0.66272303, 0.033238232, 0.0142513, 0.747990846]),
+});
+const GYRO_ADJUSTMENT_AXES = Object.freeze([
+  { key: 'x', label: 'X', sourceKey: 'sourceX', modelLabel: 'Model X' },
+  { key: 'y', label: 'Y', sourceKey: 'sourceY', modelLabel: 'Model Y' },
+  { key: 'z', label: 'Z', sourceKey: 'sourceZ', modelLabel: 'Model Z' },
+]);
+const GYRO_AXIS_PERMUTATIONS = Object.freeze([
+  Object.freeze(['x', 'y', 'z']),
+  Object.freeze(['x', 'z', 'y']),
+  Object.freeze(['y', 'x', 'z']),
+  Object.freeze(['y', 'z', 'x']),
+  Object.freeze(['z', 'x', 'y']),
+  Object.freeze(['z', 'y', 'x']),
+]);
+const GYRO_CORRECTION_OPTIONS = Object.freeze([
+  Object.freeze({ x: 1, y: 1, z: 1 }),
+  Object.freeze({ x: -1, y: 1, z: 1 }),
+  Object.freeze({ x: 1, y: -1, z: 1 }),
+  Object.freeze({ x: 1, y: 1, z: -1 }),
+  Object.freeze({ x: -1, y: -1, z: 1 }),
+  Object.freeze({ x: -1, y: 1, z: -1 }),
+  Object.freeze({ x: 1, y: -1, z: -1 }),
+  Object.freeze({ x: -1, y: -1, z: -1 }),
+]);
+const GYRO_CALIBRATION_POSES = Object.freeze([
+  Object.freeze({ key: 'neutral', label: 'Neutral' }),
+  Object.freeze({ key: 'pitch_up', label: 'Pitch +' }),
+  Object.freeze({ key: 'pitch_down', label: 'Pitch -' }),
+  Object.freeze({ key: 'yaw_left', label: 'Yaw L' }),
+  Object.freeze({ key: 'yaw_right', label: 'Yaw R' }),
+  Object.freeze({ key: 'roll_left', label: 'Roll L' }),
+  Object.freeze({ key: 'roll_right', label: 'Roll R' }),
+]);
+const GYRO_POSE_PLAYBACK_SEQUENCE = Object.freeze([
+  'neutral',
+  'pitch_up',
+  'neutral',
+  'pitch_down',
+  'neutral',
+  'yaw_left',
+  'neutral',
+  'yaw_right',
+  'neutral',
+  'roll_left',
+  'neutral',
+  'roll_right',
+]);
+const GYRO_POSE_PLAYBACK_SECONDS = 1.8;
+const GYRO_CALIBRATION_EXPECTATIONS = Object.freeze([
+  Object.freeze({ pose: 'pitch_up', axis: 'x', sign: 1 }),
+  Object.freeze({ pose: 'pitch_down', axis: 'x', sign: -1 }),
+  Object.freeze({ pose: 'yaw_left', axis: 'y', sign: 1 }),
+  Object.freeze({ pose: 'yaw_right', axis: 'y', sign: -1 }),
+  Object.freeze({ pose: 'roll_left', axis: 'z', sign: 1 }),
+  Object.freeze({ pose: 'roll_right', axis: 'z', sign: -1 }),
+]);
+const GYRO_CALIBRATION_TARGETS_BY_SIDE = Object.freeze({
+  left: Object.freeze([
+    Object.freeze({ positivePose: 'pitch_up', negativePose: 'pitch_down', target: Object.freeze([0, -1, 0]) }),
+    Object.freeze({ positivePose: 'yaw_left', negativePose: 'yaw_right', target: Object.freeze([-1, 0, 0]) }),
+    Object.freeze({ positivePose: 'roll_left', negativePose: 'roll_right', target: Object.freeze([0, 0, -1]) }),
+  ]),
+  right: Object.freeze([
+    Object.freeze({ positivePose: 'pitch_up', negativePose: 'pitch_down', target: Object.freeze([0, -1, 0]) }),
+    Object.freeze({ positivePose: 'yaw_left', negativePose: 'yaw_right', target: Object.freeze([1, 0, 0]) }),
+    Object.freeze({ positivePose: 'roll_left', negativePose: 'roll_right', target: Object.freeze([0, 0, -1]) }),
+  ]),
+});
+const GYRO_INVERT_RELATIVE_BY_SIDE = Object.freeze({ left: false, right: true });
 const HAND_BACK_PIVOT_LOCAL_Y = 0.88;
 
 function defaultModelTransforms() {
@@ -93,6 +193,64 @@ function defaultModelTransforms() {
     single: { ...DEFAULT_MODEL_TRANSFORM },
     left: { ...DEFAULT_MODEL_TRANSFORM },
     right: { ...DEFAULT_MODEL_TRANSFORM },
+  };
+}
+
+function cloneModelTransforms(transforms) {
+  return Object.entries(transforms || {}).reduce((next, [key, transform]) => {
+    next[key] = { ...DEFAULT_MODEL_TRANSFORM, ...(transform || {}) };
+    return next;
+  }, {});
+}
+
+function modelTransformsFromDefaults(overrides) {
+  const next = defaultModelTransforms();
+  if (!overrides || typeof overrides !== 'object') {
+    return next;
+  }
+
+  Object.entries(overrides).forEach(([key, transform]) => {
+    if (transform && typeof transform === 'object') {
+      next[key] = normalizeModelTransform({ ...DEFAULT_MODEL_TRANSFORM, ...transform });
+    }
+  });
+
+  return next;
+}
+
+function mergeModelTransforms(defaults, stored) {
+  const next = cloneModelTransforms(defaults);
+  if (!stored || typeof stored !== 'object') {
+    return next;
+  }
+
+  Object.entries(stored).forEach(([key, transform]) => {
+    if (transform && typeof transform === 'object') {
+      next[key] = normalizeModelTransform({ ...(next[key] || DEFAULT_MODEL_TRANSFORM), ...transform });
+    }
+  });
+
+  return next;
+}
+
+function defaultGyroAdjustments() {
+  return {
+    single: {
+      ...DEFAULT_GYRO_ADJUSTMENT,
+      alignment: [...DEFAULT_GYRO_ADJUSTMENT.alignment],
+      neutralRotate: null,
+    },
+    left: {
+      ...DEFAULT_GYRO_ADJUSTMENT,
+      alignment: [...CAPTURED_GYRO_ALIGNMENTS.left],
+      neutralRotate: [...CAPTURED_GYRO_NEUTRALS.left],
+    },
+    right: {
+      ...DEFAULT_GYRO_ADJUSTMENT,
+      invertRelative: true,
+      alignment: [...CAPTURED_GYRO_ALIGNMENTS.right],
+      neutralRotate: [...CAPTURED_GYRO_NEUTRALS.right],
+    },
   };
 }
 
@@ -176,6 +334,53 @@ function normalizeModelTransforms(value) {
   return next;
 }
 
+function normalizeGyroAdjustment(value) {
+  return GYRO_ADJUSTMENT_AXES.reduce((adjustment, axis) => {
+    adjustment[axis.key] = Number(value?.[axis.key]) < 0 ? -1 : 1;
+    adjustment[axis.sourceKey] = GYRO_SOURCE_AXES.includes(value?.[axis.sourceKey])
+      ? value[axis.sourceKey]
+      : axis.key;
+    return adjustment;
+  }, {
+    alignment: normalizeGyroAlignment(value?.alignment),
+    neutralRotate: normalizeGyroNeutralRotate(value?.neutralRotate),
+    invertRelative: value?.invertRelative === true,
+  });
+}
+
+function normalizeGyroNeutralRotate(value) {
+  if (!Array.isArray(value) || value.length < 4) {
+    return null;
+  }
+
+  const rotate = value.slice(0, 4).map((item) => Number(item));
+  if (rotate.some((item) => !Number.isFinite(item))) {
+    return null;
+  }
+
+  const length = Math.hypot(rotate[0], rotate[1], rotate[2], rotate[3]);
+  if (length < 0.000001) {
+    return null;
+  }
+
+  return rotate.map((item) => item / length);
+}
+
+function normalizeGyroAdjustments(value) {
+  const next = defaultGyroAdjustments();
+  if (!value || typeof value !== 'object') {
+    return next;
+  }
+
+  Object.entries(value).forEach(([key, adjustment]) => {
+    if (adjustment && typeof adjustment === 'object') {
+      next[key] = normalizeGyroAdjustment(adjustment);
+    }
+  });
+
+  return next;
+}
+
 function normalizeWujiWeights(value) {
   return WUJI_WEIGHT_CONTROLS.reduce((weights, control) => {
     weights[control.key] = clampNumber(
@@ -196,8 +401,12 @@ function readStoredGloveMotionSettings() {
     showSkeleton: false,
     mirrorScaleX: false,
     sceneBackgroundColor: DEFAULT_SCENE_BACKGROUND_COLOR,
+    wujiSendIntervalMs: DEFAULT_WUJI_SEND_INTERVAL_MS,
     wujiWeights: { ...DEFAULT_WUJI_WEIGHTS },
     modelTransforms: defaultModelTransforms(),
+    modelTransformVersion: 0,
+    gyroAdjustments: defaultGyroAdjustments(),
+    gyroAdjustmentVersion: GYRO_ADJUSTMENT_SETTINGS_VERSION,
   };
 
   if (typeof localStorage === 'undefined') {
@@ -210,6 +419,12 @@ function readStoredGloveMotionSettings() {
       return defaults;
     }
 
+    let gyroAdjustments = normalizeGyroAdjustments(parsed.gyroAdjustments);
+    if (parsed.gyroAdjustmentVersion !== GYRO_ADJUSTMENT_SETTINGS_VERSION) {
+      gyroAdjustments = defaultGyroAdjustments();
+    }
+    const modelTransformVersion = Number(parsed.modelTransformVersion) || 0;
+
     return {
       useLiveData: typeof parsed.useLiveData === 'boolean' ? parsed.useLiveData : defaults.useLiveData,
       bendGain: clampNumber(parsed.bendGain, defaults.bendGain, 0, 1.35),
@@ -217,8 +432,19 @@ function readStoredGloveMotionSettings() {
       showSkeleton: typeof parsed.showSkeleton === 'boolean' ? parsed.showSkeleton : defaults.showSkeleton,
       mirrorScaleX: typeof parsed.mirrorScaleX === 'boolean' ? parsed.mirrorScaleX : defaults.mirrorScaleX,
       sceneBackgroundColor: normalizeHexColor(parsed.sceneBackgroundColor, defaults.sceneBackgroundColor),
+      wujiSendIntervalMs: clampNumber(
+        parsed.wujiSendIntervalMs,
+        defaults.wujiSendIntervalMs,
+        WUJI_SEND_INTERVAL_MIN_MS,
+        WUJI_SEND_INTERVAL_MAX_MS,
+      ),
       wujiWeights: normalizeWujiWeights(parsed.wujiWeights),
-      modelTransforms: normalizeModelTransforms(parsed.modelTransforms),
+      modelTransforms: modelTransformVersion === MODEL_TRANSFORM_SETTINGS_VERSION
+        ? normalizeModelTransforms(parsed.modelTransforms)
+        : defaultModelTransforms(),
+      modelTransformVersion,
+      gyroAdjustments,
+      gyroAdjustmentVersion: GYRO_ADJUSTMENT_SETTINGS_VERSION,
     };
   } catch {
     return defaults;
@@ -231,6 +457,73 @@ function writeStoredGloveMotionSettings(settings) {
   }
 
   localStorage.setItem(GLOVE_MOTION_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function normalizeGyroCalibrationSample(sample) {
+  if (!sample || typeof sample !== 'object' || !Array.isArray(sample.rotate) || sample.rotate.length < 4) {
+    return null;
+  }
+
+  const rotate = sample.rotate.slice(0, 4).map((value) => Number(value));
+  if (rotate.some((value) => !Number.isFinite(value))) {
+    return null;
+  }
+
+  return {
+    handSide: sample.handSide === 'left' ? 'left' : 'right',
+    rotate,
+    sourceTimestamp: Number(sample.sourceTimestamp) || 0,
+    sourceAgeMs: Number.isFinite(Number(sample.sourceAgeMs)) ? Math.max(0, Math.round(Number(sample.sourceAgeMs))) : null,
+    source: typeof sample.source === 'string' ? sample.source : 'live',
+  };
+}
+
+function normalizeGyroCalibrationCapture(capture) {
+  if (!capture || typeof capture !== 'object') {
+    return null;
+  }
+
+  const pose = GYRO_CALIBRATION_POSES.find((item) => item.key === capture.pose);
+  if (!pose) {
+    return null;
+  }
+
+  return {
+    id: typeof capture.id === 'string' ? capture.id : `${pose.key}-${Number(capture.capturedAt) || Date.now()}`,
+    pose: pose.key,
+    label: pose.label,
+    handSide: capture.handSide === 'left' || capture.handSide === 'right' ? capture.handSide : null,
+    capturedAt: Number(capture.capturedAt) || Date.now(),
+    left: normalizeGyroCalibrationSample(capture.left),
+    right: normalizeGyroCalibrationSample(capture.right),
+  };
+}
+
+function readStoredGyroCalibrationCaptures() {
+  if (typeof localStorage === 'undefined') {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(localStorage.getItem(GYRO_CALIBRATION_CAPTURE_KEY) || '[]');
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map(normalizeGyroCalibrationCapture)
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredGyroCalibrationCaptures(captures) {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+
+  localStorage.setItem(GYRO_CALIBRATION_CAPTURE_KEY, JSON.stringify(captures));
 }
 
 function roundRad(value) {
@@ -276,6 +569,48 @@ function formatWujiStatus(enabled, status) {
   }
 
   return 'connecting';
+}
+
+function createWujiBridgeStatus() {
+  return {
+    connected: false,
+    frames: 0,
+    ack: '',
+    error: '',
+  };
+}
+
+function resolveWujiBridgeUrls(defaultUrl, urlsByHand) {
+  const endpoints = {};
+  if (urlsByHand && typeof urlsByHand === 'object') {
+    ['left', 'right'].forEach((handSide) => {
+      if (typeof urlsByHand[handSide] === 'string' && urlsByHand[handSide].trim()) {
+        endpoints[handSide] = urlsByHand[handSide].trim();
+      }
+    });
+  }
+
+  if (!Object.keys(endpoints).length && typeof defaultUrl === 'string' && defaultUrl.trim()) {
+    endpoints.default = defaultUrl.trim();
+  }
+  return endpoints;
+}
+
+function createWujiBridgeStatusMap(endpoints) {
+  return Object.keys(endpoints).reduce((statuses, bridgeKey) => {
+    statuses[bridgeKey] = createWujiBridgeStatus();
+    return statuses;
+  }, {});
+}
+
+function wujiBridgeKeyForHand(endpoints, handSide) {
+  if (handSide && endpoints[handSide]) {
+    return handSide;
+  }
+  if (endpoints.default) {
+    return 'default';
+  }
+  return null;
 }
 
 function clampIndex(value, maxExclusive) {
@@ -346,18 +681,114 @@ function isUsableRotate(rotate) {
   return !modelInput.some((value) => Math.abs(Number(value)) > 1.0001);
 }
 
-function transformQuaternionForRender(rotate, state, target) {
+function mappedQuaternionFromRotate(rotate, adjustment, target) {
+  const baseVector = {
+    x: Number(rotate[1]) || 0,
+    y: -(Number(rotate[0]) || 0),
+    z: -(Number(rotate[2]) || 0),
+  };
+  const sourceX = GYRO_SOURCE_AXES.includes(adjustment.sourceX) ? adjustment.sourceX : 'x';
+  const sourceY = GYRO_SOURCE_AXES.includes(adjustment.sourceY) ? adjustment.sourceY : 'y';
+  const sourceZ = GYRO_SOURCE_AXES.includes(adjustment.sourceZ) ? adjustment.sourceZ : 'z';
+  return target
+    .set(
+      baseVector[sourceX] * (adjustment.x || 1),
+      baseVector[sourceY] * (adjustment.y || 1),
+      baseVector[sourceZ] * (adjustment.z || 1),
+      Number(rotate[3]) || 0,
+    )
+    .normalize();
+}
+
+function normalizeGyroAlignment(value) {
+  const alignment = Array.isArray(value) && value.length >= 4
+    ? value.slice(0, 4).map((item, index) => (
+      Number.isFinite(Number(item)) ? Number(item) : DEFAULT_GYRO_ADJUSTMENT.alignment[index]
+    ))
+    : [...DEFAULT_GYRO_ADJUSTMENT.alignment];
+  const length = Math.hypot(alignment[0], alignment[1], alignment[2], alignment[3]);
+  if (!length) {
+    return [...DEFAULT_GYRO_ADJUSTMENT.alignment];
+  }
+
+  return alignment.map((item) => item / length);
+}
+
+function applyGyroAlignment(quaternion, adjustment, scratch) {
+  const alignment = normalizeGyroAlignment(adjustment?.alignment);
+  if (
+    Math.abs(alignment[0]) < 0.000001 &&
+    Math.abs(alignment[1]) < 0.000001 &&
+    Math.abs(alignment[2]) < 0.000001 &&
+    Math.abs(alignment[3] - 1) < 0.000001
+  ) {
+    return quaternion;
+  }
+
+  const alignmentQuaternion = scratch.alignmentQuaternion || new THREE.Quaternion();
+  const alignmentQuaternionInv = scratch.alignmentQuaternionInv || new THREE.Quaternion();
+  scratch.alignmentQuaternion = alignmentQuaternion;
+  scratch.alignmentQuaternionInv = alignmentQuaternionInv;
+  alignmentQuaternion.set(alignment[0], alignment[1], alignment[2], alignment[3]).normalize();
+  alignmentQuaternionInv.copy(alignmentQuaternion).invert();
+  return quaternion.premultiply(alignmentQuaternion).multiply(alignmentQuaternionInv);
+}
+
+function applyGyroRelativeDirection(quaternion, adjustment) {
+  quaternion.x = -quaternion.x;
+  if (adjustment?.invertRelative) {
+    quaternion.invert();
+  }
+  return quaternion;
+}
+
+function applyQuaternionAxisSigns(quaternion, signs) {
+  if (!signs) {
+    return quaternion;
+  }
+
+  quaternion.x *= Number(signs.x) < 0 ? -1 : 1;
+  quaternion.y *= Number(signs.y) < 0 ? -1 : 1;
+  quaternion.z *= Number(signs.z) < 0 ? -1 : 1;
+  return quaternion.normalize();
+}
+
+function transformQuaternionForRender(
+  rotate,
+  state,
+  target,
+  adjustment = DEFAULT_GYRO_ADJUSTMENT,
+  useCalibratedNeutral = true,
+) {
   if (!state.input) {
     state.input = new THREE.Quaternion();
   }
 
-  const q = state.input
-    .set(Number(rotate[1]), -Number(rotate[0]), Number(rotate[2]), Number(rotate[3]))
-    .normalize();
+  const baseMode = useCalibratedNeutral ? 'calibrated' : 'session';
+  if (state.baseMode !== baseMode) {
+    state.base = null;
+    state.baseInv = null;
+    state.baseSource = null;
+    state.baseMode = baseMode;
+  }
 
-  if (!state.base) {
+  const q = mappedQuaternionFromRotate(rotate, adjustment, state.input);
+  const neutralRotate = useCalibratedNeutral ? adjustment?.neutralRotate : null;
+  const hasCalibratedNeutral = isUsableRotate(neutralRotate);
+
+  if (hasCalibratedNeutral && (!state.base || state.baseSource !== neutralRotate)) {
+    state.base = mappedQuaternionFromRotate(
+      neutralRotate,
+      adjustment,
+      state.calibratedBase || new THREE.Quaternion(),
+    ).clone();
+    state.calibratedBase = state.base;
+    state.baseInv = state.base.clone().invert();
+    state.baseSource = neutralRotate;
+  } else if (!state.base) {
     state.base = q.clone();
     state.baseInv = state.base.clone().invert();
+    state.baseSource = null;
     return target.identity();
   }
 
@@ -366,14 +797,443 @@ function transformQuaternionForRender(rotate, state, target) {
   }
 
   target.multiplyQuaternions(state.baseInv, q);
-  target.x = -target.x;
+  applyGyroRelativeDirection(target, adjustment);
+  applyGyroAlignment(target, adjustment, state);
   return target.normalize();
+}
+
+function relativeQuaternionForAdjustment(neutralRotate, sampleRotate, adjustment, scratch) {
+  const base = mappedQuaternionFromRotate(neutralRotate, adjustment, scratch.base || new THREE.Quaternion()).clone();
+  const sample = mappedQuaternionFromRotate(sampleRotate, adjustment, scratch.sample || new THREE.Quaternion()).clone();
+  scratch.base = base;
+  scratch.sample = sample;
+  const baseInv = scratch.baseInv || new THREE.Quaternion();
+  scratch.baseInv = baseInv.copy(base).invert();
+  const relative = scratch.relative || new THREE.Quaternion();
+  scratch.relative = relative.multiplyQuaternions(baseInv, sample);
+  applyGyroRelativeDirection(relative, adjustment);
+  applyGyroAlignment(relative, adjustment, scratch);
+  return relative.normalize();
+}
+
+function buildGyroAdjustmentCandidate(axisOrder, correction, invertRelative = false) {
+  return {
+    x: correction.x,
+    y: correction.y,
+    z: correction.z,
+    sourceX: axisOrder[0],
+    sourceY: axisOrder[1],
+    sourceZ: axisOrder[2],
+    invertRelative,
+  };
+}
+
+function gyroAdjustmentComplexity(adjustment, handSide) {
+  const axisChanges = GYRO_ADJUSTMENT_AXES.reduce((count, axis) => (
+    count
+      + (adjustment[axis.sourceKey] === axis.key ? 0 : 1)
+      + (adjustment[axis.key] < 0 ? 1 : 0)
+  ), 0);
+  const expectedInvert = GYRO_INVERT_RELATIVE_BY_SIDE[handSide] === true;
+  return axisChanges + (adjustment.invertRelative === expectedInvert ? 0 : 4);
+}
+
+function collectGyroSamplesByPose(captures, handSide) {
+  return captures.reduce((samplesByPose, capture) => {
+    const sample = capture?.[handSide];
+    if (capture?.pose && sample?.rotate && isUsableRotate(sample.rotate)) {
+      if (!samplesByPose[capture.pose]) {
+        samplesByPose[capture.pose] = [];
+      }
+      samplesByPose[capture.pose].push(sample);
+    }
+    return samplesByPose;
+  }, {});
+}
+
+function scoreGyroAdjustmentCandidate(samplesByPose, adjustment) {
+  const neutralSample = samplesByPose.neutral?.[samplesByPose.neutral.length - 1];
+  if (!neutralSample) {
+    return null;
+  }
+
+  const scratch = {};
+  let score = 0;
+  let sampleCount = 0;
+  const missing = [];
+
+  GYRO_CALIBRATION_EXPECTATIONS.forEach((expectation) => {
+    const samples = samplesByPose[expectation.pose] || [];
+    if (!samples.length) {
+      missing.push(expectation.pose);
+      return;
+    }
+
+    samples.forEach((sample) => {
+      const relative = relativeQuaternionForAdjustment(neutralSample.rotate, sample.rotate, adjustment, scratch);
+      const targetValue = relative[expectation.axis] * expectation.sign;
+      const offAxisValue = GYRO_SOURCE_AXES
+        .filter((axis) => axis !== expectation.axis)
+        .reduce((sum, axis) => sum + Math.abs(relative[axis]), 0);
+      const signPenalty = targetValue < 0 ? Math.abs(targetValue) * 3 : 0;
+      score += targetValue - offAxisValue * 0.65 - signPenalty;
+      sampleCount += 1;
+    });
+  });
+
+  if (missing.length) {
+    return { missing, score: -Infinity, sampleCount };
+  }
+
+  return { missing, score: sampleCount ? score / sampleCount : -Infinity, sampleCount };
+}
+
+function averageGyroPoseVector(samples, neutralRotate, adjustment = DEFAULT_GYRO_ADJUSTMENT) {
+  const vector = new THREE.Vector3();
+  const scratch = {};
+  samples.forEach((sample) => {
+    const q = relativeQuaternionForAdjustment(neutralRotate, sample.rotate, adjustment, scratch);
+    const sign = q.w < 0 ? -1 : 1;
+    vector.x += q.x * sign;
+    vector.y += q.y * sign;
+    vector.z += q.z * sign;
+  });
+
+  return samples.length ? vector.multiplyScalar(1 / samples.length) : vector;
+}
+
+function averageGyroNeutralRotate(samples) {
+  if (!samples?.length) {
+    return null;
+  }
+
+  const normalizedSamples = samples
+    .map((sample) => normalizeGyroNeutralRotate(sample?.rotate))
+    .filter(Boolean);
+  if (!normalizedSamples.length) {
+    return null;
+  }
+
+  const reference = normalizedSamples[0];
+  const sum = [0, 0, 0, 0];
+  normalizedSamples.forEach((rotate) => {
+    const dot = rotate.reduce((value, item, index) => value + item * reference[index], 0);
+    const sign = dot < 0 ? -1 : 1;
+    rotate.forEach((item, index) => {
+      sum[index] += item * sign;
+    });
+  });
+
+  return normalizeGyroNeutralRotate(sum);
+}
+
+function solveGyroAlignmentQuaternion(sourceVectors, targetVectors) {
+  const matrix = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ];
+
+  sourceVectors.forEach((source, index) => {
+    const target = targetVectors[index];
+    matrix[0][0] += target.x * source.x;
+    matrix[0][1] += target.x * source.y;
+    matrix[0][2] += target.x * source.z;
+    matrix[1][0] += target.y * source.x;
+    matrix[1][1] += target.y * source.y;
+    matrix[1][2] += target.y * source.z;
+    matrix[2][0] += target.z * source.x;
+    matrix[2][1] += target.z * source.y;
+    matrix[2][2] += target.z * source.z;
+  });
+
+  const sxx = matrix[0][0];
+  const sxy = matrix[0][1];
+  const sxz = matrix[0][2];
+  const syx = matrix[1][0];
+  const syy = matrix[1][1];
+  const syz = matrix[1][2];
+  const szx = matrix[2][0];
+  const szy = matrix[2][1];
+  const szz = matrix[2][2];
+  const k = [
+    [sxx + syy + szz, syz - szy, szx - sxz, sxy - syx],
+    [syz - szy, sxx - syy - szz, sxy + syx, szx + sxz],
+    [szx - sxz, sxy + syx, -sxx + syy - szz, syz + szy],
+    [sxy - syx, szx + sxz, syz + szy, -sxx - syy + szz],
+  ];
+
+  let q = [1, 0, 0, 0];
+  for (let iteration = 0; iteration < 80; iteration += 1) {
+    const next = [0, 0, 0, 0];
+    for (let row = 0; row < 4; row += 1) {
+      for (let column = 0; column < 4; column += 1) {
+        next[row] += k[row][column] * q[column];
+      }
+    }
+    const length = Math.hypot(next[0], next[1], next[2], next[3]) || 1;
+    q = next.map((value) => value / length);
+  }
+
+  return new THREE.Quaternion(q[1], q[2], q[3], q[0]).normalize().invert();
+}
+
+function averageGyroAlignmentError(sourceVectors, targetVectors, alignmentQuaternion) {
+  if (!sourceVectors.length) {
+    return Infinity;
+  }
+
+  const total = sourceVectors.reduce((sum, source, index) => {
+    const target = targetVectors[index];
+    const aligned = source.clone().applyQuaternion(alignmentQuaternion).normalize();
+    const dot = clampNumber(aligned.dot(target), 0, -1, 1);
+    return sum + THREE.MathUtils.radToDeg(Math.acos(dot));
+  }, 0);
+
+  return total / sourceVectors.length;
+}
+
+function solveGyroAdjustmentForHand(captures, handSide) {
+  const samplesByPose = collectGyroSamplesByPose(captures, handSide);
+  const calibrationTargets = GYRO_CALIBRATION_TARGETS_BY_SIDE[handSide]
+    || GYRO_CALIBRATION_TARGETS_BY_SIDE.right;
+  const missing = [];
+  if (!samplesByPose.neutral?.length) {
+    missing.push('neutral');
+  }
+  calibrationTargets.forEach((pair) => {
+    if (!samplesByPose[pair.positivePose]?.length) {
+      missing.push(pair.positivePose);
+    }
+    if (!samplesByPose[pair.negativePose]?.length) {
+      missing.push(pair.negativePose);
+    }
+  });
+  if (missing.length) {
+    return { handSide, missing, adjustment: null, score: -Infinity, sampleCount: 0 };
+  }
+
+  const neutralRotate = averageGyroNeutralRotate(samplesByPose.neutral);
+  if (!neutralRotate) {
+    return { handSide, missing: ['neutral'], adjustment: null, score: -Infinity, sampleCount: 0 };
+  }
+  const targetVectors = calibrationTargets.map((pair) => (
+    new THREE.Vector3(pair.target[0], pair.target[1], pair.target[2]).normalize()
+  ));
+  const sampleCount = calibrationTargets.reduce((count, pair) => (
+    count + samplesByPose[pair.positivePose].length + samplesByPose[pair.negativePose].length
+  ), samplesByPose.neutral.length);
+  let bestCandidate = null;
+
+  GYRO_AXIS_PERMUTATIONS.forEach((axisOrder) => {
+    GYRO_CORRECTION_OPTIONS.forEach((correction) => {
+      [false, true].forEach((invertRelative) => {
+        const candidate = buildGyroAdjustmentCandidate(axisOrder, correction, invertRelative);
+        const sourceVectors = [];
+        let valid = true;
+
+        calibrationTargets.forEach((pair) => {
+          const positiveVector = averageGyroPoseVector(
+            samplesByPose[pair.positivePose],
+            neutralRotate,
+            candidate,
+          );
+          const negativeVector = averageGyroPoseVector(
+            samplesByPose[pair.negativePose],
+            neutralRotate,
+            candidate,
+          );
+          const sourceVector = positiveVector.sub(negativeVector);
+          if (sourceVector.lengthSq() < 0.000001) {
+            valid = false;
+            return;
+          }
+          sourceVectors.push(sourceVector.normalize());
+        });
+
+        if (!valid || sourceVectors.length < 3) {
+          return;
+        }
+
+        const alignmentQuaternion = solveGyroAlignmentQuaternion(sourceVectors, targetVectors);
+        const errorDegrees = averageGyroAlignmentError(sourceVectors, targetVectors, alignmentQuaternion);
+        const complexity = gyroAdjustmentComplexity(candidate, handSide);
+        const hasLowerError = !bestCandidate || errorDegrees < bestCandidate.errorDegrees - 0.05;
+        const isSimplerTie = bestCandidate
+          && Math.abs(errorDegrees - bestCandidate.errorDegrees) <= 0.05
+          && complexity < bestCandidate.complexity;
+        if (hasLowerError || isSimplerTie) {
+          bestCandidate = {
+            adjustment: candidate,
+            alignmentQuaternion,
+            errorDegrees,
+            complexity,
+          };
+        }
+      });
+    });
+  });
+
+  if (!bestCandidate) {
+    return { handSide, missing: ['samples'], adjustment: null, score: -Infinity, sampleCount };
+  }
+
+  const { adjustment, alignmentQuaternion, errorDegrees } = bestCandidate;
+  return {
+    handSide,
+    adjustment: {
+      ...adjustment,
+      neutralRotate,
+      alignment: [
+        alignmentQuaternion.x,
+        alignmentQuaternion.y,
+        alignmentQuaternion.z,
+        alignmentQuaternion.w,
+      ],
+    },
+    score: Number.isFinite(errorDegrees) ? -errorDegrees : -Infinity,
+    errorDegrees,
+    sampleCount,
+    missing: [],
+  };
+}
+
+function averageGyroPoseQuaternion(samples, neutralRotate, adjustment) {
+  if (!samples?.length || !neutralRotate) {
+    return new THREE.Quaternion();
+  }
+
+  const scratch = {};
+  const sum = [0, 0, 0, 0];
+  let reference = null;
+
+  samples.forEach((sample) => {
+    const quaternion = relativeQuaternionForAdjustment(
+      neutralRotate,
+      sample.rotate,
+      adjustment,
+      scratch,
+    ).clone();
+    const sign = reference && reference.dot(quaternion) < 0 ? -1 : 1;
+    if (!reference) {
+      reference = quaternion.clone();
+    }
+    sum[0] += quaternion.x * sign;
+    sum[1] += quaternion.y * sign;
+    sum[2] += quaternion.z * sign;
+    sum[3] += quaternion.w * sign;
+  });
+
+  const averaged = new THREE.Quaternion(sum[0], sum[1], sum[2], sum[3]);
+  return averaged.lengthSq() > 0.000001 ? averaged.normalize() : averaged.identity();
+}
+
+function quaternionFromPoseEuler(target) {
+  if (!Array.isArray(target?.euler) || target.euler.length < 3) {
+    return null;
+  }
+
+  const values = target.euler.slice(0, 3).map((value) => Number(value));
+  if (values.some((value) => !Number.isFinite(value))) {
+    return null;
+  }
+
+  return new THREE.Quaternion().setFromEuler(new THREE.Euler(
+    THREE.MathUtils.degToRad(values[0]),
+    THREE.MathUtils.degToRad(values[1]),
+    THREE.MathUtils.degToRad(values[2]),
+    'XYZ',
+  ));
+}
+
+function buildGyroPosePlaybackRuntime(calibrationData) {
+  if (!calibrationData || typeof calibrationData !== 'object') {
+    return null;
+  }
+
+  const runtime = {};
+  ['left', 'right'].forEach((handSide) => {
+    const captures = Array.isArray(calibrationData[handSide]?.captures)
+      ? calibrationData[handSide].captures
+      : [];
+    const samplesByPose = collectGyroSamplesByPose(captures, handSide);
+    const calibration = solveGyroAdjustmentForHand(captures, handSide);
+    const neutralRotate = calibration.adjustment?.neutralRotate;
+    if (!neutralRotate || !calibration.adjustment) {
+      return;
+    }
+
+    const poseTargets = calibrationData[handSide]?.poseTargets || {};
+    const neutralTargetQuaternion = quaternionFromPoseEuler(poseTargets.neutral);
+    const neutralTargetInverse = neutralTargetQuaternion?.clone().invert() || null;
+    const poses = GYRO_CALIBRATION_POSES.reduce((next, pose) => {
+      const targetQuaternion = quaternionFromPoseEuler(poseTargets[pose.key]);
+      if (neutralTargetInverse && targetQuaternion) {
+        next[pose.key] = neutralTargetInverse.clone().multiply(targetQuaternion).normalize();
+      } else {
+        next[pose.key] = pose.key === 'neutral'
+          ? new THREE.Quaternion()
+          : averageGyroPoseQuaternion(
+              samplesByPose[pose.key],
+              neutralRotate,
+              calibration.adjustment,
+            );
+      }
+      return next;
+    }, {});
+    const capturedSampleCount = Object.values(samplesByPose)
+      .reduce((count, samples) => count + samples.length, 0);
+    const sampleCount = Math.max(
+      capturedSampleCount,
+      Number(calibrationData[handSide]?.sampleCount) || 0,
+    );
+
+    runtime[handSide] = {
+      poses,
+      adjustment: calibration.adjustment,
+      sampleCount,
+      errorDegrees: calibration.errorDegrees,
+      targetLabels: Object.entries(poseTargets).reduce((labels, [poseKey, target]) => {
+        if (typeof target?.label === 'string') {
+          labels[poseKey] = target.label;
+        }
+        return labels;
+      }, {}),
+    };
+  });
+
+  return runtime.left || runtime.right ? runtime : null;
+}
+
+function gyroAdjustmentsFromPoseRuntime(storedAdjustments, poseRuntime) {
+  const adjustments = normalizeGyroAdjustments(storedAdjustments);
+  ['left', 'right'].forEach((handSide) => {
+    if (poseRuntime?.[handSide]?.adjustment) {
+      adjustments[handSide] = normalizeGyroAdjustment(poseRuntime[handSide].adjustment);
+    }
+  });
+  return adjustments;
+}
+
+function formatGyroAdjustmentSummary(adjustment) {
+  if (!adjustment) {
+    return 'missing';
+  }
+
+  const axisSummary = GYRO_ADJUSTMENT_AXES
+    .map((axis) => {
+      const source = adjustment[axis.sourceKey] || axis.key;
+      const sign = (adjustment[axis.key] || 1) < 0 ? '-' : '+';
+      return `${axis.label}=${sign}raw${source.toUpperCase()}`;
+    })
+    .join(' / ');
+  return adjustment.invertRelative ? `${axisSummary} / inverse Q` : axisSummary;
 }
 
 function rawRotateFromThreeQuaternion(q, target) {
   target[0] = -q.y;
   target[1] = q.x;
-  target[2] = q.z;
+  target[2] = -q.z;
   target[3] = q.w;
   return target;
 }
@@ -844,10 +1704,34 @@ export default function GloveMotionPage({
   modelScaleX = 1,
   initialHandSide = 'right',
   handViews = null,
+  modelTransformDefaults = null,
+  resetStoredModelTransforms = false,
+  showLiveHandToggle = true,
+  poseCalibrationData = null,
+  initialPoseInputMode = 'poses',
+  liveQuaternionAxisSigns = null,
   enableWujiBridgeByDefault = false,
   wujiBridgeUrl = WUJI_BRIDGE_URL,
+  wujiBridgeUrls = null,
 }) {
   const storedSettings = useMemo(() => readStoredGloveMotionSettings(), []);
+  const posePlaybackRuntime = useMemo(
+    () => buildGyroPosePlaybackRuntime(poseCalibrationData),
+    [poseCalibrationData],
+  );
+  const hasPosePlayback = Boolean(posePlaybackRuntime);
+  const initialGyroAdjustments = useMemo(
+    () => gyroAdjustmentsFromPoseRuntime(storedSettings.gyroAdjustments, posePlaybackRuntime),
+    [posePlaybackRuntime, storedSettings.gyroAdjustments],
+  );
+  const resolvedInitialPoseInputMode = initialPoseInputMode === 'live' ? 'live' : 'poses';
+  const resolvedWujiBridgeUrls = useMemo(
+    () => resolveWujiBridgeUrls(wujiBridgeUrl, wujiBridgeUrls),
+    [wujiBridgeUrl, wujiBridgeUrls],
+  );
+  const hasSideSpecificWujiBridges = Boolean(
+    resolvedWujiBridgeUrls.left || resolvedWujiBridgeUrls.right,
+  );
   const pageRef = useRef(null);
   const mountRef = useRef(null);
   const motionGroupRef = useRef(null);
@@ -872,16 +1756,29 @@ export default function GloveMotionPage({
   const skeletonHelperRef = useRef(null);
   const pressureRuntimeRef = useRef(null);
   const modelTransformsRef = useRef(storedSettings.modelTransforms);
+  const gyroAdjustmentsRef = useRef(initialGyroAdjustments);
   const responsiveTransformRef = useRef({ x: 0, y: 0, z: 0, scale: 1 });
   const mirrorScaleXRef = useRef(storedSettings.mirrorScaleX ? -1 : 1);
-  const wujiSocketRef = useRef(null);
+  const wujiSocketsRef = useRef({});
+  const wujiBridgeUrlsRef = useRef(resolvedWujiBridgeUrls);
   const wujiEnabledRef = useRef(enableWujiBridgeByDefault);
-  const wujiReconnectTimerRef = useRef(0);
-  const wujiCloseTimerRef = useRef(0);
-  const lastWujiSendAtRef = useRef(0);
+  const wujiReconnectTimersRef = useRef({});
+  const wujiCloseTimersRef = useRef({});
+  const lastWujiSendAtRef = useRef({});
+  const wujiSendIntervalRef = useRef(storedSettings.wujiSendIntervalMs);
   const wujiWeightsRef = useRef({ ...DEFAULT_WUJI_WEIGHTS });
+  const posePlaybackRef = useRef({
+    inputMode: resolvedInitialPoseInputMode,
+    selectedPose: 'neutral',
+    autoPlay: false,
+    fingerMotion: false,
+    fingerCurl: 0.08,
+  });
+  const activePoseKeyRef = useRef('neutral');
   const dataSource = useWebSocketPressureSource();
-  const [useLiveData, setUseLiveData] = useState(storedSettings.useLiveData);
+  const [useLiveData, setUseLiveData] = useState(
+    hasPosePlayback && resolvedInitialPoseInputMode === 'live' ? true : storedSettings.useLiveData,
+  );
   const [bendGain, setBendGain] = useState(storedSettings.bendGain);
   const [lineColor, setLineColor] = useState(storedSettings.lineColor);
   const [showSkeleton, setShowSkeleton] = useState(storedSettings.showSkeleton);
@@ -889,14 +1786,27 @@ export default function GloveMotionPage({
   const [sceneBackgroundColor, setSceneBackgroundColor] = useState(storedSettings.sceneBackgroundColor);
   const [isSceneFullscreen, setIsSceneFullscreen] = useState(false);
   const [wujiBridgeEnabled, setWujiBridgeEnabled] = useState(enableWujiBridgeByDefault);
-  const [wujiBridgeStatus, setWujiBridgeStatus] = useState({
-    connected: false,
-    frames: 0,
-    ack: '',
-    error: '',
-  });
+  const [wujiBridgeStatuses, setWujiBridgeStatuses] = useState(
+    () => createWujiBridgeStatusMap(resolvedWujiBridgeUrls),
+  );
+  const [wujiSendIntervalMs, setWujiSendIntervalMs] = useState(storedSettings.wujiSendIntervalMs);
+  const resolvedModelTransformDefaults = useMemo(
+    () => modelTransformsFromDefaults(modelTransformDefaults),
+    [modelTransformDefaults],
+  );
   const [wujiWeights, setWujiWeights] = useState(() => ({ ...storedSettings.wujiWeights }));
-  const [modelTransforms, setModelTransforms] = useState(() => ({ ...storedSettings.modelTransforms }));
+  const [modelTransforms, setModelTransforms] = useState(() => (
+    resetStoredModelTransforms || storedSettings.modelTransformVersion !== MODEL_TRANSFORM_SETTINGS_VERSION
+      ? cloneModelTransforms(resolvedModelTransformDefaults)
+      : mergeModelTransforms(resolvedModelTransformDefaults, storedSettings.modelTransforms)
+  ));
+  const [gyroAdjustments, setGyroAdjustments] = useState(() => initialGyroAdjustments);
+  const [transformEditSide, setTransformEditSide] = useState(() => (
+    initialHandSide === 'right' ? 'right' : 'left'
+  ));
+  const [gyroEditSide, setGyroEditSide] = useState(() => (
+    initialHandSide === 'right' ? 'right' : 'left'
+  ));
   const [loadState, setLoadState] = useState('Loading');
   const [calibrationVersion, setCalibrationVersion] = useState(0);
   const [poseReadout, setPoseReadout] = useState({
@@ -906,6 +1816,14 @@ export default function GloveMotionPage({
     rawFingerPoints: [0, 0, 0, 0, 0],
     frameAge: 'none',
   });
+  const [gyroCalibrationCaptures, setGyroCalibrationCaptures] = useState(readStoredGyroCalibrationCaptures);
+  const [gyroCaptureStatus, setGyroCaptureStatus] = useState('No samples');
+  const [poseInputMode, setPoseInputMode] = useState(resolvedInitialPoseInputMode);
+  const [selectedPose, setSelectedPose] = useState('neutral');
+  const [activePoseKey, setActivePoseKey] = useState('neutral');
+  const [autoPosePlayback, setAutoPosePlayback] = useState(false);
+  const [fingerMotion, setFingerMotion] = useState(false);
+  const [fingerCurl, setFingerCurl] = useState(0.08);
 
   const handViewConfigs = useMemo(() => {
     const views = Array.isArray(handViews) && handViews.length
@@ -924,14 +1842,50 @@ export default function GloveMotionPage({
     }));
   }, [handViews, modelScaleX]);
 
+  const hasPairedHandTransforms = handViewConfigs.some((view) => view.side === 'left')
+    && handViewConfigs.some((view) => view.side === 'right');
   const activeTransformKey = useMemo(() => {
-    const activeSideView = handViewConfigs.find((view) => view.side === dataSource.activeHandSide);
+    const activeSideView = handViewConfigs.find((view) => view.side === transformEditSide);
     return activeSideView?.key || handViewConfigs[0]?.key || 'single';
-  }, [dataSource.activeHandSide, handViewConfigs]);
+  }, [handViewConfigs, transformEditSide]);
 
-  const activeModelTransform = modelTransforms[activeTransformKey] || DEFAULT_MODEL_TRANSFORM;
+  const activeModelTransform = modelTransforms[activeTransformKey]
+    || resolvedModelTransformDefaults[activeTransformKey]
+    || DEFAULT_MODEL_TRANSFORM;
   const activeTransformLabel = handViewConfigs.find((view) => view.key === activeTransformKey)?.side
     || activeTransformKey;
+  const activeGyroKey = useMemo(() => {
+    const activeSideView = handViewConfigs.find((view) => view.side === gyroEditSide);
+    return activeSideView?.key || handViewConfigs[0]?.key || 'single';
+  }, [gyroEditSide, handViewConfigs]);
+  const activeGyroView = handViewConfigs.find((view) => view.key === activeGyroKey);
+  const activeGyroLabel = activeGyroView?.side || activeGyroKey;
+  const activeGyroCaptureSide = activeGyroView?.side === 'right' ? 'right' : 'left';
+  const activeGyroAdjustment = gyroAdjustments[activeGyroKey] || DEFAULT_GYRO_ADJUSTMENT;
+  const activeGyroCalibrationCaptures = useMemo(() => (
+    gyroCalibrationCaptures.filter((capture) => capture.handSide === activeGyroCaptureSide)
+  ), [activeGyroCaptureSide, gyroCalibrationCaptures]);
+  const gyroCaptureCounts = useMemo(() => {
+    const counts = GYRO_CALIBRATION_POSES.reduce((next, pose) => {
+      next[pose.key] = 0;
+      return next;
+    }, {});
+
+    activeGyroCalibrationCaptures.forEach((capture) => {
+      if (!counts[capture.pose]) {
+        counts[capture.pose] = 0;
+      }
+      counts[capture.pose] += 1;
+    });
+
+    return counts;
+  }, [activeGyroCalibrationCaptures]);
+  const gyroCaptureTotal = activeGyroCalibrationCaptures.length;
+  const activePose = GYRO_CALIBRATION_POSES.find((pose) => pose.key === activePoseKey)
+    || GYRO_CALIBRATION_POSES[0];
+  const posePlaybackSampleLabel = posePlaybackRuntime
+    ? `L ${posePlaybackRuntime.left?.sampleCount || 0} / R ${posePlaybackRuntime.right?.sampleCount || 0}`
+    : '';
 
   const activeCalibration = useMemo(
     () => calibrationRef.current[dataSource.activeHandSide] || DEFAULT_CALIBRATION,
@@ -963,6 +1917,16 @@ export default function GloveMotionPage({
   useEffect(() => {
     useLiveRef.current = useLiveData;
   }, [useLiveData]);
+
+  useEffect(() => {
+    posePlaybackRef.current = {
+      inputMode: poseInputMode,
+      selectedPose,
+      autoPlay: autoPosePlayback,
+      fingerMotion,
+      fingerCurl,
+    };
+  }, [autoPosePlayback, fingerCurl, fingerMotion, poseInputMode, selectedPose]);
 
   useEffect(() => {
     bendGainRef.current = bendGain;
@@ -1013,6 +1977,14 @@ export default function GloveMotionPage({
       resolvedScale,
     );
     updateManualQuaternion(transform, rig.manualQuaternion);
+    rig.manualGroup?.quaternion.copy(rig.manualQuaternion);
+    if (rig.model) {
+      rig.model.position.set(
+        -(Number(transform.pivotX) || 0),
+        -(Number(transform.pivotY) || 0),
+        -(Number(transform.pivotZ) || 0),
+      );
+    }
   };
 
   const applyCurrentModelTransform = () => {
@@ -1040,8 +2012,214 @@ export default function GloveMotionPage({
   const resetModelTransform = () => {
     setModelTransforms((current) => ({
       ...current,
-      [activeTransformKey]: { ...DEFAULT_MODEL_TRANSFORM },
+      [activeTransformKey]: {
+        ...(resolvedModelTransformDefaults[activeTransformKey] || DEFAULT_MODEL_TRANSFORM),
+      },
     }));
+  };
+
+  const toggleGyroAdjustmentAxis = (axisKey) => {
+    setGyroAdjustments((current) => {
+      const currentAdjustment = current[activeGyroKey] || DEFAULT_GYRO_ADJUSTMENT;
+      return {
+        ...current,
+        [activeGyroKey]: {
+          ...currentAdjustment,
+          [axisKey]: (currentAdjustment[axisKey] || 1) * -1,
+        },
+      };
+    });
+
+    handRigsRef.current.forEach((rig) => {
+      if (rig.transformKey === activeGyroKey) {
+        rig.quaternionState = { base: null, baseInv: null };
+        rig.displayedQuaternion.identity();
+        rig.gyroGroup?.quaternion.identity();
+      }
+    });
+  };
+
+  const updateGyroAdjustmentSource = (sourceKey, sourceAxis) => {
+    if (!GYRO_SOURCE_AXES.includes(sourceAxis)) {
+      return;
+    }
+
+    setGyroAdjustments((current) => {
+      const currentAdjustment = current[activeGyroKey] || DEFAULT_GYRO_ADJUSTMENT;
+      return {
+        ...current,
+        [activeGyroKey]: {
+          ...currentAdjustment,
+          [sourceKey]: sourceAxis,
+        },
+      };
+    });
+
+    handRigsRef.current.forEach((rig) => {
+      if (rig.transformKey === activeGyroKey) {
+        rig.quaternionState = { base: null, baseInv: null };
+        rig.displayedQuaternion.identity();
+        rig.gyroGroup?.quaternion.identity();
+      }
+    });
+  };
+
+  const readGyroCalibrationSample = (handSide, capturedAt) => {
+    const frames = framesRef.current || {};
+    const frame = frames.manualFrame?.handSide === handSide ? frames.manualFrame : frames[handSide];
+    if (!frame || !isUsableRotate(frame.rotate)) {
+      return null;
+    }
+
+    const sourceTimestamp = Number(frame.timestamp) || 0;
+    const sourceTimestampMs = sourceTimestamp > 0 && sourceTimestamp < 100000000000
+      ? sourceTimestamp * 1000
+      : sourceTimestamp;
+
+    return {
+      handSide,
+      rotate: frame.rotate.slice(0, 4).map((value) => Number(value) || 0),
+      sourceTimestamp,
+      sourceAgeMs: sourceTimestampMs ? Math.max(0, Math.round(capturedAt - sourceTimestampMs)) : null,
+      source: frame.source || 'live',
+    };
+  };
+
+  const captureGyroCalibrationPose = (poseKey) => {
+    const pose = GYRO_CALIBRATION_POSES.find((item) => item.key === poseKey);
+    if (!pose) {
+      return;
+    }
+
+    const capturedAt = Date.now();
+    const sample = readGyroCalibrationSample(activeGyroCaptureSide, capturedAt);
+    if (!sample) {
+      setGyroCaptureStatus(`${pose.label}: ${activeGyroCaptureSide} missing`);
+      return;
+    }
+
+    const capture = {
+      id: `${pose.key}-${capturedAt}`,
+      pose: pose.key,
+      label: pose.label,
+      handSide: activeGyroCaptureSide,
+      capturedAt,
+      left: activeGyroCaptureSide === 'left' ? sample : null,
+      right: activeGyroCaptureSide === 'right' ? sample : null,
+    };
+
+    setGyroCalibrationCaptures((current) => [...current, capture]);
+    setGyroCaptureStatus(`${pose.label}: ${activeGyroCaptureSide} ok`);
+  };
+
+  const buildGyroCalibrationExport = () => JSON.stringify({
+    version: 1,
+    pageKey,
+    handSide: activeGyroCaptureSide,
+    exportedAt: new Date().toISOString(),
+    poses: GYRO_CALIBRATION_POSES.map((pose) => ({ key: pose.key, label: pose.label })),
+    captures: activeGyroCalibrationCaptures,
+  }, null, 2);
+
+  const copyGyroCalibrationJson = () => {
+    const text = buildGyroCalibrationExport();
+    if (!navigator.clipboard?.writeText) {
+      setGyroCaptureStatus('Clipboard unavailable');
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => setGyroCaptureStatus(`Copied ${activeGyroCaptureSide} ${activeGyroCalibrationCaptures.length} captures`))
+      .catch(() => setGyroCaptureStatus('Copy failed'));
+  };
+
+  const exportGyroCalibrationJson = () => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const blob = new Blob([buildGyroCalibrationExport()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `gyro-calibration-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setGyroCaptureStatus(`Exported ${activeGyroCaptureSide} ${activeGyroCalibrationCaptures.length} captures`);
+  };
+
+  const clearGyroCalibrationCaptures = () => {
+    setGyroCalibrationCaptures((current) => current.filter((capture) => capture.handSide !== activeGyroCaptureSide));
+    setGyroCaptureStatus(`Cleared ${activeGyroCaptureSide} samples`);
+  };
+
+  const clearGyroCalibrationPose = (poseKey) => {
+    const pose = GYRO_CALIBRATION_POSES.find((item) => item.key === poseKey);
+    setGyroCalibrationCaptures((current) => current.filter((capture) => (
+      capture.handSide !== activeGyroCaptureSide || capture.pose !== poseKey
+    )));
+    setGyroCaptureStatus(`Cleared ${activeGyroCaptureSide} ${pose?.label || poseKey}`);
+  };
+
+  const resetGyroRuntimeState = (keys) => {
+    handRigsRef.current.forEach((rig) => {
+      if (keys.includes(rig.transformKey)) {
+        rig.quaternionState = { base: null, baseInv: null };
+        rig.displayedQuaternion.identity();
+        rig.gyroGroup?.quaternion.identity();
+      }
+    });
+  };
+
+  const applyGyroCalibrationFromSamples = () => {
+    const result = solveGyroAdjustmentForHand(activeGyroCalibrationCaptures, activeGyroCaptureSide);
+    if (!result.adjustment) {
+      setGyroCaptureStatus(`${activeGyroCaptureSide} missing ${result.missing?.join(',') || 'samples'}`);
+      return;
+    }
+
+    setGyroAdjustments((current) => ({
+      ...current,
+      [activeGyroKey]: result.adjustment,
+    }));
+    resetGyroRuntimeState([activeGyroKey]);
+    setGyroCaptureStatus(
+      `Auto Cal ${activeGyroCaptureSide}: ${Number(result.errorDegrees).toFixed(1)} deg / ${formatGyroAdjustmentSummary(result.adjustment)}`,
+    );
+  };
+
+  const mirrorActiveTransformToOtherHand = () => {
+    const sourceView = handViewConfigs.find((view) => view.key === activeTransformKey);
+    if (!sourceView?.side) {
+      return;
+    }
+
+    const targetSide = sourceView.side === 'left' ? 'right' : 'left';
+    const targetView = handViewConfigs.find((view) => view.side === targetSide);
+    if (!targetView) {
+      return;
+    }
+
+    setModelTransforms((current) => {
+      const sourceTransform = current[sourceView.key]
+        || resolvedModelTransformDefaults[sourceView.key]
+        || DEFAULT_MODEL_TRANSFORM;
+      const sourceWorldX = (Number(sourceView.x) || 0) + (Number(sourceTransform.x) || 0);
+      const targetBaseX = Number(targetView.x) || 0;
+
+      return {
+        ...current,
+        [targetView.key]: {
+          ...(resolvedModelTransformDefaults[targetView.key] || DEFAULT_MODEL_TRANSFORM),
+          ...sourceTransform,
+          x: -sourceWorldX - targetBaseX,
+          rotY: -(Number(sourceTransform.rotY) || 0),
+          rotZ: -(Number(sourceTransform.rotZ) || 0),
+        },
+      };
+    });
   };
 
   const enterSceneFullscreen = () => {
@@ -1068,12 +2246,24 @@ export default function GloveMotionPage({
     }));
   };
 
-  const resetWujiWeights = () => {
+  const resetWujiOutput = () => {
+    setWujiSendIntervalMs(DEFAULT_WUJI_SEND_INTERVAL_MS);
     setWujiWeights({ ...DEFAULT_WUJI_WEIGHTS });
   };
 
-  const sendWujiZeroFrames = () => {
-    const socket = wujiSocketRef.current;
+  const updateWujiBridgeStatus = (bridgeKey, update) => {
+    setWujiBridgeStatuses((current) => {
+      const previous = current[bridgeKey] || createWujiBridgeStatus();
+      const changes = typeof update === 'function' ? update(previous) : update;
+      return {
+        ...current,
+        [bridgeKey]: { ...previous, ...changes },
+      };
+    });
+  };
+
+  const sendWujiZeroFrames = (bridgeKey) => {
+    const socket = wujiSocketsRef.current[bridgeKey];
     if (socket?.readyState !== WebSocket.OPEN) {
       return;
     }
@@ -1083,22 +2273,23 @@ export default function GloveMotionPage({
     }
   };
 
-  const closeWujiBridge = ({ sendZero = true } = {}) => {
-    window.clearTimeout(wujiReconnectTimerRef.current);
-    window.clearTimeout(wujiCloseTimerRef.current);
-    wujiReconnectTimerRef.current = 0;
-    wujiCloseTimerRef.current = 0;
+  const closeWujiBridge = (bridgeKey, { sendZero = true } = {}) => {
+    window.clearTimeout(wujiReconnectTimersRef.current[bridgeKey]);
+    window.clearTimeout(wujiCloseTimersRef.current[bridgeKey]);
+    delete wujiReconnectTimersRef.current[bridgeKey];
+    delete wujiCloseTimersRef.current[bridgeKey];
 
-    const socket = wujiSocketRef.current;
+    const socket = wujiSocketsRef.current[bridgeKey];
     if (!socket) {
-      setWujiBridgeStatus((current) => ({ ...current, connected: false }));
+      updateWujiBridgeStatus(bridgeKey, { connected: false });
       return;
     }
 
     if (sendZero && socket.readyState === WebSocket.OPEN) {
-      sendWujiZeroFrames();
-      wujiCloseTimerRef.current = window.setTimeout(() => {
-        if (wujiSocketRef.current === socket) {
+      sendWujiZeroFrames(bridgeKey);
+      wujiCloseTimersRef.current[bridgeKey] = window.setTimeout(() => {
+        delete wujiCloseTimersRef.current[bridgeKey];
+        if (wujiSocketsRef.current[bridgeKey] === socket) {
           socket.close();
         }
       }, 180);
@@ -1108,52 +2299,68 @@ export default function GloveMotionPage({
     socket.close();
   };
 
-  const connectWujiBridge = () => {
-    if (typeof WebSocket === 'undefined') {
-      setWujiBridgeStatus((current) => ({
-        ...current,
-        connected: false,
-        error: 'WebSocket unavailable',
-      }));
+  const closeAllWujiBridges = ({ sendZero = true } = {}) => {
+    const bridgeKeys = new Set([
+      ...Object.keys(wujiBridgeUrlsRef.current),
+      ...Object.keys(wujiSocketsRef.current),
+    ]);
+    bridgeKeys.forEach((bridgeKey) => closeWujiBridge(bridgeKey, { sendZero }));
+  };
+
+  const connectWujiBridge = (bridgeKey) => {
+    const bridgeUrl = wujiBridgeUrlsRef.current[bridgeKey];
+    if (!bridgeUrl) {
       return;
     }
 
-    const currentSocket = wujiSocketRef.current;
+    if (typeof WebSocket === 'undefined') {
+      updateWujiBridgeStatus(bridgeKey, {
+        connected: false,
+        error: 'WebSocket unavailable',
+      });
+      return;
+    }
+
+    window.clearTimeout(wujiCloseTimersRef.current[bridgeKey]);
+    delete wujiCloseTimersRef.current[bridgeKey];
+    const currentSocket = wujiSocketsRef.current[bridgeKey];
+    if (currentSocket && currentSocket.url !== bridgeUrl) {
+      currentSocket.close();
+      delete wujiSocketsRef.current[bridgeKey];
+    }
     if (currentSocket && currentSocket.readyState <= WebSocket.OPEN) {
       return;
     }
 
-    window.clearTimeout(wujiReconnectTimerRef.current);
-    const socket = new WebSocket(wujiBridgeUrl);
-    wujiSocketRef.current = socket;
-    setWujiBridgeStatus((current) => ({ ...current, error: '', ack: 'connecting' }));
+    window.clearTimeout(wujiReconnectTimersRef.current[bridgeKey]);
+    delete wujiReconnectTimersRef.current[bridgeKey];
+    const socket = new WebSocket(bridgeUrl);
+    wujiSocketsRef.current[bridgeKey] = socket;
+    updateWujiBridgeStatus(bridgeKey, { error: '', ack: 'connecting' });
 
     socket.addEventListener('open', () => {
-      if (wujiSocketRef.current !== socket) return;
-      setWujiBridgeStatus((current) => ({
-        ...current,
+      if (wujiSocketsRef.current[bridgeKey] !== socket) return;
+      updateWujiBridgeStatus(bridgeKey, {
         connected: true,
         error: '',
         ack: 'connected',
-      }));
+      });
     });
 
     socket.addEventListener('message', (event) => {
-      if (wujiSocketRef.current !== socket) return;
+      if (wujiSocketsRef.current[bridgeKey] !== socket) return;
       try {
         const message = JSON.parse(event.data);
         if (message.type === 'error') {
-          setWujiBridgeStatus((current) => ({
-            ...current,
+          updateWujiBridgeStatus(bridgeKey, {
             ack: '',
             error: message.message || 'bridge error',
-          }));
+          });
           return;
         }
 
         if (message.type === 'ack') {
-          setWujiBridgeStatus((current) => ({
-            ...current,
+          updateWujiBridgeStatus(bridgeKey, (current) => ({
             connected: true,
             error: message.hardware_error || '',
             ack: `ack ${message.frames ?? current.frames}`,
@@ -1162,67 +2369,72 @@ export default function GloveMotionPage({
         }
 
         if (message.type === 'status') {
-          setWujiBridgeStatus((current) => ({
-            ...current,
+          updateWujiBridgeStatus(bridgeKey, {
             connected: true,
             error: message.hardware_error || '',
             ack: message.live ? 'live' : 'status',
-          }));
+          });
         }
       } catch {
-        setWujiBridgeStatus((current) => ({ ...current, ack: 'message' }));
+        updateWujiBridgeStatus(bridgeKey, { ack: 'message' });
       }
     });
 
     socket.addEventListener('error', () => {
-      if (wujiSocketRef.current !== socket) return;
-      setWujiBridgeStatus((current) => ({
-        ...current,
+      if (wujiSocketsRef.current[bridgeKey] !== socket) return;
+      updateWujiBridgeStatus(bridgeKey, {
         connected: false,
         error: 'bridge unavailable',
-      }));
+      });
     });
 
     socket.addEventListener('close', () => {
-      if (wujiSocketRef.current === socket) {
-        wujiSocketRef.current = null;
+      if (wujiSocketsRef.current[bridgeKey] !== socket) {
+        return;
       }
-      setWujiBridgeStatus((current) => ({
-        ...current,
+      delete wujiSocketsRef.current[bridgeKey];
+      updateWujiBridgeStatus(bridgeKey, {
         connected: false,
         ack: wujiEnabledRef.current ? 'reconnecting' : 'closed',
-      }));
+      });
 
-      if (wujiEnabledRef.current) {
-        wujiReconnectTimerRef.current = window.setTimeout(connectWujiBridge, 1200);
+      if (wujiEnabledRef.current && wujiBridgeUrlsRef.current[bridgeKey]) {
+        wujiReconnectTimersRef.current[bridgeKey] = window.setTimeout(() => {
+          delete wujiReconnectTimersRef.current[bridgeKey];
+          connectWujiBridge(bridgeKey);
+        }, 1200);
       }
     });
   };
 
-  const sendWujiBends = (bends) => {
+  const sendWujiBends = (bends, handSide) => {
     if (!wujiEnabledRef.current || !Array.isArray(bends)) {
       return;
     }
 
+    const bridgeKey = wujiBridgeKeyForHand(wujiBridgeUrlsRef.current, handSide);
+    if (!bridgeKey) {
+      return;
+    }
+
     const now = performance.now();
-    if (now - lastWujiSendAtRef.current < WUJI_SEND_INTERVAL_MS) {
+    if (now - (lastWujiSendAtRef.current[bridgeKey] || 0) < wujiSendIntervalRef.current) {
       return;
     }
 
-    const socket = wujiSocketRef.current;
+    const socket = wujiSocketsRef.current[bridgeKey];
     if (socket?.readyState !== WebSocket.OPEN) {
-      connectWujiBridge();
+      connectWujiBridge(bridgeKey);
       return;
     }
 
-    lastWujiSendAtRef.current = now;
+    lastWujiSendAtRef.current[bridgeKey] = now;
     const target = bendValuesToWujiTarget(
       bends.map((bend) => clamp01((Number(bend) || 0) * bendGainRef.current)),
       wujiWeightsRef.current,
     );
     socket.send(wujiSnapshotPayload(target, wujiWeightsRef.current));
-    setWujiBridgeStatus((current) => ({
-      ...current,
+    updateWujiBridgeStatus(bridgeKey, (current) => ({
       connected: true,
       frames: current.frames + 1,
       ack: `sent ${current.frames + 1}`,
@@ -1236,6 +2448,14 @@ export default function GloveMotionPage({
   }, [modelTransforms]);
 
   useEffect(() => {
+    gyroAdjustmentsRef.current = gyroAdjustments;
+  }, [gyroAdjustments]);
+
+  useEffect(() => {
+    writeStoredGyroCalibrationCaptures(gyroCalibrationCaptures);
+  }, [gyroCalibrationCaptures]);
+
+  useEffect(() => {
     writeStoredGloveMotionSettings({
       useLiveData,
       bendGain,
@@ -1243,8 +2463,12 @@ export default function GloveMotionPage({
       showSkeleton,
       mirrorScaleX,
       sceneBackgroundColor,
+      wujiSendIntervalMs,
       wujiWeights,
       modelTransforms,
+      modelTransformVersion: MODEL_TRANSFORM_SETTINGS_VERSION,
+      gyroAdjustments,
+      gyroAdjustmentVersion: GYRO_ADJUSTMENT_SETTINGS_VERSION,
     });
   }, [
     useLiveData,
@@ -1253,8 +2477,10 @@ export default function GloveMotionPage({
     showSkeleton,
     mirrorScaleX,
     sceneBackgroundColor,
+    wujiSendIntervalMs,
     wujiWeights,
     modelTransforms,
+    gyroAdjustments,
   ]);
 
   useEffect(() => {
@@ -1263,14 +2489,14 @@ export default function GloveMotionPage({
       const next = { ...current };
       handViewConfigs.forEach((view) => {
         if (!next[view.key]) {
-          next[view.key] = { ...DEFAULT_MODEL_TRANSFORM };
+          next[view.key] = { ...(resolvedModelTransformDefaults[view.key] || DEFAULT_MODEL_TRANSFORM) };
           changed = true;
         }
       });
 
       return changed ? next : current;
     });
-  }, [handViewConfigs]);
+  }, [handViewConfigs, resolvedModelTransformDefaults]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -1288,19 +2514,36 @@ export default function GloveMotionPage({
   }, [wujiWeights]);
 
   useEffect(() => {
+    wujiSendIntervalRef.current = wujiSendIntervalMs;
+  }, [wujiSendIntervalMs]);
+
+  useEffect(() => {
+    wujiBridgeUrlsRef.current = resolvedWujiBridgeUrls;
+    setWujiBridgeStatuses((current) => {
+      const next = { ...current };
+      Object.keys(resolvedWujiBridgeUrls).forEach((bridgeKey) => {
+        if (!next[bridgeKey]) {
+          next[bridgeKey] = createWujiBridgeStatus();
+        }
+      });
+      return next;
+    });
+  }, [resolvedWujiBridgeUrls]);
+
+  useEffect(() => {
     wujiEnabledRef.current = wujiBridgeEnabled;
 
     if (wujiBridgeEnabled) {
-      connectWujiBridge();
+      Object.keys(resolvedWujiBridgeUrls).forEach((bridgeKey) => connectWujiBridge(bridgeKey));
     } else {
-      closeWujiBridge({ sendZero: true });
+      closeAllWujiBridges({ sendZero: true });
     }
 
     return () => {
       wujiEnabledRef.current = false;
-      closeWujiBridge({ sendZero: true });
+      closeAllWujiBridges({ sendZero: true });
     };
-  }, [wujiBridgeEnabled, wujiBridgeUrl]);
+  }, [resolvedWujiBridgeUrls, wujiBridgeEnabled]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -1340,12 +2583,18 @@ export default function GloveMotionPage({
     const loader = new GLTFLoader();
     const handRigs = handViewConfigs.map((view) => {
       const group = new THREE.Group();
+      const manualGroup = new THREE.Group();
+      const gyroGroup = new THREE.Group();
+      group.add(manualGroup);
+      manualGroup.add(gyroGroup);
       motionGroup.add(group);
 
       return {
         ...view,
         transformKey: view.key,
         group,
+        manualGroup,
+        gyroGroup,
         model: null,
         skeletonHelper: null,
         bones: new Map(),
@@ -1423,7 +2672,13 @@ export default function GloveMotionPage({
           rig.model = model;
           normalizeModel(model);
           applyModelLook(model, lineColorRef.current);
-          rig.group.add(model);
+          const transform = modelTransformsRef.current?.[rig.transformKey] || DEFAULT_MODEL_TRANSFORM;
+          model.position.set(
+            -(Number(transform.pivotX) || 0),
+            -(Number(transform.pivotY) || 0),
+            -(Number(transform.pivotZ) || 0),
+          );
+          rig.gyroGroup.add(model);
 
           const bones = [];
           model.traverse((child) => {
@@ -1496,16 +2751,17 @@ export default function GloveMotionPage({
     const resize = () => {
       const { clientWidth, clientHeight } = mount;
       const compact = clientWidth < 680;
+      const compactDualHands = compact && handRigs.length > 1;
 
       renderer.setSize(clientWidth, clientHeight, false);
       camera.aspect = clientWidth / Math.max(clientHeight, 1);
       camera.position.set(0, compact ? 0.15 : 0.35, compact ? 16.8 : 14.2);
       camera.updateProjectionMatrix();
       responsiveTransformRef.current = {
-        x: compact ? -0.2 : 0,
-        y: compact ? 0.15 : 0,
+        x: compactDualHands ? 0 : compact ? -0.2 : 0,
+        y: compactDualHands ? 0.6 : compact ? 0.15 : 0,
         z: 0,
-        scale: compact ? 0.74 : 1,
+        scale: compactDualHands ? 0.42 : compact ? 0.74 : 1,
       };
       applyCurrentModelTransform();
     };
@@ -1515,8 +2771,23 @@ export default function GloveMotionPage({
       elapsed += delta;
       let readoutRig = handRigs[0] || null;
       let readoutSnapshot = null;
-      let readoutHasLive = false;
+      let readoutSource = 'SIM';
       let readoutRawFingerPoints = EMPTY_BEND;
+      const posePlaybackState = posePlaybackRef.current;
+      const useCalibrationPoseInput = Boolean(
+        posePlaybackRuntime && posePlaybackState.inputMode === 'poses',
+      );
+      const useLivePoseInput = !posePlaybackRuntime || posePlaybackState.inputMode === 'live';
+      const playbackPoseKey = useCalibrationPoseInput && posePlaybackState.autoPlay
+        ? GYRO_POSE_PLAYBACK_SEQUENCE[
+            Math.floor(elapsed / GYRO_POSE_PLAYBACK_SECONDS) % GYRO_POSE_PLAYBACK_SEQUENCE.length
+          ]
+        : posePlaybackState.selectedPose;
+
+      if (useCalibrationPoseInput && playbackPoseKey !== activePoseKeyRef.current) {
+        activePoseKeyRef.current = playbackPoseKey;
+        setActivePoseKey(playbackPoseKey);
+      }
 
       handRigs.forEach((rig) => {
         const snapshot = getRigSnapshot(rig);
@@ -1526,32 +2797,87 @@ export default function GloveMotionPage({
           updateNew147PressureColors(rig.pressureRuntime, snapshot?.mappedPressureData);
         }
 
-        const liveRotate = snapshot?.rotate;
-        const hasMappedFingerPoints = extractFingerRootPoints(snapshot?.mappedPressureData, rig.liveFingerPoints);
-        const hasLivePose = useLiveRef.current && isUsableRotate(liveRotate);
-        const hasLiveBend = useLiveRef.current && hasMappedFingerPoints;
-        const useZeroFallback = handRigs.length > 1 && rig.side;
-        const fallbackFrame = hasLivePose && hasLiveBend
-          ? null
-          : useZeroFallback
-            ? rig.zeroFrame
-            : writeSimulatedFrame(elapsed + rig.phase, rig.simulatedFrame);
-        const rotate = hasLivePose ? liveRotate : fallbackFrame.rotate;
-        const rawFingerPoints = hasLiveBend ? rig.liveFingerPoints : fallbackFrame.rawFingerPoints;
-        transformQuaternionForRender(rotate, rig.quaternionState, rig.targetQuaternion);
+        const playbackHandSide = rig.side || activeHandSideRef.current;
+        const playbackQuaternion = useCalibrationPoseInput
+          ? posePlaybackRuntime?.[playbackHandSide]?.poses?.[playbackPoseKey]
+          : null;
+        const usePosePlayback = Boolean(playbackQuaternion);
+        let hasLivePose = false;
+        let hasLiveBend = false;
+        let rawFingerPoints = rig.simulatedFrame.rawFingerPoints;
 
-        const smoothing = 1 - Math.exp(-delta * (hasLivePose ? 18 : 10));
-        rig.displayedQuaternion.slerp(rig.targetQuaternion, smoothing);
-        rig.group.quaternion.copy(rig.manualQuaternion).multiply(rig.displayedQuaternion);
-        rig.latestRawFingerPoints = rawFingerPoints.slice(0, 5);
-        rig.bend = updateFingerBend(
-          rig.bend,
-          rawFingerPoints,
-          calibrationRef.current[rig.side || snapshot?.handSide || activeHandSideRef.current] || DEFAULT_CALIBRATION,
-        );
-        if (hasLiveBend && (!rig.side || rig.side === activeHandSideRef.current)) {
-          sendWujiBends(rig.bend);
+        if (usePosePlayback) {
+          rig.targetQuaternion.copy(playbackQuaternion);
+          const smoothing = 1 - Math.exp(-delta * 8);
+          rig.displayedQuaternion.slerp(rig.targetQuaternion, smoothing);
+          rig.gyroGroup.quaternion.copy(rig.displayedQuaternion);
+
+          const bendSmoothing = 1 - Math.exp(-delta * 9);
+          for (let fingerIndex = 0; fingerIndex < FINGER_NAMES.length; fingerIndex += 1) {
+            const wave = posePlaybackState.fingerMotion
+              ? (0.5 + Math.sin(elapsed * 1.8 + fingerIndex * 0.68 + rig.phase) * 0.5) * 0.28
+              : 0;
+            const targetBend = clamp01(posePlaybackState.fingerCurl + wave);
+            rig.bend[fingerIndex] += (targetBend - rig.bend[fingerIndex]) * bendSmoothing;
+            rawFingerPoints[fingerIndex] = Math.round(targetBend * 255);
+          }
+        } else {
+          const liveRotate = snapshot?.rotate;
+          const hasMappedFingerPoints = extractFingerRootPoints(snapshot?.mappedPressureData, rig.liveFingerPoints);
+          hasLivePose = useLivePoseInput && useLiveRef.current && isUsableRotate(liveRotate);
+          hasLiveBend = useLivePoseInput && useLiveRef.current && hasMappedFingerPoints;
+          const gyroAdjustment = gyroAdjustmentsRef.current[rig.transformKey] || DEFAULT_GYRO_ADJUSTMENT;
+          const useSessionNeutral = Boolean(posePlaybackRuntime && useLivePoseInput);
+          const useZeroFallback = handRigs.length > 1 && rig.side;
+          const fallbackFrame = hasLivePose && hasLiveBend
+            ? null
+            : useZeroFallback
+              ? rig.zeroFrame
+              : writeSimulatedFrame(elapsed + rig.phase, rig.simulatedFrame);
+          const rotate = hasLivePose
+            ? liveRotate
+            : !useSessionNeutral && isUsableRotate(gyroAdjustment.neutralRotate)
+              ? gyroAdjustment.neutralRotate
+              : fallbackFrame.rotate;
+          rawFingerPoints = hasLiveBend ? rig.liveFingerPoints : fallbackFrame.rawFingerPoints;
+          if (useSessionNeutral && !hasLivePose) {
+            if (!rig.quaternionState.base) {
+              rig.targetQuaternion.identity();
+            }
+          } else {
+            transformQuaternionForRender(
+              rotate,
+              rig.quaternionState,
+              rig.targetQuaternion,
+              gyroAdjustment,
+              !useSessionNeutral,
+            );
+            if (hasLivePose) {
+              applyQuaternionAxisSigns(
+                rig.targetQuaternion,
+                liveQuaternionAxisSigns?.[playbackHandSide],
+              );
+            }
+          }
+
+          const smoothing = 1 - Math.exp(-delta * (hasLivePose ? 18 : 10));
+          rig.displayedQuaternion.slerp(rig.targetQuaternion, smoothing);
+          rig.gyroGroup.quaternion.copy(rig.displayedQuaternion);
+          rig.bend = updateFingerBend(
+            rig.bend,
+            rawFingerPoints,
+            calibrationRef.current[rig.side || snapshot?.handSide || activeHandSideRef.current] || DEFAULT_CALIBRATION,
+          );
+          const outputHandSide = rig.side || activeHandSideRef.current;
+          if (
+            hasLiveBend
+            && (hasSideSpecificWujiBridges || !rig.side || rig.side === activeHandSideRef.current)
+          ) {
+            sendWujiBends(rig.bend, outputHandSide);
+          }
         }
+
+        rig.latestRawFingerPoints = rawFingerPoints.slice(0, 5);
         applyFingerBend(
           rig.bones,
           rig.originalQuaternions,
@@ -1564,7 +2890,7 @@ export default function GloveMotionPage({
         if (!readoutRig || rig.side === activeHandSideRef.current) {
           readoutRig = rig;
           readoutSnapshot = snapshot;
-          readoutHasLive = hasLivePose || hasLiveBend;
+          readoutSource = usePosePlayback ? 'CAL' : hasLivePose || hasLiveBend ? 'LIVE' : 'SIM';
           readoutRawFingerPoints = rawFingerPoints;
         }
       });
@@ -1585,11 +2911,15 @@ export default function GloveMotionPage({
       if (performance.now() - lastReadoutAt > 250) {
         lastReadoutAt = performance.now();
         setPoseReadout({
-          source: readoutHasLive ? 'LIVE' : 'SIM',
+          source: readoutSource,
           quaternion: formatQuaternion(readoutRig?.displayedQuaternion || new THREE.Quaternion()),
           bends: (readoutRig?.bend || EMPTY_BEND).map((value) => Math.round(value * 100)),
           rawFingerPoints: Array.from(readoutRawFingerPoints || EMPTY_BEND).map((value) => Math.round(value)),
-          frameAge: readoutSnapshot?.timestamp ? `${Math.max(0, Date.now() - readoutSnapshot.timestamp)} ms` : 'none',
+          frameAge: posePlaybackRuntime
+            ? posePlaybackSampleLabel
+            : readoutSnapshot?.timestamp
+              ? `${Math.max(0, Date.now() - readoutSnapshot.timestamp)} ms`
+              : 'none',
         });
       }
 
@@ -1628,7 +2958,17 @@ export default function GloveMotionPage({
       bonesRef.current = new Map();
       originalQuaternionsRef.current = new Map();
     };
-  }, [handViewConfigs, modelUrl, regionColorOptions, regionDataSource, regionLabel]);
+  }, [
+    handViewConfigs,
+    hasSideSpecificWujiBridges,
+    liveQuaternionAxisSigns,
+    modelUrl,
+    posePlaybackRuntime,
+    posePlaybackSampleLabel,
+    regionColorOptions,
+    regionDataSource,
+    regionLabel,
+  ]);
 
   const resetQuaternionBase = () => {
     quaternionStateRef.current = { base: null, baseInv: null };
@@ -1636,15 +2976,17 @@ export default function GloveMotionPage({
     handRigsRef.current.forEach((rig) => {
       rig.quaternionState = { base: null, baseInv: null };
       rig.displayedQuaternion.identity();
-      rig.group.quaternion.copy(rig.manualQuaternion);
+      rig.gyroGroup?.quaternion.identity();
     });
   };
 
-  const captureCalibration = (index) => {
-    const handSide = dataSource.activeHandSide;
+  const captureCalibration = (index, requestedHandSide = dataSource.activeHandSide) => {
+    const handSide = requestedHandSide === 'left' ? 'left' : 'right';
+    const handRig = handRigsRef.current.find((rig) => rig.side === handSide);
+    const rawFingerPoints = handRig?.latestRawFingerPoints || latestRawFingerPointsRef.current;
     const current = calibrationRef.current[handSide] || DEFAULT_CALIBRATION.map((row) => [...row]);
     const next = current.map((row) => [...row]);
-    next[index] = latestRawFingerPointsRef.current.slice(0, 5);
+    next[index] = rawFingerPoints.slice(0, 5);
     calibrationRef.current = {
       ...calibrationRef.current,
       [handSide]: next,
@@ -1659,7 +3001,7 @@ export default function GloveMotionPage({
       className={`glove-motion-page${isSceneFullscreen ? ' scene-fullscreen' : ''}`}
       style={{ '--glove-background-color': sceneBackgroundColor }}
     >
-      <nav className="app-nav" style={{ '--nav-count': 9 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 10 }} aria-label="Page view">
         <button type="button" onClick={() => onNavigate('terrain')}>Pressure</button>
         <button type="button" onClick={() => onNavigate('hand')}>Wireframe</button>
         <button type="button" onClick={() => onNavigate('obj')}>OBJ</button>
@@ -1668,6 +3010,7 @@ export default function GloveMotionPage({
         <button className={pageKey === 'motiondouble' ? 'active' : ''} type="button" onClick={() => onNavigate('motiondouble')}>MotionDouble</button>
         <button className={pageKey === 'motion2' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2')}>Motion2</button>
         <button className={pageKey === 'motion2double' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2double')}>M2Double</button>
+        <button className={pageKey === 'm2doublePro' ? 'active' : ''} type="button" onClick={() => onNavigate('m2doublePro')}>M2 Pro</button>
         <button type="button" onClick={() => onNavigate('points')}>Points</button>
       </nav>
 
@@ -1679,41 +3022,145 @@ export default function GloveMotionPage({
 
       <section className="glove-motion-panel" aria-label="Glove motion controls">
         <div className="glove-motion-status">
-          <strong className={poseReadout.source === 'LIVE' ? 'online' : ''}>{poseReadout.source}</strong>
-          <span>{dataSource.status.connected ? 'WS connected' : dataSource.status.connecting ? 'Connecting' : 'Simulation'}</span>
+          <strong className={poseReadout.source === 'LIVE' || poseReadout.source === 'CAL' ? 'online' : ''}>{poseReadout.source}</strong>
+          <span>
+            {hasPosePlayback && poseInputMode === 'poses'
+              ? `${activePose.label} / ${posePlaybackSampleLabel}`
+              : dataSource.status.connected
+                ? `WS connected / ${dataSource.status.frameCount} frames`
+                : dataSource.status.connecting
+                  ? 'Connecting'
+                  : 'Simulation'}
+          </span>
         </div>
 
         <button className="glove-fullscreen-button" type="button" onClick={enterSceneFullscreen}>
           Fullscreen 3D
         </button>
 
-        <div className="glove-side-toggle" role="group" aria-label="Active hand side">
-          {['left', 'right'].map((side) => (
-            <button
-              key={side}
-              className={dataSource.activeHandSide === side ? 'active' : ''}
-              type="button"
-              onClick={() => {
-                dataSource.setActiveHandSide(side);
+        {hasPosePlayback ? (
+          <div className="glove-pose-playback-control" aria-label="Quaternion input controls">
+            <div className="glove-pose-playback-heading">
+              <span>{poseInputMode === 'live' ? 'WebSocket quaternion' : 'Quaternion poses'}</span>
+              <strong>{poseInputMode === 'live' ? 'L + R' : posePlaybackSampleLabel}</strong>
+            </div>
+            <div className="glove-pose-source-toggle" role="group" aria-label="Quaternion input source">
+              <button
+                className={poseInputMode === 'live' ? 'active' : ''}
+                type="button"
+                aria-pressed={poseInputMode === 'live'}
+                onClick={() => {
+                  setPoseInputMode('live');
+                  setUseLiveData(true);
+                  setAutoPosePlayback(false);
+                  resetQuaternionBase();
+                }}
+              >
+                WS Live
+              </button>
+              <button
+                className={poseInputMode === 'poses' ? 'active' : ''}
+                type="button"
+                aria-pressed={poseInputMode === 'poses'}
+                onClick={() => setPoseInputMode('poses')}
+              >
+                Pose Test
+              </button>
+            </div>
+            {poseInputMode === 'live' ? (
+              <button className="glove-pose-set-neutral" type="button" onClick={resetQuaternionBase}>
+                Set Neutral
+              </button>
+            ) : (
+              <>
+                <div className="glove-pose-playback-grid" role="group" aria-label="Calibration pose">
+                  {GYRO_CALIBRATION_POSES.map((pose) => (
+                    <button
+                      key={pose.key}
+                      className={activePoseKey === pose.key ? 'active' : ''}
+                      type="button"
+                      onClick={() => {
+                        setAutoPosePlayback(false);
+                        setSelectedPose(pose.key);
+                      }}
+                    >
+                      <span>{pose.label}</span>
+                      {posePlaybackRuntime.left?.targetLabels?.[pose.key] ? (
+                        <small>L {posePlaybackRuntime.left.targetLabels[pose.key]}</small>
+                      ) : null}
+                      {posePlaybackRuntime.right?.targetLabels?.[pose.key] ? (
+                        <small>R {posePlaybackRuntime.right.targetLabels[pose.key]}</small>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+                <div className="glove-pose-playback-actions">
+                  <button
+                    className={autoPosePlayback ? 'active' : ''}
+                    type="button"
+                    aria-pressed={autoPosePlayback}
+                    onClick={() => setAutoPosePlayback((value) => !value)}
+                  >
+                    Auto sequence
+                  </button>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={fingerMotion}
+                      onChange={(event) => setFingerMotion(event.target.checked)}
+                    />
+                    <span>Finger motion</span>
+                  </label>
+                </div>
+                <label className="glove-pose-finger-curl">
+                  <span>Finger curl</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.72"
+                    step="0.01"
+                    value={fingerCurl}
+                    onChange={(event) => setFingerCurl(Number(event.target.value))}
+                    onInput={(event) => setFingerCurl(Number(event.target.value))}
+                  />
+                  <strong>{Math.round(fingerCurl * 100)}%</strong>
+                </label>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {showLiveHandToggle ? (
+          <div className="glove-side-toggle" role="group" aria-label="Active hand side">
+            {['left', 'right'].map((side) => (
+              <button
+                key={side}
+                className={dataSource.activeHandSide === side ? 'active' : ''}
+                type="button"
+                onClick={() => {
+                  dataSource.setActiveHandSide(side);
+                  resetQuaternionBase();
+                }}
+              >
+                {side}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {!hasPosePlayback ? (
+          <label className="glove-toggle-control">
+            <input
+              type="checkbox"
+              checked={useLiveData}
+              onChange={(event) => {
+                setUseLiveData(event.target.checked);
                 resetQuaternionBase();
               }}
-            >
-              {side}
-            </button>
-          ))}
-        </div>
-
-        <label className="glove-toggle-control">
-          <input
-            type="checkbox"
-            checked={useLiveData}
-            onChange={(event) => {
-              setUseLiveData(event.target.checked);
-              resetQuaternionBase();
-            }}
-          />
-          <span>Live data</span>
-        </label>
+            />
+            <span>Live data</span>
+          </label>
+        ) : null}
         <label className="glove-toggle-control">
           <input
             type="checkbox"
@@ -1736,19 +3183,39 @@ export default function GloveMotionPage({
             checked={wujiBridgeEnabled}
             onChange={(event) => setWujiBridgeEnabled(event.target.checked)}
           />
-          <span>Wuji bridge</span>
+          <span>{hasSideSpecificWujiBridges ? 'Wuji bridges' : 'Wuji bridge'}</span>
         </label>
-        <div className="glove-bridge-status" title={wujiBridgeUrl}>
-          <span>{wujiBridgeUrl}</span>
-          <strong className={wujiBridgeEnabled && wujiBridgeStatus.connected && !wujiBridgeStatus.error ? 'online' : ''}>
-            {formatWujiStatus(wujiBridgeEnabled, wujiBridgeStatus)}
-          </strong>
-        </div>
+        {Object.entries(resolvedWujiBridgeUrls).map(([bridgeKey, bridgeUrl]) => {
+          const status = wujiBridgeStatuses[bridgeKey] || createWujiBridgeStatus();
+          const bridgeLabel = bridgeKey === 'left' ? 'L' : bridgeKey === 'right' ? 'R' : '';
+          return (
+            <div className="glove-bridge-status" title={bridgeUrl} key={bridgeKey}>
+              <span>{bridgeLabel ? `${bridgeLabel} ${bridgeUrl}` : bridgeUrl}</span>
+              <strong className={wujiBridgeEnabled && status.connected && !status.error ? 'online' : ''}>
+                {formatWujiStatus(wujiBridgeEnabled, status)}
+              </strong>
+            </div>
+          );
+        })}
         <div className="glove-wuji-weight-control" aria-label="Wuji bridge bend weights">
           <div className="glove-wuji-weight-heading">
-            <span>Wuji weights</span>
-            <button type="button" onClick={resetWujiWeights}>Reset</button>
+            <span>Wuji output</span>
+            <button type="button" onClick={resetWujiOutput}>Reset</button>
           </div>
+          <label>
+            <span>Interval</span>
+            <input
+              type="range"
+              min={WUJI_SEND_INTERVAL_MIN_MS}
+              max={WUJI_SEND_INTERVAL_MAX_MS}
+              step={WUJI_SEND_INTERVAL_STEP_MS}
+              value={wujiSendIntervalMs}
+              aria-label="Wuji send interval"
+              onChange={(event) => setWujiSendIntervalMs(Number(event.target.value))}
+              onInput={(event) => setWujiSendIntervalMs(Number(event.target.value))}
+            />
+            <strong>{Math.round(wujiSendIntervalMs)} ms</strong>
+          </label>
           {WUJI_WEIGHT_CONTROLS.map((control) => (
             <label key={control.key}>
               <span>{control.label}</span>
@@ -1820,8 +3287,27 @@ export default function GloveMotionPage({
         <div className="glove-transform-control" aria-label="Model transform controls">
           <div className="glove-transform-heading">
             <span>Transform: {activeTransformLabel}</span>
-            <button type="button" onClick={resetModelTransform}>Reset</button>
+            <div>
+              {hasPairedHandTransforms ? (
+                <button type="button" onClick={mirrorActiveTransformToOtherHand}>Mirror Other</button>
+              ) : null}
+              <button type="button" onClick={resetModelTransform}>Reset</button>
+            </div>
           </div>
+          {hasPairedHandTransforms ? (
+            <div className="glove-transform-side-toggle" role="group" aria-label="Position edit hand">
+              {['left', 'right'].map((side) => (
+                <button
+                  key={side}
+                  className={transformEditSide === side ? 'active' : ''}
+                  type="button"
+                  onClick={() => setTransformEditSide(side)}
+                >
+                  Position {side}
+                </button>
+              ))}
+            </div>
+          ) : null}
           {MODEL_TRANSFORM_CONTROLS.map((control) => (
             <label key={control.key}>
               <span>{control.label}</span>
@@ -1839,10 +3325,106 @@ export default function GloveMotionPage({
           ))}
         </div>
 
-        <div className="glove-motion-actions">
-          <button type="button" onClick={resetQuaternionBase}>Zero Q</button>
-          <button type="button" onClick={() => captureCalibration(0)}>Open Cal {dataSource.activeHandSide}</button>
-          <button type="button" onClick={() => captureCalibration(1)}>Bend Cal {dataSource.activeHandSide}</button>
+        <div className="glove-gyro-control" aria-label="Gyro axis controls">
+          <div className="glove-transform-heading">
+            <span>Gyro: {activeGyroLabel}</span>
+          </div>
+          {hasPairedHandTransforms ? (
+            <div className="glove-transform-side-toggle" role="group" aria-label="Gyro edit hand">
+              {['left', 'right'].map((side) => (
+                <button
+                  key={side}
+                  className={gyroEditSide === side ? 'active' : ''}
+                  type="button"
+                  onClick={() => setGyroEditSide(side)}
+                >
+                  Gyro {side}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <div className="glove-gyro-axis-toggle" aria-label="Gyro frame correction">
+            {GYRO_ADJUSTMENT_AXES.map((axis) => {
+              const sign = activeGyroAdjustment[axis.key] || 1;
+              const sourceAxis = activeGyroAdjustment[axis.sourceKey] || axis.key;
+              return (
+                <div className="glove-gyro-axis-row" key={axis.key}>
+                  <button
+                    className={sign < 0 ? 'active' : ''}
+                    type="button"
+                    onClick={() => toggleGyroAdjustmentAxis(axis.key)}
+                  >
+                    {axis.label} {sign < 0 ? '-' : '+'}
+                  </button>
+                  <select
+                    value={sourceAxis}
+                    aria-label={`${axis.label} gyro source axis`}
+                    onChange={(event) => updateGyroAdjustmentSource(axis.sourceKey, event.target.value)}
+                  >
+                    {GYRO_SOURCE_AXES.map((source) => (
+                      <option key={source} value={source}>raw {source.toUpperCase()}</option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })}
+          </div>
+          <div className="glove-gyro-capture-control" aria-label="Gyro calibration samples">
+            <div className="glove-transform-heading">
+              <span>Gyro samples {activeGyroCaptureSide}: {gyroCaptureTotal}</span>
+              <div>
+                <button type="button" onClick={applyGyroCalibrationFromSamples} disabled={!gyroCaptureTotal}>Auto Cal</button>
+                <button type="button" onClick={copyGyroCalibrationJson} disabled={!gyroCaptureTotal}>Copy</button>
+                <button type="button" onClick={exportGyroCalibrationJson} disabled={!gyroCaptureTotal}>Export</button>
+                <button type="button" onClick={clearGyroCalibrationCaptures} disabled={!gyroCaptureTotal}>Clear</button>
+              </div>
+            </div>
+            <div className="glove-gyro-pose-grid">
+              {GYRO_CALIBRATION_POSES.map((pose) => {
+                const count = gyroCaptureCounts[pose.key] || 0;
+                return (
+                  <div className="glove-gyro-pose-row" key={pose.key}>
+                    <button
+                      className="glove-gyro-pose-capture"
+                      type="button"
+                      onClick={() => captureGyroCalibrationPose(pose.key)}
+                    >
+                      <span>{pose.label}</span>
+                      <strong>{count}</strong>
+                    </button>
+                    <button
+                      className="glove-gyro-pose-clear"
+                      type="button"
+                      aria-label={`Clear ${activeGyroCaptureSide} ${pose.label}`}
+                      title={`Clear ${activeGyroCaptureSide} ${pose.label}`}
+                      disabled={!count}
+                      onClick={() => clearGyroCalibrationPose(pose.key)}
+                    >
+                      x
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="glove-gyro-capture-status">{gyroCaptureStatus}</div>
+          </div>
+        </div>
+
+        <div className={`glove-motion-actions${hasPosePlayback && hasPairedHandTransforms ? ' paired' : ''}`}>
+          {!hasPosePlayback ? <button type="button" onClick={resetQuaternionBase}>Zero Q</button> : null}
+          {hasPosePlayback && hasPairedHandTransforms ? (
+            <>
+              <button type="button" onClick={() => captureCalibration(0, 'left')}>Open Cal left</button>
+              <button type="button" onClick={() => captureCalibration(1, 'left')}>Bend Cal left</button>
+              <button type="button" onClick={() => captureCalibration(0, 'right')}>Open Cal right</button>
+              <button type="button" onClick={() => captureCalibration(1, 'right')}>Bend Cal right</button>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={() => captureCalibration(0)}>Open Cal {dataSource.activeHandSide}</button>
+              <button type="button" onClick={() => captureCalibration(1)}>Bend Cal {dataSource.activeHandSide}</button>
+            </>
+          )}
         </div>
 
         <dl className="glove-motion-readout">
