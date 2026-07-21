@@ -1710,6 +1710,7 @@ export default function GloveMotionPage({
   poseCalibrationData = null,
   initialPoseInputMode = 'poses',
   liveQuaternionAxisSigns = null,
+  lockOrientation = false,
   enableWujiBridgeByDefault = false,
   wujiBridgeUrl = WUJI_BRIDGE_URL,
   wujiBridgeUrls = null,
@@ -2810,7 +2811,11 @@ export default function GloveMotionPage({
           rig.targetQuaternion.copy(playbackQuaternion);
           const smoothing = 1 - Math.exp(-delta * 8);
           rig.displayedQuaternion.slerp(rig.targetQuaternion, smoothing);
-          rig.gyroGroup.quaternion.copy(rig.displayedQuaternion);
+          if (lockOrientation) {
+            rig.gyroGroup.quaternion.identity();
+          } else {
+            rig.gyroGroup.quaternion.copy(rig.displayedQuaternion);
+          }
 
           const bendSmoothing = 1 - Math.exp(-delta * 9);
           for (let fingerIndex = 0; fingerIndex < FINGER_NAMES.length; fingerIndex += 1) {
@@ -2862,7 +2867,11 @@ export default function GloveMotionPage({
 
           const smoothing = 1 - Math.exp(-delta * (hasLivePose ? 18 : 10));
           rig.displayedQuaternion.slerp(rig.targetQuaternion, smoothing);
-          rig.gyroGroup.quaternion.copy(rig.displayedQuaternion);
+          if (lockOrientation) {
+            rig.gyroGroup.quaternion.identity();
+          } else {
+            rig.gyroGroup.quaternion.copy(rig.displayedQuaternion);
+          }
           rig.bend = updateFingerBend(
             rig.bend,
             rawFingerPoints,
@@ -2962,6 +2971,7 @@ export default function GloveMotionPage({
     handViewConfigs,
     hasSideSpecificWujiBridges,
     liveQuaternionAxisSigns,
+    lockOrientation,
     modelUrl,
     posePlaybackRuntime,
     posePlaybackSampleLabel,
@@ -3001,12 +3011,13 @@ export default function GloveMotionPage({
       className={`glove-motion-page${isSceneFullscreen ? ' scene-fullscreen' : ''}`}
       style={{ '--glove-background-color': sceneBackgroundColor }}
     >
-      <nav className="app-nav" style={{ '--nav-count': 10 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 11 }} aria-label="Page view">
         <button type="button" onClick={() => onNavigate('terrain')}>Pressure</button>
         <button type="button" onClick={() => onNavigate('hand')}>Wireframe</button>
         <button type="button" onClick={() => onNavigate('obj')}>OBJ</button>
         <button type="button" onClick={() => onNavigate('bones')}>Bones</button>
         <button className={pageKey === 'gloveMotion' ? 'active' : ''} type="button" onClick={() => onNavigate('gloveMotion')}>Motion</button>
+        <button className={pageKey === 'gloveStill' ? 'active' : ''} type="button" onClick={() => onNavigate('gloveStill')}>Still</button>
         <button className={pageKey === 'motiondouble' ? 'active' : ''} type="button" onClick={() => onNavigate('motiondouble')}>MotionDouble</button>
         <button className={pageKey === 'motion2' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2')}>Motion2</button>
         <button className={pageKey === 'motion2double' ? 'active' : ''} type="button" onClick={() => onNavigate('motion2double')}>M2Double</button>

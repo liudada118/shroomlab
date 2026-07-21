@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import BoneControlPage from './BoneControlPage.jsx';
 import GloveMotionPage from './GloveMotionPage.jsx';
+import GloveStillPage from './GloveStillPage.jsx';
 import HandWireframePage from './HandWireframePage.jsx';
 import LightStudyPage from './LightStudyPage.jsx';
 import M2DoubleProPage from './M2DoubleProPage.jsx';
@@ -47,6 +48,9 @@ function pageFromHash() {
   }
   if (window.location.hash === '#/glove-motion') {
     return 'gloveMotion';
+  }
+  if (window.location.hash === '#/glove-still') {
+    return 'gloveStill';
   }
   if (window.location.hash === '#/motiondouble') {
     return 'motiondouble';
@@ -506,6 +510,7 @@ function App() {
       lightStudy: '/light-study',
       bones: '/glb-bones',
       gloveMotion: '/glove-motion',
+      gloveStill: '/glove-still',
       motiondouble: '/motiondouble',
       motion2: '/motion2',
       motion2double: '/motion2double',
@@ -540,6 +545,10 @@ function App() {
 
   if (page === 'gloveMotion') {
     return <GloveMotionPage onNavigate={navigate} />;
+  }
+
+  if (page === 'gloveStill') {
+    return <GloveStillPage onNavigate={navigate} />;
   }
 
   if (page === 'motiondouble') {
@@ -592,7 +601,7 @@ function App() {
 
   return (
     <main className="dashboard-shell dashboard-shell-with-editor">
-      <nav className="app-nav" style={{ '--nav-count': 13 }} aria-label="Page view">
+      <nav className="app-nav" style={{ '--nav-count': 14 }} aria-label="Page view">
         <button className="active" type="button" onClick={() => navigate('terrain')}>
           Pressure
         </button>
@@ -610,6 +619,9 @@ function App() {
         </button>
         <button type="button" onClick={() => navigate('gloveMotion')}>
           Motion
+        </button>
+        <button type="button" onClick={() => navigate('gloveStill')}>
+          Still
         </button>
         <button type="button" onClick={() => navigate('motiondouble')}>
           MotionDouble
